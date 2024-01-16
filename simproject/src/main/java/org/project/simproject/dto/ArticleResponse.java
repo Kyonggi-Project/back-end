@@ -18,8 +18,8 @@ public class ArticleResponse {
     public ArticleResponse(Article article){
         this.title = article.getTitle();
         this.content = article.getContent();
-        this.creatAt = article.getCreateTime();
-        this.updateAt = article.getUpdateTime();
+        this.creatAt = article.getCreatedAt();
+        this.updateAt = article.getUpdatedAt();
         this.author = article.getAuthor();
     }
 }

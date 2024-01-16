@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "article")
+@Table(name = "articles")
 public class Article {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,11 +24,11 @@ public class Article {
     @Column(name = "author", nullable = false)
     private String author;
     @CreatedDate
-    @Column(name = "createTime")
-    private LocalDateTime createTime;
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
     @LastModifiedDate
-    @Column(name = "updateTime")
-    private LocalDateTime updateTime;
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
     @Column(name = "likesCount")
     private int likesCount;
 
@@ -37,8 +37,8 @@ public class Article {
         this.title = title;
         this.content = content;
         this.author = author;
-        this.createTime = LocalDateTime.now();
-        this.updateTime = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
         this.likesCount = 0;
     }
 
