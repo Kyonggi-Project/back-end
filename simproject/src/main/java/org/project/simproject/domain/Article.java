@@ -2,6 +2,7 @@ package org.project.simproject.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.project.simproject.dto.ModifyArticleRequest;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
@@ -40,6 +41,12 @@ public class Article {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
         this.likesCount = 0;
+    }
+
+    public void modify(ModifyArticleRequest request){
+        this.title = request.getTitle();
+        this.content = request.getContent();
+        this.updatedAt = LocalDateTime.now();
     }
 
 }
