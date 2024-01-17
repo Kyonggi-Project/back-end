@@ -13,7 +13,7 @@ import java.util.List;
 @Service
 public class ArticleService {
     @Autowired
-    ArticleRepository articleRepository;
+    private ArticleRepository articleRepository;
 
     public Article save(AddArticleRequest request, String author){
         return articleRepository.save(request.toEntity(author));
@@ -43,6 +43,6 @@ public class ArticleService {
     }
 
     public List<Article> findToAuthor(String author){
-        return articleRepository.findByAuthorLike(author);
+        return articleRepository.findByAuthorContains(author);
     }
 }
