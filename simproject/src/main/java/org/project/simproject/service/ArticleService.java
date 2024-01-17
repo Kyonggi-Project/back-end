@@ -1,6 +1,6 @@
 package org.project.simproject.service;
 
-import lombok.Lombok;
+import jakarta.transaction.Transactional;
 import org.project.simproject.domain.Article;
 import org.project.simproject.dto.AddArticleRequest;
 import org.project.simproject.dto.ModifyArticleRequest;
@@ -28,6 +28,13 @@ public class ArticleService {
                 .orElseThrow(() -> new IllegalArgumentException("Article Not Found"));
     }
 
+    public void delete(Long id){
+        Article article = articleRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Article Not Found"));
+        articleRepository.delete(article);
+    }
+
+    @Transactional
     public Article modify(Long id, ModifyArticleRequest request){
         Article article = articleRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Article Not Found"));
@@ -35,13 +42,7 @@ public class ArticleService {
         return article;
     }
 
-    public void delete(Long id){
-        Article article = articleRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Article Not Found"));
-        articleRepository.delete(article);
-    }
-
     public List<Article> findToAuthor(String author){
-        return articleRepository.findByAuthor(author);
+        return articleRepository.findByAuthorLike(author);
     }
 }
