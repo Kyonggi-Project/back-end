@@ -14,6 +14,7 @@ public class ArticleResponse {
     private LocalDateTime creatAt;
     private LocalDateTime updateAt;
     private String author;
+    private int likesCount;
 
     public ArticleResponse(Article article){
         this.title = article.getTitle();
@@ -21,5 +22,6 @@ public class ArticleResponse {
         this.creatAt = article.getCreatedAt();
         this.updateAt = article.getUpdatedAt();
         this.author = article.getAuthor();
+        this.likesCount = article.getLikesCount();
     }
 }
