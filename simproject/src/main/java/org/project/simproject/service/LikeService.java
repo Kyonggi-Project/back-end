@@ -28,12 +28,16 @@ public class LikeService {
 
         if (isArticleLike(article, user)) {
             Like deleteLike = likeRepository.findLikeByArticleAndUser(article, user);
+
+            article.likeDelete();
             likeRepository.delete(deleteLike);
         } else {
             Like newLike = Like.builder()
                     .article(article)
                     .user(user)
                     .build();
+
+            article.likeAdd();
             likeRepository.save(newLike);
         }
     }
