@@ -13,9 +13,9 @@ public class Comment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", updatable = false, nullable = false)
     private Long id;
-    @Column(name = "articleId")
+    @Column(name = "articleId", nullable = false)
     private Long articleId;
-    @Column(name = "nickname")
+    @Column(name = "nickname", nullable = false)
     private String nickname;
     @Column(name = "content")
     private String content;
