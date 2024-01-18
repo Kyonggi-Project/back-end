@@ -10,10 +10,9 @@ import org.project.simproject.domain.Comment;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class AddCommentRequest {
-    private Long articleId;
     private String content;
 
-    public Comment toEntity(String nickname){
+    public Comment toEntity(Long articleId, String nickname){
         return Comment.builder()
                 .articleId(articleId)
                 .content(content)
