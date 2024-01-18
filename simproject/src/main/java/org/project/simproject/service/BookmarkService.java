@@ -3,12 +3,10 @@ package org.project.simproject.service;
 import lombok.RequiredArgsConstructor;
 import org.project.simproject.domain.Article;
 import org.project.simproject.domain.Bookmark;
-import org.project.simproject.dto.AddBookmarkRequest;
-import org.project.simproject.repository.ArticleRepository;
+import org.project.simproject.domain.User;
 import org.project.simproject.repository.BookmarkRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -16,35 +14,39 @@ import java.util.List;
 public class BookmarkService {
 
     private final BookmarkRepository bookmarkRepository;
-    private final ArticleRepository articleRepository;
 
-    public Bookmark save(AddBookmarkRequest request, Long userId) {
-        return bookmarkRepository.save(request.toEntity(userId));
+    private final ArticleService articleService;
+
+    public void toggleBookmark(Long articleId, Long userId) {
+        Article article = articleService.findToId(articleId);
+//        User user = userService.findToId(userId);           // 추후 UserService 구현 후 추가
+        User user = User.builder()
+                .email("test")
+                .password("test")
+                .nickname("test")
+                .build();
+
+        if (isArticleBookmarked(article, user)) {
+            Bookmark deleteBookmark = bookmarkRepository.findBookmarkByArticleAndUser(article, user);
+            bookmarkRepository.delete(deleteBookmark);
+        } else {
+            Bookmark newBookmark = Bookmark.builder()
+                    .article(article)
+                    .user(user)
+                    .build();
+            bookmarkRepository.save(newBookmark);
+        }
     }
 
     public List<Article> findBookmarkedArticlesByUser(Long userId) {
-        List<Long> bookmarkedArticlesIdList = bookmarkRepository.findBookmarksByUserId(userId).stream()
-                .map(Bookmark::getArticleId).toList();
-
-        List<Article> bookmarkedArticlesList = new ArrayList<>();
-
-        for (Long id : bookmarkedArticlesIdList) {
-            Article bookmarkedArticle = articleRepository.findById(id)
-                    .orElseThrow();
-            bookmarkedArticlesList.add(bookmarkedArticle);
-        }
-
-        return bookmarkedArticlesList;
+        return bookmarkRepository.findBookmarksByUserId(userId)
+                .stream()
+                .map(Bookmark::getArticle)
+                .toList();
     }
 
-    public void delete(Long articleId, Long userId) {
-        Bookmark deleteRequestBookmark = bookmarkRepository.findById(articleId)
-                .orElseThrow(IllegalArgumentException::new);
-        bookmarkRepository.delete(deleteRequestBookmark);
-    }
-
-    public boolean isArticleBookmarked(Long articleId, Long userId) {
-        return bookmarkRepository.existsByArticleIdAndUserId(articleId, userId);
+    public boolean isArticleBookmarked(Article article, User user) {
+        return bookmarkRepository.existsBookmarkByArticleAndUser(article, user);
     }
 
 }

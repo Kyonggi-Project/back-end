@@ -14,16 +14,18 @@ import java.time.LocalDateTime;
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", updatable = false, nullable = false)
     private Long id;
-    @Column(name = "articleId", nullable = false)
+
+    @Column( nullable = false)
     private Long articleId;
-    @Column(name = "nickname", nullable = false)
+
+    @Column(nullable = false)
     private String nickname;
-    @Column(name = "content")
+
     private String content;
-    @Column(name = "likesCount")
+
     private int likesCount;
+
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 

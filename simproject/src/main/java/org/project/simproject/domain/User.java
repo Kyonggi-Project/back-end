@@ -18,15 +18,15 @@ import java.util.List;
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", updatable = false, nullable = false)
     private Long id;
-    @Column(name = "email")
+
     private String email;
-    @Column(name = "password")
+
     private String password;
-    @Column(name = "nickname", unique = true)
+
+    @Column(unique = true)
     private String nickname;
-    @Column(name = "articlesCount")
+
     private int articlesCount;
 
     @Override

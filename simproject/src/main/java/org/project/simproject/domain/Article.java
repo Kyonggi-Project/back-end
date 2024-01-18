@@ -16,21 +16,25 @@ import java.time.LocalDateTime;
 public class Article {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", updatable = false, nullable = false)
     private Long id;
-    @Column(name = "title", nullable = false)
+
+    @Column(nullable = false)
     private String title;
-    @Column(name = "content", nullable = false)
+
+    @Column(nullable = false)
     private String content;
-    @Column(name = "author", nullable = false)
+
+    @Column(nullable = false)
     private String author;
+
     @CreatedDate
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
     @LastModifiedDate
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-    @Column(name = "likesCount")
+
     private int likesCount;
 
     @Builder

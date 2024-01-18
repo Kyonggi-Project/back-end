@@ -11,16 +11,19 @@ import lombok.*;
 public class Bookmark {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", updatable = false, nullable = false)
     private Long id;
-    @Column(name = "articleId")
-    private Long articleId;
-    @Column(name = "userId")
-    private Long userId;
+
+    @ManyToOne
+    @JoinColumn(name = "article_id")
+    private Article article;
+
+    @ManyToOne
+    @JoinColumn(name = "user")
+    private User user;
 
     @Builder
-    public Bookmark(Long articleId, Long userId){
-        this.articleId = articleId;
-        this.userId = userId;
+    public Bookmark(Article article, User user){
+        this.article = article;
+        this.user = user;
     }
 }
