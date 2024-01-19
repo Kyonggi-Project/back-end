@@ -2,22 +2,22 @@ package org.project.simproject.service;
 
 import lombok.RequiredArgsConstructor;
 import org.project.simproject.domain.Article;
-import org.project.simproject.domain.Like;
+import org.project.simproject.domain.ArticleLike;
 import org.project.simproject.domain.User;
-import org.project.simproject.repository.LikeRepository;
+import org.project.simproject.repository.ArticleLikeRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class LikeService {
+public class ArticleLikeService {
 
-    private final LikeRepository likeRepository;
+    private final ArticleLikeRepository articleLikeRepository;
 
     private final ArticleService articleService;
 
-    public void toggleLike(Long articleId, Long userId) {
+    public void toggleArticleLike(Long articleId, Long userId) {
         Article article = articleService.findToId(articleId);
 //        User user = userService.findToId(userId);           // 추후 UserService 구현 후 추가
         User user = User.builder()
@@ -27,30 +27,30 @@ public class LikeService {
                 .build();
 
         if (isArticleLike(article, user)) {
-            Like deleteLike = likeRepository.findLikeByArticleAndUser(article, user);
+            ArticleLike deleteLike = articleLikeRepository.findArticleLikeByArticleAndUser(article, user);
 
             article.likeDelete();
-            likeRepository.delete(deleteLike);
+            articleLikeRepository.delete(deleteLike);
         } else {
-            Like newLike = Like.builder()
+            ArticleLike newArticleLike = ArticleLike.builder()
                     .article(article)
                     .user(user)
                     .build();
 
             article.likeAdd();
-            likeRepository.save(newLike);
+            articleLikeRepository.save(newArticleLike);
         }
     }
 
     public List<Article> findLikeArticlesByUser(Long userId) {
-        return likeRepository.findLikesByUserId(userId)
+        return articleLikeRepository.findArticleLikesByUserId(userId)
                 .stream()
-                .map(Like::getArticle)
+                .map(ArticleLike::getArticle)
                 .toList();
     }
 
     public boolean isArticleLike(Article article, User user) {
-        return likeRepository.existsLikeByArticleAndUser(article, user);
+        return articleLikeRepository.existsArticleLikeByArticleAndUser(article, user);
     }
 
 }

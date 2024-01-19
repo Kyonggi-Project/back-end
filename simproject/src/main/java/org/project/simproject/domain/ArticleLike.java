@@ -7,8 +7,8 @@ import lombok.*;
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "likes")
-public class Like {
+@Table(name = "article_likes")
+public class ArticleLike {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,7 +22,7 @@ public class Like {
     private User user;
 
     @Builder
-    public Like(Article article, User user) {
+    public ArticleLike(Article article, User user) {
         this.article = article;
         this.user = user;
     }
