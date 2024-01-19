@@ -1,22 +1,27 @@
 package org.project.simproject.service;
 
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.project.simproject.domain.Article;
+import org.project.simproject.domain.User;
 import org.project.simproject.dto.AddArticleRequest;
 import org.project.simproject.dto.ModifyArticleRequest;
 import org.project.simproject.repository.ArticleRepository;
+import org.project.simproject.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ArticleService {
-    @Autowired
-    private ArticleRepository articleRepository;
+    private final ArticleRepository articleRepository;
+    private final UserRepository userRepository;
 
-    public Article save(AddArticleRequest request, String author){
-        return articleRepository.save(request.toEntity(author));
+    public Article save(AddArticleRequest request, User user){
+        user.articleAdd();
+        return articleRepository.save(request.toEntity(user.getNickname()));
     }
 
     public List<Article> findAll(){
@@ -28,7 +33,9 @@ public class ArticleService {
                 .orElseThrow(() -> new IllegalArgumentException("Article Not Found"));
     }
 
-    public void delete(Long id){
+    public void delete(Long id, User user){
+        user.articleDelete();
+
         Article article = articleRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Article Not Found"));
         articleRepository.delete(article);
