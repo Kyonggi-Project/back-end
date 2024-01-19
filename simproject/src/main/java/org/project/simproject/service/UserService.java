@@ -18,18 +18,21 @@ public class UserService {
         return userRepository.save(addUserRequest.toEntity());
     }
     @Transactional
-    public User updateUser(Long id,ModifyRequest modifyRequest) {
-        User user = userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 아이디 : " + id));
+    public User updateUser(String email, ModifyRequest modifyRequest) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 아이디 : " + email));
         user.modify(modifyRequest);
         return user;
     }
 
-    public User showUser(Long id) {
-        return userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 아이디 : " + id));
+    public User showUser(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 아이디 : " + email));
     }
 
-    public void delete(Long id) {
-        User user = userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 아이디 : " + id));
+    public void delete(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 아이디 : " + email));
         userRepository.delete(user);
     }
 }
