@@ -18,7 +18,7 @@ public class Bookmark {
     private Article article;
 
     @ManyToOne
-    @JoinColumn(name = "user")
+    @JoinColumn(name = "user_id")
     private User user;
 
     @Builder
