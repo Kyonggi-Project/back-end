@@ -39,4 +39,9 @@ public class CommentService {
 
         return comment;
     }
+
+    public Comment findToId(Long id){
+        return commentRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Comment Not Found"));
+    }
 }
