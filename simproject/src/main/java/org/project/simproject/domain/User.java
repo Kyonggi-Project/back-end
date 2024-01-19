@@ -2,6 +2,7 @@ package org.project.simproject.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.project.simproject.dto.ModifyRequest;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,6 +21,7 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name= "email", unique = true)
     private String email;
 
     private String password;
@@ -41,7 +43,6 @@ public class User implements UserDetails {
         this.nickname = nickname;
         this.articlesCount = 0;
     }
-
 
     @Override
     public String getPassword() {
@@ -71,5 +72,14 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return false;
+    }
+
+    public void modify(ModifyRequest modifyRequest) {
+        if(modifyRequest.getPassword().equals("")) {
+            this.nickname = modifyRequest.getNickname();
+        }
+        else if(modifyRequest.getNickname().equals("")) {
+            this.password = modifyRequest.getPassword();
+        }
     }
 }
