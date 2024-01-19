@@ -42,4 +42,12 @@ public class Comment {
         this.content = request.getContent();
         this.updatedAt = LocalDateTime.now();
     }
+
+    public void likeAdd(){
+        this.likesCount++;
+    }
+
+    public void likeDelete(){
+        this.likesCount--;
+    }
 }
