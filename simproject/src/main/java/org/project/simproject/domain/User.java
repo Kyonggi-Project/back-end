@@ -82,4 +82,12 @@ public class User implements UserDetails {
             this.password = modifyRequest.getPassword();
         }
     }
+
+    public void articleAdd(){
+        this.articlesCount++;
+    }
+
+    public void articleDelete(){
+        this.articlesCount--;
+    }
 }
