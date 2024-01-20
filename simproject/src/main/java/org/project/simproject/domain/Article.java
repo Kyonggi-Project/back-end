@@ -29,7 +29,6 @@ public class Article {
     @ManyToOne
     @JoinColumn(name = "user_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @Column(nullable = false)
     private User author;
 
     @CreatedDate
