@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.project.simproject.dto.ArticleResponse;
+import org.project.simproject.service.ArticleLikeService;
 import org.project.simproject.service.ArticleService;
 import org.project.simproject.service.BookmarkService;
 import org.springframework.http.HttpStatus;
@@ -22,11 +23,19 @@ import java.util.List;
 public class ArticleController {
     private final ArticleService articleService;
     private final BookmarkService bookmarkService;
+    private final ArticleLikeService articleLikeService;
 
     @Operation(summary = "북마크 게시글 모두 보기", description = "북마크 서비스에서 DTO 가져오기")
     @GetMapping("/bookmarked")
     public ResponseEntity<List<ArticleResponse>> getBookmarkedArticles(@RequestParam Long userId){
         List<ArticleResponse> list = bookmarkService.findBookmarkedArticlesByUser(userId);
+        return ResponseEntity.status(HttpStatus.OK).body(list);
+    }
+
+    @Operation(summary = "좋아요 게시글 모두 보기", description = "ArticleLike 서비스에서 DTO 가져오기")
+    @GetMapping("/bookmarked")
+    public ResponseEntity<List<ArticleResponse>> getLikedArticles(@RequestParam Long userId){
+        List<ArticleResponse> list = articleLikeService.findLikeArticlesByUser(userId);
         return ResponseEntity.status(HttpStatus.OK).body(list);
     }
 }
