@@ -33,7 +33,7 @@ public class ArticleController {
     }
 
     @Operation(summary = "좋아요 게시글 모두 보기", description = "ArticleLike 서비스에서 DTO 가져오기")
-    @GetMapping("/bookmarked")
+    @GetMapping("/liked")
     public ResponseEntity<List<ArticleResponse>> getLikedArticles(@RequestParam Long userId){
         List<ArticleResponse> list = articleLikeService.findLikeArticlesByUser(userId);
         return ResponseEntity.status(HttpStatus.OK).body(list);
