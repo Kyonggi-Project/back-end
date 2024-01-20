@@ -13,16 +13,12 @@ public class CommentLikeService {
 
     private final CommentLikeRepository commentLikeRepository;
 
+    private final UserService userService;
     private final CommentService commentService;
 
     public void toggleCommentLike(Long commentId, Long userId) {
         Comment comment = commentService.findToId(commentId);
-//        User user = userService.findToId(userId);           // 추후 UserService 구현 후 추가
-        User user = User.builder()                             // Test용 임시 User 생성
-                .email("test")
-                .password("test")
-                .nickname("test")
-                .build();
+        User user = userService.findToId(userId);
 
         if (isLiked(comment, user)) {
             CommentLike deleteLike = commentLikeRepository.findCommentLikeByCommentAndUser(comment, user);

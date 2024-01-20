@@ -2,13 +2,12 @@ package org.project.simproject.service;
 
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.project.simproject.repository.*;
 import org.project.simproject.domain.User;
-import org.project.simproject.dto.*;
+import org.project.simproject.dto.AddUserRequest;
+import org.project.simproject.dto.ModifyRequest;
+import org.project.simproject.repository.UserRepository;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -16,6 +15,11 @@ public class UserService {
     private final UserRepository userRepository;
     public User createUser(AddUserRequest addUserRequest) {
         return userRepository.save(addUserRequest.toEntity());
+    }
+
+    public User findToId(Long id){
+        return userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("User Not Found"));
     }
     @Transactional
     public User updateUser(String email, ModifyRequest modifyRequest) {

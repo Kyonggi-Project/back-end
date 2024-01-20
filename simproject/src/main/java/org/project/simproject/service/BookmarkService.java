@@ -16,16 +16,12 @@ public class BookmarkService {
 
     private final BookmarkRepository bookmarkRepository;
 
+    private final UserService userService;
     private final ArticleService articleService;
 
     public void toggleBookmark(Long articleId, Long userId) {
         Article article = articleService.findToId(articleId);
-//        User user = userService.findToId(userId);           // 추후 UserService 구현 후 추가
-        User user = User.builder()                             // Test용 임시 User 생성
-                .email("test")
-                .password("test")
-                .nickname("test")
-                .build();
+        User user = userService.findToId(userId);
 
         if (isBookmarked(article, user)) {
             Bookmark deleteBookmark = bookmarkRepository.findBookmarkByArticleAndUser(article, user);
