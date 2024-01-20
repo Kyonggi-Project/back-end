@@ -4,7 +4,9 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.project.simproject.domain.Article;
 import org.project.simproject.domain.Comment;
+import org.project.simproject.domain.User;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -12,11 +14,11 @@ import org.project.simproject.domain.Comment;
 public class AddCommentRequest {
     private String content;
 
-    public Comment toEntity(Long articleId, String nickname){
+    public Comment toEntity(Article articleId, User userId){
         return Comment.builder()
                 .articleId(articleId)
                 .content(content)
-                .nickname(nickname)
+                .userId(userId)
                 .build();
     }
 }

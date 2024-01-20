@@ -2,6 +2,8 @@ package org.project.simproject.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.project.simproject.dto.ModifyCommentRequest;
 
 import java.time.LocalDateTime;
@@ -16,11 +18,15 @@ public class Comment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column( nullable = false)
-    private Long articleId;
+    @ManyToOne
+    @JoinColumn(name = "article_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Article articleId;
 
-    @Column(nullable = false)
-    private String nickname;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private User userId;
 
     private String content;
 
@@ -30,9 +36,9 @@ public class Comment {
     private LocalDateTime updatedAt;
 
     @Builder
-    public Comment(Long articleId, String nickname, String content){
+    public Comment(Article articleId, User userId, String content){
         this.articleId = articleId;
-        this.nickname = nickname;
+        this.userId = userId;
         this.content = content;
         this.likesCount = 0;
         this.updatedAt = LocalDateTime.now();

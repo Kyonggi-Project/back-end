@@ -17,7 +17,7 @@ public class CommentResponse {
 
     public CommentResponse(Comment comment){
         this.id = comment.getId();
-        this.nickname = comment.getNickname();
+        this.nickname = comment.getUserId().getNickname();
         this.content = comment.getContent();
         this.likesCount = comment.getLikesCount();
         this.updatedAt = comment.getUpdatedAt();

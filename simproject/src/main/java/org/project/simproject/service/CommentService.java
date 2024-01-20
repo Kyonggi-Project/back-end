@@ -1,7 +1,9 @@
 package org.project.simproject.service;
 
 import jakarta.transaction.Transactional;
+import org.project.simproject.domain.Article;
 import org.project.simproject.domain.Comment;
+import org.project.simproject.domain.User;
 import org.project.simproject.dto.AddCommentRequest;
 import org.project.simproject.dto.ModifyCommentRequest;
 import org.project.simproject.repository.CommentRepository;
@@ -15,8 +17,8 @@ public class CommentService {
     @Autowired
     private CommentRepository commentRepository;
 
-    public Comment save(AddCommentRequest request, Long articleId, String nickname){
-        return commentRepository.save(request.toEntity(articleId, nickname));
+    public Comment save(AddCommentRequest request, Article articleId, User userId){
+        return commentRepository.save(request.toEntity(articleId, userId));
     }
 
     public List<Comment> findByArticleId(Long articleId){
