@@ -5,10 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.project.simproject.service.CommentLikeService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -19,10 +16,10 @@ public class CommentLikeController {
     private final CommentLikeService commentLikeService;
 
     @Operation(summary = "댓글 좋아요 토글", description = "좋아요 추가/삭제 여부는 Service 레이어에서 실행")
-    @PostMapping("/toggle")
+    @PostMapping("/toggle/{articleId}")
     public ResponseEntity<String> toggleBookmark(
             @RequestParam Long userId,
-            @RequestParam Long articleId
+            @PathVariable Long articleId
     ) {
         try {
             commentLikeService.toggleCommentLike(userId, articleId);
