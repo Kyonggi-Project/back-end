@@ -18,13 +18,13 @@ public class CommentLikeService {
     public void toggleCommentLike(Long commentId, Long userId) {
         Comment comment = commentService.findToId(commentId);
 //        User user = userService.findToId(userId);           // 추후 UserService 구현 후 추가
-        User user = User.builder()
+        User user = User.builder()                             // Test용 임시 User 생성
                 .email("test")
                 .password("test")
                 .nickname("test")
                 .build();
 
-        if (isCommentLike(comment, user)) {
+        if (isLiked(comment, user)) {
             CommentLike deleteLike = commentLikeRepository.findCommentLikeByCommentAndUser(comment, user);
 
             comment.likeDelete();
@@ -40,7 +40,7 @@ public class CommentLikeService {
         }
     }
 
-    public boolean isCommentLike(Comment comment, User user) {
+    public boolean isLiked(Comment comment, User user) {
         return commentLikeRepository.existsCommentLikeByCommentAndUser(comment, user);
     }
 
