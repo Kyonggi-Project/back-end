@@ -8,7 +8,6 @@ import org.project.simproject.dto.AddArticleRequest;
 import org.project.simproject.dto.ModifyArticleRequest;
 import org.project.simproject.repository.ArticleRepository;
 import org.project.simproject.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,7 +20,7 @@ public class ArticleService {
 
     public Article save(AddArticleRequest request, User user){
         user.articleAdd();
-        return articleRepository.save(request.toEntity(user.getNickname()));
+        return articleRepository.save(request.toEntity(user));
     }
 
     public List<Article> findAll(){

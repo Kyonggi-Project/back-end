@@ -2,6 +2,8 @@ package org.project.simproject.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.project.simproject.dto.ModifyArticleRequest;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -24,8 +26,11 @@ public class Article {
     @Column(nullable = false)
     private String content;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @Column(nullable = false)
-    private String author;
+    private User author;
 
     @CreatedDate
     @Column(name = "created_at")
@@ -38,7 +43,7 @@ public class Article {
     private int likesCount;
 
     @Builder
-    public Article(String title, String content, String author){
+    public Article(String title, String content, User author){
         this.title = title;
         this.content = content;
         this.author = author;

@@ -3,6 +3,7 @@ package org.project.simproject.dto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.project.simproject.domain.Article;
+import org.project.simproject.domain.User;
 
 import java.time.LocalDateTime;
 
@@ -14,7 +15,7 @@ public class ArticleResponse {
     private String content;
     private LocalDateTime creatAt;
     private LocalDateTime updateAt;
-    private String author;
+    private User author;
     private int likesCount;
 
     public ArticleResponse(Article article){

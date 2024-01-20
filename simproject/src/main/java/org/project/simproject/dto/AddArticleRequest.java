@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.project.simproject.domain.Article;
+import org.project.simproject.domain.User;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -13,7 +14,7 @@ public class AddArticleRequest {
     private String title;
     private String content;
 
-    public Article toEntity(String author){
+    public Article toEntity(User author){
         return Article.builder()
                 .title(title)
                 .content(content)
