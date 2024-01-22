@@ -37,7 +37,7 @@ public class BookmarkService {
     }
 
     public List<ArticleResponse> findBookmarkedArticlesByUser(Long userId) {
-        return bookmarkRepository.findBookmarksByUserId(userId)
+        return bookmarkRepository.findByUserId(userId)
                 .stream()
                 .map(Bookmark::getArticle)
                 .map(ArticleResponse::new)
