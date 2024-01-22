@@ -22,7 +22,7 @@ public class CommentLikeController {
             @PathVariable Long articleId
     ) {
         try {
-            commentLikeService.toggleCommentLike(userId, articleId);
+            commentLikeService.toggleCommentLike(articleId, userId);
             return ResponseEntity.ok("CommentLike toggled successfully.");
         } catch (Exception exception) {
             return ResponseEntity.internalServerError()

@@ -22,7 +22,7 @@ public class BookmarkController {
             @PathVariable Long articleId
     ) {
         try {
-            bookmarkService.toggleBookmark(userId, articleId);
+            bookmarkService.toggleBookmark(articleId, userId);
             return ResponseEntity.ok("Bookmark toggled successfully.");
         } catch (Exception exception) {
             return ResponseEntity.internalServerError()

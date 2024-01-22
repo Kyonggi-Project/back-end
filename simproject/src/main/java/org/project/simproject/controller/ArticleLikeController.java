@@ -22,7 +22,7 @@ public class ArticleLikeController {
             @PathVariable Long articleId
     ) {
         try {
-            articleLikeService.toggleArticleLike(userId, articleId);
+            articleLikeService.toggleArticleLike(articleId, userId);
             return ResponseEntity.ok("ArticleLike toggled successfully.");
         } catch (Exception exception) {
             return ResponseEntity.internalServerError()
