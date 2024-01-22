@@ -1,11 +1,13 @@
 package org.project.simproject.service;
 
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.project.simproject.domain.Article;
 import org.project.simproject.domain.Comment;
 import org.project.simproject.domain.User;
 import org.project.simproject.dto.AddCommentRequest;
 import org.project.simproject.dto.ModifyCommentRequest;
+import org.project.simproject.repository.ArticleRepository;
 import org.project.simproject.repository.CommentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,16 +15,16 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class CommentService {
-    @Autowired
-    private CommentRepository commentRepository;
+    private final CommentRepository commentRepository;
 
     public Comment save(AddCommentRequest request, Article articleId, User userId){
         return commentRepository.save(request.toEntity(articleId, userId));
     }
 
-    public List<Comment> findByArticleId(Long articleId){
-        List<Comment> list = commentRepository.findByArticleId(articleId);
+    public List<Comment> findByArticleId(Article article){
+        List<Comment> list = commentRepository.findByArticleId(article);
 
         return list;
     }
