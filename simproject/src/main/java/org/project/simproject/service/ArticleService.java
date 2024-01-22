@@ -50,7 +50,7 @@ public class ArticleService {
     }
 
     public List<Article> findToAuthor(String author){
-        List<Article> articleList = null;
+        List<Article> articleList = new ArrayList<>();
         List<User> list = userRepository.findByNicknameContains(author);
         for(User user : list){
             if(user.getArticlesCount() != 0){
