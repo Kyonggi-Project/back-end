@@ -1,9 +1,9 @@
 -- Users
 INSERT INTO users (email, password, nickname, articles_count)
 VALUES
-    ('user1@example.com', 'password1', 'user1', 2),
+    ('user1@example.com', 'password1', 'user1', 1),
     ('user2@example.com', 'password2', 'user2', 1),
-    ('user3@example.com', 'password3', 'user3', 0);
+    ('user3@example.com', 'password3', 'user3', 1);
 
 -- Articles
 INSERT INTO articles (title, content, user_id, created_at, updated_at, likes_count)
