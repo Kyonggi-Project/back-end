@@ -54,7 +54,7 @@ public class ArticleService {
         List<User> list = userRepository.findByNicknameContains(author);
         for(User user : list){
             if(user.getArticlesCount() != 0){
-                articleList.add(articleRepository.findByAuthor(user.getId())
+                articleList.add(articleRepository.findByAuthor(user)
                         .orElseThrow(() -> new IllegalArgumentException("Article Not Found")));
             }
         }
