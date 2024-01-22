@@ -10,6 +10,7 @@ import org.project.simproject.repository.ArticleRepository;
 import org.project.simproject.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -49,6 +50,18 @@ public class ArticleService {
     }
 
     public List<Article> findToAuthor(String author){
-        return articleRepository.findByAuthorContains(author);
+        List<Article> articleList = null;
+        List<User> list = userRepository.findByNicknameContains(author);
+        for(User user : list){
+            if(user.getArticlesCount() != 0){
+                articleList.add(articleRepository.findByAuthor(user.getId())
+                        .orElseThrow(() -> new IllegalArgumentException("Article Not Found")));
+            }
+        }
+        return articleList;
+    }
+
+    public List<Article> findToContent(String content){
+        return articleRepository.findByContentContains(content);
     }
 }
