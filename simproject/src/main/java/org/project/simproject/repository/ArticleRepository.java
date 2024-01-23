@@ -12,4 +12,5 @@ import java.util.Optional;
 public interface ArticleRepository extends JpaRepository<Article, Long> {
     Optional<Article> findByAuthor(User user);
     List<Article> findByContentContains(String content);
+    List<Article> findByTitleContains(String title);
 }

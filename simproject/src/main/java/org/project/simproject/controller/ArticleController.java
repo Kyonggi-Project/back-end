@@ -81,7 +81,7 @@ public class ArticleController {
         return ResponseEntity.status(HttpStatus.OK).body(list);
     }
 
-    @Operation(summary = "특정 내용을 포함한 게시글 모두 보기", description = "게시글 서비스에서 list로 받아옴")
+    @Operation(summary = "특정 제목 및 내용을 포함한 게시글 모두 보기", description = "게시글 서비스에서 list로 받아옴")
     @GetMapping("/viewArticles/content")
     public ResponseEntity<List<ArticleResponse>> getArticleByContent(@RequestParam String content){
         List<ArticleResponse> list = articleService.findToContent(content)
