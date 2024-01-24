@@ -62,8 +62,7 @@ public class ArticleService {
     }
 
     public List<Article> findToContent(String content){
-        List<Article> list = articleRepository.findByContentContains(content);
-        list.addAll(articleRepository.findByTitleContains(content));
+        List<Article> list = articleRepository.findByContentContainsOrTitleContains(content, content);
         return list;
     }
 }
