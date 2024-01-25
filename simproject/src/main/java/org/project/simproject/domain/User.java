@@ -1,5 +1,6 @@
 package org.project.simproject.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.project.simproject.dto.ModifyRequest;
@@ -7,6 +8,7 @@ import org.project.simproject.dto.ModifyRequest;
 //import org.springframework.security.core.authority.SimpleGrantedAuthority;
 //import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -30,6 +32,14 @@ public class User /*implements UserDetails*/ {
     private String nickname;
 
     private int articlesCount;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "followee")
+    private List<Follow> followers = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "follower")
+    private List<Follow> following = new ArrayList<>();
 
     /*@Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
