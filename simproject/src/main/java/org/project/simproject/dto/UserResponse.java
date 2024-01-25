@@ -9,9 +9,13 @@ import org.project.simproject.domain.User;
 public class UserResponse {
     private String nickname;
     private int articlesCount;
+    private int followers;
+    private int following;
 
     public UserResponse(User user){
         this.nickname = user.getNickname();
         this.articlesCount = user.getArticlesCount();
+        this.followers = user.getFollowers().size();
+        this.following = user.getFollowing().size();
     }
 }
