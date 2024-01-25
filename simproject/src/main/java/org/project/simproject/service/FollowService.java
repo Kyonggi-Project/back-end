@@ -3,15 +3,22 @@ package org.project.simproject.service;
 import lombok.RequiredArgsConstructor;
 import org.project.simproject.domain.Follow;
 import org.project.simproject.domain.User;
+import org.project.simproject.dto.UserResponse;
 import org.project.simproject.repository.FollowRepository;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class FollowService {
     private final FollowRepository followRepository;
+    private final UserService userService;
 
-    public void toggle(User follower, User followee){
+    public void toggle(Long id, String followeeEmail){
+        User follower = userService.findToId(id);
+        User followee = userService.showUser(followeeEmail);
+
         if(isFollowed(follower, followee)){
             Follow follow = followRepository.findFollowByFollowerAndFollowee(follower, followee);
             followRepository.delete(follow);
@@ -23,6 +30,24 @@ public class FollowService {
                     .build();
             followRepository.save(follow);
         }
+    }
+
+    public List<UserResponse> findListOfFollower(String email){
+        User user = userService.showUser(email);
+        return user.getFollowers()
+                .stream()
+                .map(Follow::getFollower)
+                .map(UserResponse::new)
+                .toList();
+    }
+
+    public List<UserResponse> findListOfFollowee(String email){
+        User user = userService.showUser(email);
+        return user.getFollowing()
+                .stream()
+                .map(Follow::getFollowee)
+                .map(UserResponse::new)
+                .toList();
     }
 
     public boolean isFollowed(User follower, User followee){
