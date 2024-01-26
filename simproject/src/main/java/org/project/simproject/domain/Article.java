@@ -1,5 +1,6 @@
 package org.project.simproject.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
@@ -9,6 +10,8 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -40,6 +43,10 @@ public class Article {
     private LocalDateTime updatedAt;
 
     private int likesCount;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "articleId")
+    private List<Comment> comments = new ArrayList<>();
 
     @Builder
     public Article(String title, String content, User author){
