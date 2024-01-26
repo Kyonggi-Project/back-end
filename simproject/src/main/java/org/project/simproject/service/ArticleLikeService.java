@@ -40,7 +40,7 @@ public class ArticleLikeService {
     }
 
     public List<ArticleResponse> findLikeArticlesByUser(Long userId) {
-        return articleLikeRepository.findByUserId(userId)
+        return userService.findToId(userId).getArticleLikes()
                 .stream()
                 .map(ArticleLike::getArticle)
                 .map(ArticleResponse::new)

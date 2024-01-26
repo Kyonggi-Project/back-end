@@ -41,6 +41,14 @@ public class User /*implements UserDetails*/ {
     @OneToMany(mappedBy = "follower")
     private List<Follow> following = new ArrayList<>();
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "user")
+    private List<Bookmark> bookmarks = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "user")
+    private List<ArticleLike> articleLikes = new ArrayList<>();
+
     /*@Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("user"));
