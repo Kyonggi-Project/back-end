@@ -7,10 +7,13 @@ import org.project.simproject.domain.User;
 import org.project.simproject.dto.AddUserRequest;
 import org.project.simproject.dto.ModifyRequest;
 import org.project.simproject.dto.UserResponse;
+import org.project.simproject.service.FollowService;
 import org.project.simproject.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -19,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+    private final FollowService followService;
 
     //유저 추가
     @Operation(summary = "유저 추가", description = "유저 서비스에서 유저를 추가")
@@ -46,6 +50,20 @@ public class UserController {
     public ResponseEntity<User> userModify(@RequestParam String email, @RequestBody ModifyRequest modifyRequest) {
         User modifyuser = userService.updateUser(email,modifyRequest);
         return new ResponseEntity<>(modifyuser,HttpStatus.OK);
+    }
+
+    @Operation(summary = "특정 유저의 팔로워 목록 보기", description = "FollowService에서 실행")
+    @GetMapping("/follower/{email}")
+    public ResponseEntity<List<UserResponse>> getFollower(@PathVariable String email){
+        List<UserResponse> list = followService.findListOfFollower(email);
+        return ResponseEntity.status(HttpStatus.OK).body(list);
+    }
+
+    @Operation(summary = "특정 유저의 팔로잉 목록 보기", description = "FollowService에서 실행")
+    @GetMapping("/following/{email}")
+    public ResponseEntity<List<UserResponse>> getFollowing(@PathVariable String email){
+        List<UserResponse> list = followService.findListOfFollowee(email);
+        return ResponseEntity.status(HttpStatus.OK).body(list);
     }
 
     //유저 삭제

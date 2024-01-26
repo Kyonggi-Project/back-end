@@ -25,17 +25,4 @@ public class FollowController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @Operation(summary = "특정 유저의 팔로워 목록 보기", description = "임시 controller")
-    @GetMapping("/follower/{email}")
-    public ResponseEntity<List<UserResponse>> getFollower(@PathVariable String email){
-        List<UserResponse> list = followService.findListOfFollower(email);
-        return ResponseEntity.status(HttpStatus.OK).body(list);
-    }
-
-    @Operation(summary = "특정 유저의 팔로잉 목록 보기", description = "임시 controller")
-    @GetMapping("/following/{email}")
-    public ResponseEntity<List<UserResponse>> getFollowing(@PathVariable String email){
-        List<UserResponse> list = followService.findListOfFollowee(email);
-        return ResponseEntity.status(HttpStatus.OK).body(list);
-    }
 }
