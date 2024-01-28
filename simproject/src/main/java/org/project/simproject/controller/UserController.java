@@ -39,10 +39,10 @@ public class UserController {
     //특정 유저 정보 보기
     @Operation(summary = "특정 유저 정보", description = "유저 서비스에서 특정 유저의 정보를 조회")
     @GetMapping("/profile/{email}")
-    public ResponseEntity<User> getProfile(@PathVariable String email)
+    public ResponseEntity<UserResponse> getProfile(@PathVariable String email)
     {
         User showUser = userService.showUser(email);
-        return new ResponseEntity<>(showUser, HttpStatus.OK);
+        return new ResponseEntity<>(new UserResponse(showUser), HttpStatus.OK);
     }
     //현재 유저 수정
     @Operation(summary = "유저 정보 수정", description = "유저 서비스에서 현재 유저의 정보를 수정")
