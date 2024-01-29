@@ -4,9 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.project.simproject.dto.ModifyRequest;
-//import org.springframework.security.core.GrantedAuthority;
-//import org.springframework.security.core.authority.SimpleGrantedAuthority;
-//import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,7 +18,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Table(name = "users")
-public class User /*implements UserDetails*/ {
+public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -49,10 +49,10 @@ public class User /*implements UserDetails*/ {
     @OneToMany(mappedBy = "user")
     private List<ArticleLike> articleLikes = new ArrayList<>();
 
-    /*@Override
+    @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("user"));
-    }*/
+    }
 
     @Builder
     public User(String email, String password, String nickname){
@@ -62,7 +62,7 @@ public class User /*implements UserDetails*/ {
         this.articlesCount = 0;
     }
 
-    /*@Override
+    @Override
     public String getPassword() {
         return password;
     }
@@ -90,7 +90,7 @@ public class User /*implements UserDetails*/ {
     @Override
     public boolean isEnabled() {
         return false;
-    }*/
+    }
 
     public void modify(ModifyRequest modifyRequest) {
         if(modifyRequest.getPassword().equals("")) {

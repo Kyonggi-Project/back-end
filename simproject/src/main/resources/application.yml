@@ -14,3 +14,8 @@ spring:
   h2:
     console:
       enabled: true
+
+jwt:
+  issuer: kmymy27@gmail.com
+  # 특정값을 Base64로 인코딩한 값
+  secret: c2lsdmVybmluZS10ZWNoLXNwcmluZy1ib290LWp3dC10dXRvcmlhbC1zZWNyZXQtc2lsdmVybmluZS10ZWNoLXNwcmluZy1ib290LWp3dC10dXRvcmlhbC1zZWNyZXQK
