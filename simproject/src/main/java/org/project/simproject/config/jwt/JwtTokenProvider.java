@@ -19,9 +19,8 @@ import java.util.Set;
 public class JwtTokenProvider {
 
     private final Properties properties;
-    private final Duration tokenValidTerm = Duration.ofMinutes(30);
 
-    public String createToken(User user) {
+    public String createToken(User user, Duration tokenValidTerm) {
         Date now = new Date();
 
         return Jwts.builder()
@@ -41,8 +40,7 @@ public class JwtTokenProvider {
         Set<SimpleGrantedAuthority> authorities = Collections.singleton(new SimpleGrantedAuthority("ROLE_USER"));
 
         return new UsernamePasswordAuthenticationToken(new org.springframework  //인증 객체 토큰 생성 및 가져오기
-                .security.core.userdetails.User(claims.getSubject
-                (), "", authorities), token, authorities);
+                .security.core.userdetails.User(getEmail(token), "", authorities), token, authorities);
     }
 
     public Claims getClaims(String token) {
@@ -67,9 +65,7 @@ public class JwtTokenProvider {
 
     public boolean validateToken(String token) {
         try {
-            Jws<Claims> claims = Jwts.parser().setSigningKey(properties.getSecret()).parseClaimsJws(token);
-
-            return !claims.getBody().getExpiration().before(new Date());
+            return !getClaims(token).getExpiration().before(new Date());
         } catch (Exception e) {
             return false;
         }
