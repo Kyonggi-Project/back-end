@@ -1,4 +1,4 @@
-package org.project.simproject.config;
+/*package org.project.simproject.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,4 +11,4 @@ public class PasswordEncoding {
         return new BCryptPasswordEncoder();
     }
 
-}
+}*/
