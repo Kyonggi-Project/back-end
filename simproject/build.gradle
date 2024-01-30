@@ -13,20 +13,20 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    runtimeOnly 'com.h2database:h2'                                                 // h2 Database
-    compileOnly 'org.projectlombok:lombok'
+    implementation 'org.springframework.boot:spring-boot-starter-web'               // Web 관련 기능 제공
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'          // Test 관련 기능 제공
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'          // JPA Data 관련 기능 제공
+    runtimeOnly 'com.h2database:h2'                                                 // H2 Database
+    compileOnly 'org.projectlombok:lombok'                                          // 각종 Annotation 제공
     annotationProcessor 'org.projectlombok:lombok'
-    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'         // 템플릿 작성 시, 타임리프 관련 기능 제공
+    implementation 'org.springframework.boot:spring-boot-starter-security'          // Spring Security
 
     implementation 'org.hibernate.validator:hibernate-validator:8.0.0.Final'        // Hibernate-Validator
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'        // OpenApi
 
-    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
-    testImplementation 'org.springframework.security:spring-security-test'
+    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'          // 타임리프 관련 Security 제공
+    testImplementation 'org.springframework.security:spring-security-test'          // Security Test 제공
     testAnnotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.projectlombok:lombok'
 
