@@ -19,6 +19,8 @@ import java.util.Set;
 public class JwtTokenProvider {
 
     private final Properties properties;
+    private final static String HEADER_AUTHORIZATION = "Authorization";
+    private final static String TOKEN_PREFIX = "Bearer ";
 
     public String createToken(User user, Duration tokenValidTerm) {
         Date now = new Date();
@@ -60,7 +62,12 @@ public class JwtTokenProvider {
     }
 
     public String resolveToken(HttpServletRequest request) {
-        return request.getHeader("X-AUTH-TOKEN");
+        String authorizationHeader = request.getHeader(HEADER_AUTHORIZATION);
+        if(authorizationHeader != null && authorizationHeader.startsWith(TOKEN_PREFIX)) {
+            return authorizationHeader.substring(TOKEN_PREFIX.length());
+        }
+
+        return null;
     }
 
     public boolean validateToken(String token) {
