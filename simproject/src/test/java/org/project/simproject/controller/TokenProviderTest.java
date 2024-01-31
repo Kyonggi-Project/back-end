@@ -73,15 +73,15 @@ class TokenProviderTest {
     @DisplayName("토큰을 통해 인증 객체 생성")
     @Test
     public void test4(){
-        String subject = "user@gmail.com";
+        String email = "user@gmail.com";
         JwtFactory factory = JwtFactory.builder()
-                .subject(subject)
+                .claims(Map.of("email", email))
                 .build();
         String token = factory.createToken(jwtProperties);
 
         Authentication authentication = tokenProvider.getAuthentication(token);
 
-        assertThat(((UserDetails)authentication.getPrincipal()).getUsername()).isEqualTo(subject);
+        assertThat(((UserDetails)authentication.getPrincipal()).getUsername()).isEqualTo(email);
     }
 
     @DisplayName("토큰을 통해 유저 ID 가져오기")
