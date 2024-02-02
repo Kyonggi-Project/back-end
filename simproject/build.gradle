@@ -34,6 +34,8 @@ dependencies {
     implementation 'javax.xml.bind:jaxb-api:2.3.1'                                  // XML 파일 처리
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'  // @ConfigurationProperties Annotation
 
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'     // oauth2.0 관련 기능 제공
+
 }
 
 test {
