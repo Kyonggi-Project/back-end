@@ -15,6 +15,17 @@ spring:
     console:
       enabled: true
 
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 106453341605-64801ronf4qmpbaeebfl925ftshptlh9.apps.googleusercontent.com
+            client-secret: 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
+            scope:
+              - email
+              - profile
+
 jwt:
   issuer: kmymy27@gmail.com
   # 특정값을 Base64로 인코딩한 값
