@@ -28,4 +28,9 @@ public class RefreshToken {
         this.userId = userId;
         this.refreshToken = refreshToken;
     }
+
+    public RefreshToken update(String newRefreshToken){
+        this.refreshToken = newRefreshToken;
+        return this;
+    }
 }

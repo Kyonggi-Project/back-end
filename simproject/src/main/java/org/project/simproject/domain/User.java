@@ -101,6 +101,11 @@ public class User implements UserDetails {
         }
     }
 
+    public User update(String nickname){
+        this.nickname = nickname;
+        return this;
+    }
+
     public void articleAdd(){
         this.articlesCount++;
     }
