@@ -20,7 +20,7 @@ public class RefreshToken {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private User userId;
 
-    @Column(name = "refresh_token", nullable = false)
+    @Column(name = "refresh_token", nullable = false, length = 300)
     private String refreshToken;
 
     @Builder

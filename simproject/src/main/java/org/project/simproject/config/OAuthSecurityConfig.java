@@ -34,7 +34,8 @@ public class OAuthSecurityConfig {
         return (web) -> web.ignoring()
                 .requestMatchers(toH2Console())
                 .requestMatchers("/v2/api-docs", "/swagger-resources/**",
-                        "/swagger-ui.html", "/webjars/**", "/swagger/**", "/sign-api/exception");
+                        "/swagger-ui.html", "/webjars/**", "/swagger/**", "/sign-api/exception",
+                        "/static/**", "/img/**");
     }
 
     @Bean
@@ -55,7 +56,7 @@ public class OAuthSecurityConfig {
                 .anyRequest().permitAll();
 
         http.oauth2Login()
-                .loginPage("/login")
+                .loginPage("/oauthLogin")
                 .authorizationEndpoint()
                 .authorizationRequestRepository(oAuth2CookieRepository())
                 .and()
