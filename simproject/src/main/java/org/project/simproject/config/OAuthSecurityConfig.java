@@ -2,6 +2,7 @@ package org.project.simproject.config;
 
 import lombok.RequiredArgsConstructor;
 import org.project.simproject.config.jwt.JwtTokenProvider;
+import org.project.simproject.config.oauth.AuthSuccessHandler;
 import org.project.simproject.config.oauth.OAuth2CookieRepository;
 import org.project.simproject.config.oauth.OAuth2SuccessHandler;
 import org.project.simproject.config.oauth.OAuth2UserCustomService;
@@ -40,10 +41,7 @@ public class OAuthSecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf().disable()
-                .httpBasic().disable()
-                .formLogin().disable()
-                .logout().disable();
+        http.csrf().disable();
 
         http.sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
@@ -52,7 +50,7 @@ public class OAuthSecurityConfig {
 
         http.authorizeRequests()
                 .requestMatchers("/api/token/createToken").permitAll()
-                .requestMatchers("/api/**").authenticated()
+                .requestMatchers("/api/**").permitAll()
                 .anyRequest().permitAll();
 
         http.oauth2Login()
@@ -71,6 +69,15 @@ public class OAuthSecurityConfig {
                 .defaultAuthenticationEntryPointFor(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
                         new AntPathRequestMatcher("/api/**"));
 
+        http.formLogin()
+                .loginPage("/login")
+                .defaultSuccessUrl("/")
+                .successHandler(authSuccessHandler())
+                .and()
+                .logout()
+                .logoutSuccessUrl("/login")
+                .invalidateHttpSession(true);
+
         return http.build();
     }
 
@@ -80,6 +87,14 @@ public class OAuthSecurityConfig {
                 jwtTokenProvider,
                 refreshTokenRepository,
                 oAuth2CookieRepository(),
+                userService
+        );
+    }
+
+    public AuthSuccessHandler authSuccessHandler(){
+        return new AuthSuccessHandler(
+                jwtTokenProvider,
+                refreshTokenRepository,
                 userService
         );
     }

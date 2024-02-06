@@ -6,6 +6,7 @@ import org.project.simproject.domain.User;
 import org.project.simproject.dto.AddUserRequest;
 import org.project.simproject.dto.ModifyRequest;
 import org.project.simproject.repository.UserRepository;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,8 +14,15 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
     public User createUser(AddUserRequest addUserRequest) {
-        return userRepository.save(addUserRequest.toEntity());
+        return userRepository.save(
+                User.builder()
+                        .email(addUserRequest.getEmail())
+                        .password(bCryptPasswordEncoder.encode(addUserRequest.getPassword()))
+                        .nickname(addUserRequest.getNickname())
+                        .build()
+        );
     }
 
     public User findToId(Long id){
