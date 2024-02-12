@@ -1,4 +1,4 @@
-package org.project.simproject.dto;
+package org.project.simproject.dto.request;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

@@ -5,9 +5,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.project.simproject.domain.Article;
 import org.project.simproject.domain.Comment;
-import org.project.simproject.dto.AddCommentRequest;
-import org.project.simproject.dto.CommentResponse;
-import org.project.simproject.dto.ModifyCommentRequest;
+import org.project.simproject.dto.request.AddCommentRequest;
+import org.project.simproject.dto.response.CommentResponse;
+import org.project.simproject.dto.request.ModifyCommentRequest;
 import org.project.simproject.service.ArticleService;
 import org.project.simproject.service.CommentService;
 import org.project.simproject.service.UserService;
@@ -31,12 +31,24 @@ public class CommentController {
     public ResponseEntity<Comment> addComment(@PathVariable Long articleId,
                                               @RequestParam Long userId,
                                               @RequestBody AddCommentRequest request){
-        Comment comment = commentService.save(request, articleService.findToId(articleId), userService.findToId(userId));
+        Comment comment = commentService.save(request, articleService.findById(articleId), userService.findById(userId));
         return ResponseEntity.status(HttpStatus.CREATED).body(comment);
     }
 
+    @Operation(summary = "특정 게시글 댓글 모두 보기", description = "댓글 서비스에서 모든 댓글 불러오기")
+    @GetMapping("/comments/{articleId}")
+    public ResponseEntity<List<CommentResponse>> getAllComments(@PathVariable Long articleId){
+        Article article = articleService.findById(articleId);
+        List<CommentResponse> list = commentService.findByArticleId(article)
+                .stream()
+                .map(CommentResponse::new)
+                .toList();
+        return ResponseEntity.status(HttpStatus.OK).body(list);
+
+    }
+
     @Operation(summary = "댓글 수정하기", description = "ModifyRequest 가져오기")
-    @PutMapping("/updateComment/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<Comment> modifyComment(@PathVariable Long id,
                                                  @RequestBody ModifyCommentRequest request){
         Comment comment = commentService.modify(request, id);
@@ -44,21 +56,9 @@ public class CommentController {
     }
 
     @Operation(summary = "댓글 삭제하기", description = "특정 댓글 데이터 DB에서 삭제하기")
-    @DeleteMapping("/deleteComment/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteComment(@PathVariable Long id){
         commentService.delete(id);
         return ResponseEntity.status(HttpStatus.OK).build();
-    }
-
-    @Operation(summary = "특정 게시글 댓글 모두 보기", description = "댓글 서비스에서 모든 댓글 불러오기")
-    @GetMapping("/comments/{articleId}")
-    public ResponseEntity<List<CommentResponse>> getAllComments(@PathVariable Long articleId){
-        Article article = articleService.findToId(articleId);
-        List<CommentResponse> list = commentService.findByArticleId(article)
-                .stream()
-                .map(CommentResponse::new)
-                .toList();
-        return ResponseEntity.status(HttpStatus.OK).body(list);
-
     }
 }

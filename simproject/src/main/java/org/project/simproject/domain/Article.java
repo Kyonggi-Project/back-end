@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-import org.project.simproject.dto.ModifyArticleRequest;
+import org.project.simproject.dto.request.ModifyArticleRequest;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
@@ -48,14 +48,12 @@ public class Article {
     @OneToMany(mappedBy = "articleId")
     private List<Comment> comments = new ArrayList<>();
 
-    @Builder
-    public Article(String title, String content, User author){
-        this.title = title;
-        this.content = content;
-        this.author = author;
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-        this.likesCount = 0;
+    public void addLike(){
+        this.likesCount++;
+    }
+
+    public void deleteLike(){
+        this.likesCount--;
     }
 
     public void modify(ModifyArticleRequest request){
@@ -64,11 +62,13 @@ public class Article {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public void likeAdd(){
-        this.likesCount++;
-    }
-
-    public void likeDelete(){
-        this.likesCount--;
+    @Builder
+    public Article(String title, String content, User author){
+        this.title = title;
+        this.content = content;
+        this.author = author;
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+        this.likesCount = 0;
     }
 }

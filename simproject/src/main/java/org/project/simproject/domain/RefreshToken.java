@@ -23,14 +23,14 @@ public class RefreshToken {
     @Column(name = "refresh_token", nullable = false, length = 300)
     private String refreshToken;
 
+    public RefreshToken update(String newRefreshToken){
+        this.refreshToken = newRefreshToken;
+        return this;
+    }
+
     @Builder
     public RefreshToken(User userId, String refreshToken){
         this.userId = userId;
         this.refreshToken = refreshToken;
-    }
-
-    public RefreshToken update(String newRefreshToken){
-        this.refreshToken = newRefreshToken;
-        return this;
     }
 }

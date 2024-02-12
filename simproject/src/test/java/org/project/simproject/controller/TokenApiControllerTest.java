@@ -8,7 +8,7 @@ import org.project.simproject.config.jwt.JwtFactory;
 import org.project.simproject.config.jwt.Properties;
 import org.project.simproject.domain.RefreshToken;
 import org.project.simproject.domain.User;
-import org.project.simproject.dto.RefreshTokenRequest;
+import org.project.simproject.dto.request.RefreshTokenRequest;
 import org.project.simproject.repository.RefreshTokenRepository;
 import org.project.simproject.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/artilcle-like")
+@RequestMapping("/api/article-like")
 @Tag(name = "게시물 좋아요", description = "게시물 좋아요 기능")
 public class ArticleLikeController {
 
@@ -17,12 +17,12 @@ public class ArticleLikeController {
 
     @Operation(summary = "게시물 좋아요 토글", description = "좋아요 추가/삭제 여부는 Service 레이어에서 실행")
     @PostMapping("/toggle/{articleId}")
-    public ResponseEntity<String> toggleBookmark(
+    public ResponseEntity<String> toggleArticleLike(
             @RequestParam Long userId,
             @PathVariable Long articleId
     ) {
         try {
-            articleLikeService.toggleArticleLike(articleId, userId);
+            articleLikeService.toggle(articleId, userId);
             return ResponseEntity.ok("ArticleLike toggled successfully.");
         } catch (Exception exception) {
             return ResponseEntity.internalServerError()

@@ -32,7 +32,7 @@ public class AuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
         String email = authentication.getName();
-        User user = userService.showUser(email);
+        User user = userService.findByEmail(email);
 
         String refreshToken = jwtTokenProvider.createToken(user, REFRESH_TOKEN_DURATION);
         saveRefreshToken(user, refreshToken);

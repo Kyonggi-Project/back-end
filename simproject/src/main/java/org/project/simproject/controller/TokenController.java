@@ -1,8 +1,8 @@
 package org.project.simproject.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.project.simproject.dto.AccessTokenResponse;
-import org.project.simproject.dto.RefreshTokenRequest;
+import org.project.simproject.dto.response.AccessTokenResponse;
+import org.project.simproject.dto.request.RefreshTokenRequest;
 import org.project.simproject.service.TokenService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

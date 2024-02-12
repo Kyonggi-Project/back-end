@@ -1,4 +1,4 @@
-package org.project.simproject.dto;
+package org.project.simproject.dto.response;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

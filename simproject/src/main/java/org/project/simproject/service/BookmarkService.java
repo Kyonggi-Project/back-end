@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.project.simproject.domain.Article;
 import org.project.simproject.domain.Bookmark;
 import org.project.simproject.domain.User;
-import org.project.simproject.dto.ArticleResponse;
+import org.project.simproject.dto.response.ArticleResponse;
 import org.project.simproject.repository.BookmarkRepository;
 import org.springframework.stereotype.Service;
 
@@ -19,9 +19,9 @@ public class BookmarkService {
     private final UserService userService;
     private final ArticleService articleService;
 
-    public void toggleBookmark(Long articleId, Long userId) {
-        Article article = articleService.findToId(articleId);
-        User user = userService.findToId(userId);
+    public void toggle(Long articleId, Long userId) {
+        Article article = articleService.findById(articleId);
+        User user = userService.findById(userId);
 
         if (isBookmarked(article, user)) {
             Bookmark deleteBookmark = bookmarkRepository.findBookmarkByArticleAndUser(article, user);
@@ -37,7 +37,7 @@ public class BookmarkService {
     }
 
     public List<ArticleResponse> findBookmarkedArticlesByUser(Long userId) {
-        return userService.findToId(userId).getBookmarks()
+        return userService.findById(userId).getBookmarks()
                 .stream()
                 .map(Bookmark::getArticle)
                 .map(ArticleResponse::new)

@@ -41,7 +41,7 @@ class TokenProviderTest {
         String token = tokenProvider.createToken(user, Duration.ofDays(14));
 
         Long id = Jwts.parser()
-                .setSigningKey(jwtProperties.getSecret())
+                .setSigningKey(jwtProperties.getSecretKey())
                 .parseClaimsJws(token)
                 .getBody()
                 .get("id", Long.class);

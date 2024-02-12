@@ -1,7 +1,7 @@
 package org.project.simproject.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.project.simproject.dto.AddUserRequest;
+import org.project.simproject.dto.request.AddUserRequest;
 import org.project.simproject.service.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,7 +14,7 @@ public class TestViewController {
 
     @PostMapping("/signup")
     public String save(AddUserRequest addUserRequest){
-        userService.createUser(addUserRequest);
+        userService.save(addUserRequest);
         return "redirect:/login";
     }
 

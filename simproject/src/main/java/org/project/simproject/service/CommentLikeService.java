@@ -16,14 +16,14 @@ public class CommentLikeService {
     private final UserService userService;
     private final CommentService commentService;
 
-    public void toggleCommentLike(Long commentId, Long userId) {
-        Comment comment = commentService.findToId(commentId);
-        User user = userService.findToId(userId);
+    public void toggle(Long commentId, Long userId) {
+        Comment comment = commentService.findById(commentId);
+        User user = userService.findById(userId);
 
         if (isLiked(comment, user)) {
             CommentLike deleteLike = commentLikeRepository.findCommentLikeByCommentAndUser(comment, user);
 
-            comment.likeDelete();
+            comment.deleteLike();
             commentLikeRepository.delete(deleteLike);
         } else {
             CommentLike newCommentLike = CommentLike.builder()
@@ -31,7 +31,7 @@ public class CommentLikeService {
                     .user(user)
                     .build();
 
-            comment.likeAdd();
+            comment.addLike();
             commentLikeRepository.save(newCommentLike);
         }
     }

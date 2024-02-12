@@ -33,12 +33,11 @@ public class JwtTokenProvider {
                 .setExpiration(new Date(now.getTime() + tokenValidTerm.toMillis()))
                 .claim("id", user.getId())
                 .claim("email", user.getEmail())
-                .signWith(SignatureAlgorithm.HS256, properties.getSecret())
+                .signWith(SignatureAlgorithm.HS256, properties.getSecretKey())
                 .compact();
     }
 
     public Authentication getAuthentication(String token) {
-        Claims claims = getClaims(token);
         Set<SimpleGrantedAuthority> authorities = Collections.singleton(new SimpleGrantedAuthority("ROLE_USER"));
 
         return new UsernamePasswordAuthenticationToken(new org.springframework  //인증 객체 토큰 생성 및 가져오기
@@ -46,7 +45,7 @@ public class JwtTokenProvider {
     }
 
     public Claims getClaims(String token) {
-        return Jwts.parser().setSigningKey(properties.getSecret()).parseClaimsJws(token).getBody();
+        return Jwts.parser().setSigningKey(properties.getSecretKey()).parseClaimsJws(token).getBody();
     }
 
     public String getUsername(String token) {

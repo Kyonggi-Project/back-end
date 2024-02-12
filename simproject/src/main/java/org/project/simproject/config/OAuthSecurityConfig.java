@@ -25,10 +25,12 @@ import static org.springframework.boot.autoconfigure.security.servlet.PathReques
 @Configuration
 public class OAuthSecurityConfig {
 
-    private final OAuth2UserCustomService oAuth2UserCustomService;
     private final JwtTokenProvider jwtTokenProvider;
+
     private final RefreshTokenRepository refreshTokenRepository;
+
     private final UserService userService;
+    private final OAuth2UserCustomService oAuth2UserCustomService;
 
     @Bean
     public WebSecurityCustomizer configure() {

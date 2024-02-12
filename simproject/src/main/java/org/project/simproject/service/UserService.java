@@ -3,8 +3,8 @@ package org.project.simproject.service;
 
 import lombok.RequiredArgsConstructor;
 import org.project.simproject.domain.User;
-import org.project.simproject.dto.AddUserRequest;
-import org.project.simproject.dto.ModifyRequest;
+import org.project.simproject.dto.request.AddUserRequest;
+import org.project.simproject.dto.request.ModifyRequest;
 import org.project.simproject.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
-    public User createUser(AddUserRequest addUserRequest) {
+    public User save(AddUserRequest addUserRequest) {
         return userRepository.save(
                 User.builder()
                         .email(addUserRequest.getEmail())
@@ -25,21 +25,22 @@ public class UserService {
         );
     }
 
-    public User findToId(Long id){
+    public User findById(Long id){
         return userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("User Not Found"));
     }
+
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 아이디 : " + email));
+    }
+
     @Transactional
-    public User updateUser(String email, ModifyRequest modifyRequest) {
+    public User modify(String email, ModifyRequest modifyRequest) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 아이디 : " + email));
         user.modify(modifyRequest);
         return user;
-    }
-
-    public User showUser(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 아이디 : " + email));
     }
 
     public void delete(Long id) {

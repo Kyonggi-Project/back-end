@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.project.simproject.domain.Article;
 import org.project.simproject.domain.ArticleLike;
 import org.project.simproject.domain.User;
-import org.project.simproject.dto.ArticleResponse;
+import org.project.simproject.dto.response.ArticleResponse;
 import org.project.simproject.repository.ArticleLikeRepository;
 import org.springframework.stereotype.Service;
 
@@ -19,14 +19,14 @@ public class ArticleLikeService {
     private final UserService userService;
     private final ArticleService articleService;
 
-    public void toggleArticleLike(Long articleId, Long userId) {
-        Article article = articleService.findToId(articleId);
-        User user = userService.findToId(userId);
+    public void toggle(Long articleId, Long userId) {
+        Article article = articleService.findById(articleId);
+        User user = userService.findById(userId);
 
         if (isLiked(article, user)) {
             ArticleLike deleteLike = articleLikeRepository.findArticleLikeByArticleAndUser(article, user);
 
-            article.likeDelete();
+            article.deleteLike();
             articleLikeRepository.delete(deleteLike);
         } else {
             ArticleLike newArticleLike = ArticleLike.builder()
@@ -34,13 +34,13 @@ public class ArticleLikeService {
                     .user(user)
                     .build();
 
-            article.likeAdd();
+            article.addLike();
             articleLikeRepository.save(newArticleLike);
         }
     }
 
-    public List<ArticleResponse> findLikeArticlesByUser(Long userId) {
-        return userService.findToId(userId).getArticleLikes()
+    public List<ArticleResponse> findLikedArticlesByUser(Long userId) {
+        return userService.findById(userId).getArticleLikes()
                 .stream()
                 .map(ArticleLike::getArticle)
                 .map(ArticleResponse::new)

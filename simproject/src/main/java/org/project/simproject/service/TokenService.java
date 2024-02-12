@@ -12,6 +12,7 @@ import java.time.Duration;
 @RequiredArgsConstructor
 public class TokenService {
     private final JwtTokenProvider jwtTokenProvider;
+    
     private final RefreshTokenRepository refreshTokenRepository;
 
     public String createNewAccessToken(String refreshToken){

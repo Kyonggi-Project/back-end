@@ -4,8 +4,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.project.simproject.domain.Article;
 import org.project.simproject.domain.User;
-import org.project.simproject.dto.AddArticleRequest;
-import org.project.simproject.dto.ModifyArticleRequest;
+import org.project.simproject.dto.request.AddArticleRequest;
+import org.project.simproject.dto.request.ModifyArticleRequest;
 import org.project.simproject.repository.ArticleRepository;
 import org.project.simproject.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -20,7 +20,7 @@ public class ArticleService {
     private final UserRepository userRepository;
 
     public Article save(AddArticleRequest request, User user){
-        user.articleAdd();
+        user.addArticle();
         return articleRepository.save(request.toEntity(user));
     }
 
@@ -28,28 +28,12 @@ public class ArticleService {
         return articleRepository.findAll();
     }
 
-    public Article findToId(Long id){
+    public Article findById(Long id){
         return articleRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Article Not Found"));
     }
 
-    public void delete(Long id, User user){
-        user.articleDelete();
-
-        Article article = articleRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Article Not Found"));
-        articleRepository.delete(article);
-    }
-
-    @Transactional
-    public Article modify(Long id, ModifyArticleRequest request){
-        Article article = articleRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Article Not Found"));
-        article.modify(request);
-        return article;
-    }
-
-    public List<Article> findToAuthor(String author){
+    public List<Article> findByAuthor(String author){
         List<Article> articleList = new ArrayList<>();
         List<User> list = userRepository.findByNicknameContains(author);
         for(User user : list){
@@ -61,8 +45,23 @@ public class ArticleService {
         return articleList;
     }
 
-    public List<Article> findToContent(String content){
-        List<Article> list = articleRepository.findByContentContainsOrTitleContains(content, content);
-        return list;
+    public List<Article> findByContent(String content){
+        return articleRepository.findByContentContainsOrTitleContains(content, content);
+    }
+
+    @Transactional
+    public Article modify(Long id, ModifyArticleRequest request){
+        Article article = articleRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Article Not Found"));
+        article.modify(request);
+        return article;
+    }
+
+    public void delete(Long id, User user){
+        user.deleteArticle();
+
+        Article article = articleRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Article Not Found"));
+        articleRepository.delete(article);
     }
 }

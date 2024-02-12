@@ -3,7 +3,7 @@ package org.project.simproject.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
-import org.project.simproject.dto.ModifyRequest;
+import org.project.simproject.dto.request.ModifyRequest;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -49,17 +49,30 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user")
     private List<ArticleLike> articleLikes = new ArrayList<>();
 
+    public void addArticle(){
+        this.articlesCount++;
+    }
+
+    public void deleteArticle(){
+        this.articlesCount--;
+    }
+
+    public User update(String nickname){
+        this.nickname = nickname;
+        return this;
+    }
+
+    public void modify(ModifyRequest modifyRequest) {
+        if(modifyRequest.getPassword().equals("")) {
+            this.nickname = modifyRequest.getNickname();
+        }
+        else if(modifyRequest.getNickname().equals("")) {
+            this.password = modifyRequest.getPassword();
+        }
+    }
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("user"));
-    }
-
-    @Builder
-    public User(String email, String password, String nickname){
-        this.email = email;
-        this.password = password;
-        this.nickname = nickname;
-        this.articlesCount = 0;
     }
 
     @Override
@@ -92,25 +105,11 @@ public class User implements UserDetails {
         return true;
     }
 
-    public void modify(ModifyRequest modifyRequest) {
-        if(modifyRequest.getPassword().equals("")) {
-            this.nickname = modifyRequest.getNickname();
-        }
-        else if(modifyRequest.getNickname().equals("")) {
-            this.password = modifyRequest.getPassword();
-        }
-    }
-
-    public User update(String nickname){
+    @Builder
+    public User(String email, String password, String nickname){
+        this.email = email;
+        this.password = password;
         this.nickname = nickname;
-        return this;
-    }
-
-    public void articleAdd(){
-        this.articlesCount++;
-    }
-
-    public void articleDelete(){
-        this.articlesCount--;
+        this.articlesCount = 0;
     }
 }
