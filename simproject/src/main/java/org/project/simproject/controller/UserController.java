@@ -37,12 +37,19 @@ public class UserController {
         }
     }
     //특정 유저 정보 보기
-    @Operation(summary = "특정 유저 정보", description = "유저 서비스에서 특정 유저의 정보를 조회")
-    @GetMapping("/profile/{email}")
-    public ResponseEntity<UserResponse> getProfile(@PathVariable String email)
+    @Operation(summary = "특정 유저 정보", description = "유저 서비스에서 특정 유저의 정보를 이메일로 조회")
+    @GetMapping("/profile/email/{email}")
+    public ResponseEntity<UserResponse> getProfileByEmail(@PathVariable String email)
     {
         User showUser = userService.findByEmail(email);
         return new ResponseEntity<>(new UserResponse(showUser), HttpStatus.OK);
+    }
+
+    @Operation(summary = "특정 닉네임의 유저 보기", description = "유저 서비스에서 특정 유저의 정보를 닉네임으로 조회")
+    @GetMapping("/profile/nickname/{nickname}")
+    public ResponseEntity<UserResponse> getProfileByNickname(@PathVariable String nickname){
+        User user = userService.findByNickname(nickname);
+        return ResponseEntity.status(HttpStatus.OK).body(new UserResponse(user));
     }
 
     @Operation(summary = "특정 유저의 팔로워 목록 보기", description = "FollowService에서 실행")

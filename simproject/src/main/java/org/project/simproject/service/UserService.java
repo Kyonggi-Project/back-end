@@ -35,6 +35,11 @@ public class UserService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 아이디 : " + email));
     }
 
+    public User findByNickname(String nickname){
+        return userRepository.findByNickname(nickname)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+    }
+
     @Transactional
     public User modify(String email, ModifyRequest modifyRequest) {
         User user = userRepository.findByEmail(email)
