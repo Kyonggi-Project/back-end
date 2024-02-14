@@ -32,7 +32,7 @@ public class ChatRoomController {
     }
 
     @Operation(summary = "대화방 찾기", description = "대화방 서비스에서 데이터베이스에서 이름으로 대화방 데이터 찾기")
-    @GetMapping("/allChatrooms")
+    @GetMapping("/viewChatroom")
     public ResponseEntity<List<ChatRoomResponse>> findChatRoomsByName(@RequestParam String name) {
         return ResponseEntity.status(HttpStatus.OK).body(chatRoomService.findByName(name));
     }
