@@ -22,6 +22,12 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'         // 템플릿 작성 시, 타임리프 관련 기능 제공
     implementation 'org.springframework.boot:spring-boot-starter-security'          // Spring Security
 
+    // Chatting 기능 의존성
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'         // WebSocket 기능 제공
+    implementation 'org.webjars:webjars-locator-core'                               // WebSocket
+    implementation 'org.webjars:stomp-websocket:2.3.4'                              // STOMP 프로토콜 제공
+    implementation 'org.webjars:sockjs-client:1.5.1'                                // SockJS 기능 제공
+
     implementation 'org.hibernate.validator:hibernate-validator:8.0.0.Final'        // Hibernate-Validator
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'        // OpenApi
 
