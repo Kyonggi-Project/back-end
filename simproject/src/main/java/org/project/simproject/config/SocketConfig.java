@@ -1,4 +1,4 @@
-/*package org.project.simproject.config.chat;
+package org.project.simproject.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
@@ -8,11 +8,11 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 
 @Configuration
 @EnableWebSocketMessageBroker
-public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+public class SocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/")
-                .setAllowedOrigins("http://localhost:8080")
+        registry.addEndpoint("/ws")
+                .setAllowedOrigins("*")
                 .withSockJS();
     }
 
@@ -21,4 +21,4 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.enableSimpleBroker("/queue", "/topic");
         registry.setApplicationDestinationPrefixes("/app");
     }
-}*/
+}
