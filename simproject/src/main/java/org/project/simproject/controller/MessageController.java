@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/api/message")
 public class MessageController {
 
     private final MessageService messageService;
@@ -34,9 +33,9 @@ public class MessageController {
         return messageService.save(addMessageRequest);
     }
 
-    @DeleteMapping("/delete/{messageId}")
+    /*@DeleteMapping("/delete/{messageId}")
     public ResponseEntity<Void> deleteMessage(@PathVariable Long messageId, @RequestParam String userId) {
         messageService.delete(messageId, userId);
         return ResponseEntity.status(HttpStatus.OK).build();
-    }
+    }*/
 }

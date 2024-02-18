@@ -18,23 +18,6 @@ if (deleteButton) {
     });
 }
 
-// 보기 기능
-const viewButton = document.getElementById('view-btn');
-
-if (viewButton) {
-    viewButton.addEventListener('click', event => {
-
-        function success() {
-            alert('filter success');
-        }
-
-        function fail() {
-            alert('filter fail');
-        }
-
-        httpRequest('GET',`/articles`, null, success, fail);
-    });
-}
 
 // 수정 기능
 const modifyButton = document.getElementById('modify-btn');
