@@ -22,4 +22,11 @@ public class TokenService {
             return jwtTokenProvider.createToken(user, Duration.ofMinutes(15));
         }
     }
+
+    public User findByUserId(String refreshToken){
+        if(!jwtTokenProvider.validateToken(refreshToken)) throw new IllegalArgumentException("Token Not Found");
+        else{
+            return refreshTokenRepository.findByRefreshToken(refreshToken).getUserId();
+        }
+    }
 }
