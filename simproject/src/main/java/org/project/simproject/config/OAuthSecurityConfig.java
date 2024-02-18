@@ -38,7 +38,7 @@ public class OAuthSecurityConfig {
                 .requestMatchers(toH2Console())
                 .requestMatchers("/v2/api-docs", "/swagger-resources/**",
                         "/swagger-ui.html", "/webjars/**", "/swagger/**", "/sign-api/exception",
-                        "/static/**", "/img/**");
+                        "/static/**", "/img/**", "/js/**");
     }
 
     @Bean
