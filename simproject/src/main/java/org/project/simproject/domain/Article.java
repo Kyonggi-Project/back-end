@@ -48,6 +48,9 @@ public class Article {
     @OneToMany(mappedBy = "articleId")
     private List<Comment> comments = new ArrayList<>();
 
+    @OneToMany(mappedBy = "article")
+    private List<ArticleTagRelation> articleTagRelations = new ArrayList<>();
+
     public void addLike(){
         this.likesCount++;
     }
@@ -56,6 +59,14 @@ public class Article {
         this.likesCount--;
     }
 
+    public void addTag(ArticleTagRelation relation) {
+        articleTagRelations.add(relation);
+    }
+
+    public void deleteTag(ArticleTagRelation relation) {
+        articleTagRelations.remove(relation);
+    }
+    
     public void modify(ModifyArticleRequest request){
         this.title = request.getTitle();
         this.content = request.getContent();

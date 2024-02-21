@@ -18,6 +18,7 @@ import java.util.List;
 public class ArticleService {
     private final ArticleRepository articleRepository;
     private final UserRepository userRepository;
+    private final TagService tagService;
 
     public Article save(AddArticleRequest request, User user){
         user.addArticle();
@@ -57,11 +58,15 @@ public class ArticleService {
         return article;
     }
 
+    @Transactional
     public void delete(Long id, User user){
         user.deleteArticle();
 
         Article article = articleRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Article Not Found"));
+
+        // Article에서 사용된 Tag와의 관계 테이블 삭제
+        tagService.deleteRelations(article);
         articleRepository.delete(article);
     }
 }
