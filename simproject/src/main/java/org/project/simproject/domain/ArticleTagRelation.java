@@ -2,6 +2,8 @@ package org.project.simproject.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Getter
@@ -15,10 +17,12 @@ public class ArticleTagRelation {
 
     @ManyToOne
     @JoinColumn(name = "article_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Article article;
 
     @ManyToOne
     @JoinColumn(name = "tag_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Tag tag;
 
     @Builder

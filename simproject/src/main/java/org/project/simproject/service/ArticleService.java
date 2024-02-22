@@ -20,9 +20,16 @@ public class ArticleService {
     private final UserRepository userRepository;
     private final TagService tagService;
 
+    @Transactional
     public Article save(AddArticleRequest request, User user){
+        Article article = request.toEntity(user);
+        for (String tagName : request.getTags()) {
+            tagService.save(article.getId(), tagName);
+        }
+
         user.addArticle();
-        return articleRepository.save(request.toEntity(user));
+
+        return articleRepository.save(article);
     }
 
     public List<Article> findAll(){
