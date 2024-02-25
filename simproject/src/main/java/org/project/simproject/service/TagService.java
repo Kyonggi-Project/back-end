@@ -77,6 +77,9 @@ public class TagService {       // DTO 이용하도록 추후에 수정
     @Transactional
     public void deleteRelations(Article article) {
         List<ArticleTagRelation> relations = articleTagRelationRepository.findArticleTagRelationsByArticle(article);
+
+        if (relations.isEmpty()) return;
+
         articleTagRelationRepository.deleteAll(relations);
 
         for (ArticleTagRelation relation : relations) {

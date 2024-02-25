@@ -23,10 +23,12 @@ public class ArticleService {
     @Transactional
     public Article save(AddArticleRequest request, User user){
         Article article = request.toEntity(user);
-        for (String tagName : request.getTags()) {
-            tagService.save(article.getId(), tagName);
-        }
 
+        if (!request.getTagNames().isEmpty()) {
+            for (String tagName : request.getTagNames()) {
+                tagService.save(article.getId(), tagName);
+            }
+        }
         user.addArticle();
 
         return articleRepository.save(article);
