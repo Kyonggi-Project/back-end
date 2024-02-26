@@ -19,15 +19,12 @@ public class TagService {       // DTO 이용하도록 추후에 수정
     private final TagRepository tagRepository;
     private final ArticleTagRelationRepository articleTagRelationRepository;
 
-    private final ArticleService articleService;
 
     @Transactional
-    public void save(Long articleId, String name) {
+    public void save(Article article, String name) {
 
         // 같은 내용의 Tag의 존재 여부 확인. 존재하지 않을 시, Tag를 만들고 DB에 저장
         Tag tag = findByNameOrSave(name);
-
-        Article article = articleService.findById(articleId);           // Article 검색 방법 다시 생각해보기
 
         ArticleTagRelation relation = articleTagRelationRepository.save(
                 ArticleTagRelation.builder()

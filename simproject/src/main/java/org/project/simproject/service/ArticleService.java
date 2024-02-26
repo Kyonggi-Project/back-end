@@ -26,7 +26,7 @@ public class ArticleService {
 
         if (!request.getTagNames().isEmpty()) {
             for (String tagName : request.getTagNames()) {
-                tagService.save(article.getId(), tagName);
+                tagService.save(article, tagName);
             }
         }
         user.addArticle();
