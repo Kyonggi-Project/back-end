@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
       layout:decorate="~{layout/base_layout}">
 
 <div layout:fragment="main" class="mt-5 p-4">
@@ -27,8 +26,8 @@
             </div>
         </div>
 
-        <input type="hidden" id="roomId" th:value="${room.id}" />
-        <input type="hidden" id="loginId" th:value="${user.nickname}"/>
+        <input type="text" id="roomId" th:value="${room.id}" />
+        <input type="text" id="loginId" th:value="${user.nickname}"/>
 
 
     </div>
