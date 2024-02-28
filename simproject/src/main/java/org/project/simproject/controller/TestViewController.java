@@ -17,11 +17,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import java.util.List;
+
 @Controller
 @RequiredArgsConstructor
 public class TestViewController {
     private final UserService userService;
     private final ChatRoomRepository chatRoomRepository;
+    private final ChatRoomService chatRoomService;
     private final TokenService tokenService;
 
     @PostMapping("/signup")
@@ -55,5 +58,13 @@ public class TestViewController {
         model.addAttribute("user", new UserResponse(user));
 
         return "room";
+    }
+
+    @GetMapping("/chat/room/list")
+    public String chatRoomList(Model model){
+        List<ChatRoomResponse> list = chatRoomService.findAll();
+        model.addAttribute("room", list);
+
+        return "chatRoomList";
     }
 }
