@@ -10,11 +10,13 @@ import org.project.simproject.domain.ChatRoom;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class ChatRoomResponse {
+    private Long id;
     private String name;
 
     private String masterId;
 
     public ChatRoomResponse(ChatRoom chatRoom) {
+        this.id = chatRoom.getId();
         this.name = chatRoom.getName();
         this.masterId = chatRoom.getMasterId();
     }
