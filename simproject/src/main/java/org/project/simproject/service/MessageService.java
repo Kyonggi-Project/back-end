@@ -7,6 +7,8 @@ import org.project.simproject.dto.response.MessageResponse;
 import org.project.simproject.repository.MessageRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class MessageService {
@@ -15,6 +17,14 @@ public class MessageService {
 
     public MessageResponse save(AddMessageRequest addMessageRequest) {
         return new MessageResponse(messageRepository.save(addMessageRequest.toEntity()));
+    }
+
+    public List<MessageResponse> findAllByRoomId(Long roomId){
+        List<MessageResponse> list = messageRepository.findAllByRoomId(roomId)
+                .stream()
+                .map(MessageResponse::new)
+                .toList();
+        return list;
     }
 
     public void delete(Long messageId, String userId) {
