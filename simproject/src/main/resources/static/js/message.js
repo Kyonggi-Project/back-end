@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", function () {
     stomp.connect({}, function () {
         console.log("STOMP Connection");
 
-        stomp.subscribe("/topic/" + roomId, function (chat) {
+        stomp.subscribe("/topic/" + roomId, function () {
             loadChatMessages();
         });
 

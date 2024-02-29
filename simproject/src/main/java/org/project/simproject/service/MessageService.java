@@ -34,4 +34,8 @@ public class MessageService {
             messageRepository.delete(message);
         }
     }
+
+    public boolean isSubscribed(String sender, Long roomId){
+        return messageRepository.existsMessageBySenderAndRoomId(sender, roomId);
+    }
 }

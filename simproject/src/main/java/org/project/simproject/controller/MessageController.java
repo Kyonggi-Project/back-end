@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,12 +20,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class MessageController {
 
     private final MessageService messageService;
+    private final SimpMessagingTemplate template;
 
     @MessageMapping("/enter/{roomId}")
-    @SendTo("/topic/{roomId}")
-    public MessageResponse enterChatRoom(AddMessageRequest addMessageRequest) {
-        addMessageRequest.setContent(addMessageRequest.getSender() + "님이 입장하였습니다.");
-        return messageService.save(addMessageRequest);
+    public void enterChatRoom(AddMessageRequest addMessageRequest) {
+        if(!messageService.isSubscribed(addMessageRequest.getSender(), addMessageRequest.getRoomId())){
+            addMessageRequest.setContent(addMessageRequest.getSender() + "님이 입장하였습니다.");
+            template.convertAndSend("/topic/" + addMessageRequest.getRoomId(),
+                    messageService.save(addMessageRequest));
+        }
+        else{
+            template.convertAndSend("/topic/" + addMessageRequest.getRoomId(), addMessageRequest);
+        }
     }
 
     @MessageMapping("/send/{roomId}")
