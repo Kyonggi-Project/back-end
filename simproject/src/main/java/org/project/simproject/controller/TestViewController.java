@@ -48,6 +48,7 @@ public class TestViewController {
         return "signup";
     }
 
+    // 특정 채팅방 입장을 위한 GET Method
     @GetMapping("/chat/room/{roomId}")
     public String enterChatRoom(Model model, @PathVariable Long roomId,
                                 @CookieValue(value = "refresh_token", defaultValue = "cookie") String cookie){
@@ -60,6 +61,7 @@ public class TestViewController {
         return "room";
     }
 
+    // 모든 채팅방의 리스트를 보여주기 위한 GET Method
     @GetMapping("/chat/room/list")
     public String chatRoomList(Model model){
         List<ChatRoomResponse> list = chatRoomService.findAll();

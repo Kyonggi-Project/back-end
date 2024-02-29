@@ -13,7 +13,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1")
-public class MessageRestController {
+public class MessageRestController {    // axios를 사용하여 메시지를 동기화하기 위한 RestAPIController
     private final MessageService messageService;
 
     @GetMapping("/chat/messages/{roomId}")

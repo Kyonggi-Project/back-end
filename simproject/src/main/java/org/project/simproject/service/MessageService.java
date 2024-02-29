@@ -19,6 +19,7 @@ public class MessageService {
         return new MessageResponse(messageRepository.save(addMessageRequest.toEntity()));
     }
 
+    // 특정 채팅방의 메시지를 모두 불러와 DTO로 변환해 Controller로 전달
     public List<MessageResponse> findAllByRoomId(Long roomId){
         List<MessageResponse> list = messageRepository.findAllByRoomId(roomId)
                 .stream()
@@ -35,6 +36,7 @@ public class MessageService {
         }
     }
 
+    // 이미 구독중인 채팅방인지 참/거짓 판단
     public boolean isSubscribed(String sender, Long roomId){
         return messageRepository.existsMessageBySenderAndRoomId(sender, roomId);
     }

@@ -1,3 +1,4 @@
+// SockJS 연동을 위한 js파일
 document.addEventListener("DOMContentLoaded", function () {
     const roomId = document.querySelector('input#roomId').value;;
     const loginId = document.querySelector('input#loginId').value;
@@ -19,6 +20,7 @@ document.addEventListener("DOMContentLoaded", function () {
         stomp.send("/app/enter/" + roomId, {}, JSON.stringify({roomId: roomId, sender: loginId}));
     });
 
+    // 메시지를 작성하고 전송하기 위한 메소드
     const sendMessage = (e) => {
         const msg = document.querySelector('input#msg');
 
@@ -27,6 +29,7 @@ document.addEventListener("DOMContentLoaded", function () {
         msg.value = '';
     };
 
+    // btnSend 버튼에 이벤트 추가
     const sendBtn = document.querySelector('button#btnSend');
     sendBtn.addEventListener('click', sendMessage);
 

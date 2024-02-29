@@ -20,10 +20,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class MessageController {
 
     private final MessageService messageService;
-    private final SimpMessagingTemplate template;
+    private final SimpMessagingTemplate template;   // 입장한 적이 있는 사용자인지 구분하여 전송하기 위한 템플릿
 
     @MessageMapping("/enter/{roomId}")
     public void enterChatRoom(AddMessageRequest addMessageRequest) {
+        // 입장한 적이 있는 사용자인지 확인하기 위한 절차, 처음 입장하는 사용자라면 조건문 true
         if(!messageService.isSubscribed(addMessageRequest.getSender(), addMessageRequest.getRoomId())){
             addMessageRequest.setContent(addMessageRequest.getSender() + "님이 입장하였습니다.");
             template.convertAndSend("/topic/" + addMessageRequest.getRoomId(),
