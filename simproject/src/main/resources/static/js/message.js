@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", function () {
             loadChatMessages();
         });
 
-        stomp.send("/app/enter/" + roomId, {}, JSON.stringify({roomId: roomId, sender: loginId}));
+        stomp.send("/app/enter/" + roomId, {}, JSON.stringify({roomId: roomId, sender: loginId, status: "ENTER"}));
     });
 
     // 메시지를 작성하고 전송하기 위한 메소드
@@ -25,7 +25,8 @@ document.addEventListener("DOMContentLoaded", function () {
         const msg = document.querySelector('input#msg');
 
         console.log(loginId + ":" + msg.value);
-        stomp.send("/app/send/" + roomId, {}, JSON.stringify({roomId: roomId, content: msg.value, sender: loginId}));
+        stomp.send("/app/send/" + roomId, {}, JSON.stringify({roomId: roomId, content: msg.value, sender: loginId,
+        status: "TALK"}));
         msg.value = '';
     };
 
@@ -42,10 +43,13 @@ document.addEventListener("DOMContentLoaded", function () {
         console.log(response.data);
 
         let htmlStr = '';
+        let count = 0;
         for(let chat of response.data) {
 
-            if(chat.sender == loginId) {
-                htmlStr += `
+            if(((chat.sender == loginId) && (chat.status == "ENTER")) || count >= 1){
+                count++;
+                if(chat.sender == loginId) {
+                    htmlStr += `
 					<div class="d-flex align-items-center alert alert-warning border border-dark">
 					  <div class="flex-grow-1 ms-3">
 					    <h5>${chat.sender}</h5>
@@ -53,8 +57,8 @@ document.addEventListener("DOMContentLoaded", function () {
 					  </div>
 					</div>
 				`;
-            } else {
-                htmlStr += `
+                } else {
+                    htmlStr += `
 					<div class="d-flex align-items-center alert alert-primary border border-dark">
 					  <div class="flex-grow-1 ms-3">
 					    <h5>${chat.sender}</h5>
@@ -62,6 +66,7 @@ document.addEventListener("DOMContentLoaded", function () {
 					  </div>
 					</div>
 				`;
+                }
             }
         }
 
