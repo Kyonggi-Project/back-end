@@ -2,6 +2,7 @@ package org.project.simproject.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.project.simproject.util.ChatMessageStatus;
 
 import java.time.LocalDateTime;
 
@@ -23,11 +24,15 @@ public class Message {
 
     private LocalDateTime sendDateTime;
 
+    @Enumerated(EnumType.STRING)
+    private ChatMessageStatus status;
+
     @Builder
-    public Message(String content, Long roomId, String sender) {
+    public Message(String content, Long roomId, String sender, ChatMessageStatus status) {
         this.content = content;
         this.roomId = roomId;
         this.sender = sender;
+        this.status = status;
         this.sendDateTime = LocalDateTime.now();
     }
 }
