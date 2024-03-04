@@ -48,6 +48,7 @@ public class Article {
     @OneToMany(mappedBy = "articleId")
     private List<Comment> comments = new ArrayList<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "article")
     private List<ArticleTagRelation> articleTagRelations = new ArrayList<>();
 

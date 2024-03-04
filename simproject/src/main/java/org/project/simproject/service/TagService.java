@@ -39,14 +39,16 @@ public class TagService {       // DTO 이용하도록 추후에 수정
     }
 
     public Tag findByNameOrSave(String name) {
-        return tagRepository.findByName(name)
-                .orElse(
-                        tagRepository.save(
-                                Tag.builder()
-                                        .name(name)
-                                        .build()
-                        )
-                );
+        if(tagRepository.existsTagByName(name)){
+            return findByName(name);
+        }
+        else{
+            return tagRepository.save(
+                    Tag.builder()
+                            .name(name)
+                            .build()
+            );
+        }
     }
 
     public List<Tag> findTagsByArticle(Article article) {

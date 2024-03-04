@@ -1,5 +1,6 @@
 package org.project.simproject.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,6 +19,7 @@ public class Tag {
 
     private String name;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "tag")
     private List<ArticleTagRelation> articleTagRelations = new ArrayList<>();
 
