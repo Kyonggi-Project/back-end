@@ -13,11 +13,13 @@ document.addEventListener("DOMContentLoaded", function () {
     stomp.connect({}, function () {
         console.log("STOMP Connection");
 
-        stomp.subscribe("/topic/" + roomId, function () {
-            loadChatMessages();
-        });
+        loadChatMessages().then(function() {
+            stomp.subscribe("/topic/" + roomId, function (chat) {
+                showChatMessages(JSON.parse(chat.body));
+            });
 
-        stomp.send("/app/enter/" + roomId, {}, JSON.stringify({roomId: roomId, sender: loginId, status: "ENTER"}));
+            stomp.send("/app/enter/" + roomId, {}, JSON.stringify({roomId: roomId, sender: loginId, status: "ENTER"}));
+        });
     });
 
     // 메시지를 작성하고 전송하기 위한 메소드
@@ -113,4 +115,21 @@ document.addEventListener("DOMContentLoaded", function () {
         messageArea.scrollTop = messageArea.scrollHeight;
     };
 
+    const showChatMessages = (chat) => {
+        let htmlStr = '';
+        const messageArea = document.querySelector('div#messages');
+        let existingHTML = messageArea.innerHTML;
+        if(chat.content != null){
+            htmlStr += `
+                        <div class="d-flex align-items-center alert alert-primary border border-dark">
+                          <div class="flex-grow-1 ms-3">
+                            <h5>${chat.sender}</h5>
+                            <p>${chat.content}</p>
+                          </div>
+                        </div>
+                    `;
+            existingHTML += htmlStr;
+            messageArea.innerHTML = existingHTML;
+        }
+    };
 });
