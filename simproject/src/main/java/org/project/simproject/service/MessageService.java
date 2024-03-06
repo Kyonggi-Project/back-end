@@ -5,6 +5,7 @@ import org.project.simproject.domain.Message;
 import org.project.simproject.dto.request.AddMessageRequest;
 import org.project.simproject.dto.response.MessageResponse;
 import org.project.simproject.repository.MessageRepository;
+import org.project.simproject.util.ChatMessageStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,16 +29,16 @@ public class MessageService {
         return list;
     }
 
+    // 특정 메시지 타입을 가지는 채팅 메시지의 개수를 돌려줌
+    public int findMessageByRoomIdAndSenderAndStatus(Long roomId, String sender, ChatMessageStatus status){
+        return messageRepository.findMessageByRoomIdAndSenderAndStatus(roomId, sender, status).size();
+    }
+
     public void delete(Long messageId, String userId) {
         Message message = messageRepository.findById(messageId)
                 .orElseThrow(() -> new IllegalArgumentException("Message Not Found"));
         if(message.getSender().equals(userId)) {
             messageRepository.delete(message);
         }
-    }
-
-    // 이미 구독중인 채팅방인지 참/거짓 판단
-    public boolean isSubscribed(String sender, Long roomId){
-        return messageRepository.existsMessageBySenderAndRoomId(sender, roomId);
     }
 }

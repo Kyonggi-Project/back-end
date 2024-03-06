@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.project.simproject.dto.request.AddMessageRequest;
 import org.project.simproject.dto.response.MessageResponse;
 import org.project.simproject.service.MessageService;
+import org.project.simproject.util.ChatMessageStatus;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -24,8 +25,12 @@ public class MessageController {
 
     @MessageMapping("/enter/{roomId}")
     public void enterChatRoom(AddMessageRequest addMessageRequest) {
-        // 입장한 적이 있는 사용자인지 확인하기 위한 절차, 처음 입장하는 사용자라면 조건문 true
-        if(!messageService.isSubscribed(addMessageRequest.getSender(), addMessageRequest.getRoomId())){
+        int enter = messageService.findMessageByRoomIdAndSenderAndStatus(addMessageRequest.getRoomId(),
+                addMessageRequest.getSender(), ChatMessageStatus.ENTER);
+        int leave = messageService.findMessageByRoomIdAndSenderAndStatus(addMessageRequest.getRoomId(),
+                addMessageRequest.getSender(), ChatMessageStatus.LEAVE);
+
+        if((enter - leave) == 0){   // 입장/퇴장 횟수를 이용해 메시지 전송 여부를 판단
             addMessageRequest.setContent(addMessageRequest.getSender() + "님이 입장하였습니다.");
             template.convertAndSend("/topic/" + addMessageRequest.getRoomId(),
                     messageService.save(addMessageRequest));
@@ -39,6 +44,13 @@ public class MessageController {
     @SendTo("/topic/{roomId}")
     public MessageResponse sendMessage(AddMessageRequest addMessageRequest) {
         return messageService.save(addMessageRequest);
+    }
+
+    @MessageMapping("/leave/{roomId}")      // 채팅룸 완전히 퇴장
+    public void leaveChatRoom(AddMessageRequest addMessageRequest) {
+        addMessageRequest.setContent(addMessageRequest.getSender() + "님이 퇴장하였습니다.");
+        template.convertAndSend("/topic/" + addMessageRequest.getRoomId(),
+                messageService.save(addMessageRequest));
     }
 
     /*@DeleteMapping("/delete/{messageId}")
