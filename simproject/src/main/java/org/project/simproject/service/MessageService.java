@@ -1,5 +1,6 @@
 package org.project.simproject.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.project.simproject.domain.Message;
 import org.project.simproject.dto.request.AddMessageRequest;
@@ -16,6 +17,7 @@ public class MessageService {
 
     private final MessageRepository messageRepository;
 
+    @Transactional
     public MessageResponse save(AddMessageRequest addMessageRequest) {
         return new MessageResponse(messageRepository.save(addMessageRequest.toEntity()));
     }
@@ -34,11 +36,11 @@ public class MessageService {
         return messageRepository.findMessageByRoomIdAndSenderAndStatus(roomId, sender, status).size();
     }
 
-    public void delete(Long messageId, String userId) {
+    /*public void delete(Long messageId, String userId) {
         Message message = messageRepository.findById(messageId)
                 .orElseThrow(() -> new IllegalArgumentException("Message Not Found"));
         if(message.getSender().equals(userId)) {
             messageRepository.delete(message);
         }
-    }
+    }*/
 }

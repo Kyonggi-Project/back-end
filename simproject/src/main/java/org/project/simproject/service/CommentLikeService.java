@@ -1,5 +1,6 @@
 package org.project.simproject.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.project.simproject.domain.Comment;
 import org.project.simproject.domain.CommentLike;
@@ -16,6 +17,7 @@ public class CommentLikeService {
     private final UserService userService;
     private final CommentService commentService;
 
+    @Transactional
     public void toggle(Long commentId, Long userId) {
         Comment comment = commentService.findById(commentId);
         User user = userService.findById(userId);

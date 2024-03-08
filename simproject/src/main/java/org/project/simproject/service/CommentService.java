@@ -18,6 +18,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final ArticleService articleService;
 
+    @Transactional
     public Comment save(AddCommentRequest request, Article articleId, User userId){
         return commentRepository.save(request.toEntity(articleId, userId));
     }
@@ -40,6 +41,7 @@ public class CommentService {
         return comment;
     }
 
+    @Transactional
     public void delete(Long id){
         Comment comment = commentRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Comment Not Found"));

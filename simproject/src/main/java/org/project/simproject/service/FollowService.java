@@ -1,5 +1,6 @@
 package org.project.simproject.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.project.simproject.domain.Follow;
 import org.project.simproject.domain.User;
@@ -15,6 +16,7 @@ public class FollowService {
     private final FollowRepository followRepository;
     private final UserService userService;
 
+    @Transactional
     public void toggle(Long id, String followeeEmail){
         User follower = userService.findById(id);
         User followee = userService.findByEmail(followeeEmail);

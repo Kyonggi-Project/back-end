@@ -16,6 +16,7 @@ public class ChatRoomService {
 
     private final ChatRoomRepository chatRoomRepository;
 
+    @Transactional
     public ChatRoomResponse save(CreateChatRoomRequest createChatRoomRequest) {
         return new ChatRoomResponse(chatRoomRepository.save(createChatRoomRequest.toEntity()));
     }
@@ -46,6 +47,7 @@ public class ChatRoomService {
         return new ChatRoomResponse(chatRoom);
     }
 
+    @Transactional
     public void delete(Long roomId, String userId) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
                         .orElseThrow(() -> new IllegalArgumentException("ChatRoom Not Found"));

@@ -1,5 +1,6 @@
 package org.project.simproject.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.project.simproject.domain.Article;
 import org.project.simproject.domain.Bookmark;
@@ -19,6 +20,7 @@ public class BookmarkService {
     private final UserService userService;
     private final ArticleService articleService;
 
+    @Transactional
     public void toggle(Long articleId, Long userId) {
         Article article = articleService.findById(articleId);
         User user = userService.findById(userId);

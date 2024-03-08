@@ -15,6 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    @Transactional
     public User save(AddUserRequest addUserRequest) {
         return userRepository.save(
                 User.builder()
@@ -48,6 +50,7 @@ public class UserService {
         return user;
     }
 
+    @Transactional
     public void delete(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
