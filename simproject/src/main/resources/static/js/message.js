@@ -2,6 +2,7 @@
 document.addEventListener("DOMContentLoaded", function () {
     const roomId = document.querySelector('input#roomId').value;;
     const loginId = document.querySelector('input#loginId').value;
+    const loadChatMessagesEvent = new Event('loadChatMessagesCompleted');
 
     console.log(roomId + ", " + loginId);
 
@@ -13,7 +14,9 @@ document.addEventListener("DOMContentLoaded", function () {
     stomp.connect({}, function () {
         console.log("STOMP Connection");
 
-        loadChatMessages().then(function() {
+        loadChatMessages();
+
+        document.addEventListener('loadChatMessagesCompleted', function () {
             stomp.subscribe("/topic/" + roomId, function (chat) {
                 showChatMessages(JSON.parse(chat.body));
             });
@@ -113,6 +116,8 @@ document.addEventListener("DOMContentLoaded", function () {
         const messageArea = document.querySelector('div#messages');
         messageArea.innerHTML = htmlStr;
         messageArea.scrollTop = messageArea.scrollHeight;
+
+        document.dispatchEvent(loadChatMessagesEvent);
     };
 
     const showChatMessages = (chat) => {
