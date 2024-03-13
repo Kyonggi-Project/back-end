@@ -12,6 +12,10 @@ import org.project.simproject.service.ArticleLikeService;
 import org.project.simproject.service.ArticleService;
 import org.project.simproject.service.BookmarkService;
 import org.project.simproject.service.UserService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -40,13 +44,12 @@ public class ArticleController {
 
     @Operation(summary = "게시글 모두 보기", description = "게시글 서비스에서 모든 게시글 불러오기")
     @GetMapping("/allArticles")
-    public ResponseEntity<List<ArticleResponse>> getAllArticles(){
-        List<Article> articleList = articleService.findAll();
-        List<ArticleResponse> list = articleList.stream()
-                .map(ArticleResponse::new)
-                .toList();
+    public ResponseEntity<Page<ArticleResponse>> getAllArticles(
+            @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC)Pageable pageable
+            ){
+        Page<ArticleResponse> articleList = articleService.findAll(pageable);
 
-        return ResponseEntity.status(HttpStatus.OK).body(list);
+        return ResponseEntity.status(HttpStatus.OK).body(articleList);
     }
 
     @Operation(summary = "특정 게시글 보기", description = "게시글 서비스에서 특정 게시글 불러오기")
@@ -58,35 +61,34 @@ public class ArticleController {
 
     @Operation(summary = "특정 유저의 게시글 모두 보기", description = "게시글 서비스에서 list로 받아옴")
     @GetMapping("/viewArticle/author")
-    public ResponseEntity<List<ArticleResponse>> getArticleByAuthor(@RequestParam String author){
-        List<ArticleResponse> list = articleService.findByAuthor(author)
-                .stream()
-                .map(ArticleResponse::new)
-                .toList();
+    public ResponseEntity<Page<ArticleResponse>> getArticleByAuthor(@RequestParam String author,
+                                                                    @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC)Pageable pageable){
+        Page<ArticleResponse> list = articleService.findByAuthor(author, pageable);
+
         return ResponseEntity.status(HttpStatus.OK).body(list);
     }
 
     @Operation(summary = "특정 제목 및 내용을 포함한 게시글 모두 보기", description = "게시글 서비스에서 list로 받아옴")
     @GetMapping("/viewArticles/content")
-    public ResponseEntity<List<ArticleResponse>> getArticleByContent(@RequestParam String content){
-        List<ArticleResponse> list = articleService.findByContent(content)
-                .stream()
-                .map(ArticleResponse::new)
-                .toList();
+    public ResponseEntity<Page<ArticleResponse>> getArticleByContent(@RequestParam String content,
+                                                                     @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC)Pageable pageable){
+        Page<ArticleResponse> list = articleService.findByContent(content, pageable);
         return ResponseEntity.status(HttpStatus.OK).body(list);
     }
 
     @Operation(summary = "북마크 게시글 모두 보기", description = "북마크 서비스에서 DTO 가져오기")
     @GetMapping("/bookmarked")
-    public ResponseEntity<List<ArticleResponse>> getBookmarkedArticles(@RequestParam Long userId){
-        List<ArticleResponse> list = bookmarkService.findBookmarkedArticlesByUser(userId);
+    public ResponseEntity<Page<ArticleResponse>> getBookmarkedArticles(@RequestParam Long userId,
+                                                                       @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC)Pageable pageable){
+        Page<ArticleResponse> list = bookmarkService.findBookmarkedArticlesByUser(userId, pageable);
         return ResponseEntity.status(HttpStatus.OK).body(list);
     }
 
     @Operation(summary = "좋아요 게시글 모두 보기", description = "ArticleLike 서비스에서 DTO 가져오기")
     @GetMapping("/liked")
-    public ResponseEntity<List<ArticleResponse>> getLikedArticles(@RequestParam Long userId){
-        List<ArticleResponse> list = articleLikeService.findLikedArticlesByUser(userId);
+    public ResponseEntity<Page<ArticleResponse>> getLikedArticles(@RequestParam Long userId,
+                                                                  @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC)Pageable pageable){
+        Page<ArticleResponse> list = articleLikeService.findLikedArticlesByUser(userId, pageable);
         return ResponseEntity.status(HttpStatus.OK).body(list);
     }
 

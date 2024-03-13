@@ -6,12 +6,19 @@ import org.project.simproject.domain.Article;
 import org.project.simproject.domain.User;
 import org.project.simproject.dto.request.AddArticleRequest;
 import org.project.simproject.dto.request.ModifyArticleRequest;
+import org.project.simproject.dto.response.ArticleResponse;
 import org.project.simproject.repository.ArticleRepository;
 import org.project.simproject.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.project.simproject.util.ConvertPage.convertListToPage;
 
 @Service
 @RequiredArgsConstructor
@@ -34,8 +41,8 @@ public class ArticleService {
         return articleRepository.save(article);
     }
 
-    public List<Article> findAll(){
-        return articleRepository.findAll();
+    public Page<ArticleResponse> findAll(Pageable pageable){
+        return articleRepository.findAll(pageable).map(ArticleResponse::new);
     }
 
     public Article findById(Long id){
@@ -43,20 +50,20 @@ public class ArticleService {
                 .orElseThrow(() -> new IllegalArgumentException("Article Not Found"));
     }
 
-    public List<Article> findByAuthor(String author){
+    public Page<ArticleResponse> findByAuthor(String author, Pageable pageable){
         List<Article> articleList = new ArrayList<>();
         List<User> list = userRepository.findByNicknameContains(author);
         for(User user : list){
             if(user.getArticlesCount() != 0){
-                articleList.add(articleRepository.findByAuthor(user)
-                        .orElseThrow(() -> new IllegalArgumentException("Article Not Found")));
+                articleList.addAll(articleRepository.findByAuthor(user));
             }
         }
-        return articleList;
+        Page<ArticleResponse> articlePage = convertListToPage(articleList, pageable).map(ArticleResponse::new);
+        return articlePage;
     }
 
-    public List<Article> findByContent(String content){
-        return articleRepository.findByContentContainsOrTitleContains(content, content);
+    public Page<ArticleResponse> findByContent(String content, Pageable pageable){
+        return articleRepository.findByContentContainsOrTitleContains(content, content, pageable).map(ArticleResponse::new);
     }
 
     @Transactional

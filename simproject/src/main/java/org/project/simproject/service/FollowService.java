@@ -34,8 +34,8 @@ public class FollowService {
         }
     }
 
-    public List<UserResponse> findFollowers(String email){
-        User user = userService.findByEmail(email);
+    public List<UserResponse> findFollowers(String nickname){
+        User user = userService.findByNickname(nickname);
         return user.getFollowers()
                 .stream()
                 .map(Follow::getFollower)
@@ -43,8 +43,8 @@ public class FollowService {
                 .toList();
     }
 
-    public List<UserResponse> findFollowees(String email){
-        User user = userService.findByEmail(email);
+    public List<UserResponse> findFollowees(String nickname){
+        User user = userService.findByNickname(nickname);
         return user.getFollowing()
                 .stream()
                 .map(Follow::getFollowee)

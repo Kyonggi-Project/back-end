@@ -3,6 +3,7 @@ package org.project.simproject.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.project.simproject.domain.ChatRoom;
+import org.project.simproject.domain.User;
 import org.project.simproject.dto.request.CreateChatRoomRequest;
 import org.project.simproject.dto.response.ChatRoomResponse;
 import org.project.simproject.repository.ChatRoomRepository;
@@ -17,8 +18,8 @@ public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
 
     @Transactional
-    public ChatRoomResponse save(CreateChatRoomRequest createChatRoomRequest) {
-        return new ChatRoomResponse(chatRoomRepository.save(createChatRoomRequest.toEntity()));
+    public ChatRoomResponse save(CreateChatRoomRequest createChatRoomRequest, User user) {
+        return new ChatRoomResponse(chatRoomRepository.save(createChatRoomRequest.toEntity(user.getNickname())));
     }
 
     public List<ChatRoomResponse> findAll() {
@@ -29,7 +30,7 @@ public class ChatRoomService {
     }
 
     public List<ChatRoomResponse> findByName(String name) {
-        return chatRoomRepository.findAllByName(name)
+        return chatRoomRepository.findAllByNameContains(name)
                 .stream()
                 .map(ChatRoomResponse::new)
                 .toList();

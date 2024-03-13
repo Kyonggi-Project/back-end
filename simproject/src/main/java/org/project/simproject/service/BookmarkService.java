@@ -7,9 +7,13 @@ import org.project.simproject.domain.Bookmark;
 import org.project.simproject.domain.User;
 import org.project.simproject.dto.response.ArticleResponse;
 import org.project.simproject.repository.BookmarkRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
+import static org.project.simproject.util.ConvertPage.convertListToPage;
 
 @Service
 @RequiredArgsConstructor
@@ -38,12 +42,12 @@ public class BookmarkService {
         }
     }
 
-    public List<ArticleResponse> findBookmarkedArticlesByUser(Long userId) {
-        return userService.findById(userId).getBookmarks()
+    public Page<ArticleResponse> findBookmarkedArticlesByUser(Long userId, Pageable pageable) {
+        List<Article> list = userService.findById(userId).getBookmarks()
                 .stream()
                 .map(Bookmark::getArticle)
-                .map(ArticleResponse::new)
                 .toList();
+        return convertListToPage(list, pageable).map(ArticleResponse::new);
     }
 
     public boolean isBookmarked(Article article, User user) {

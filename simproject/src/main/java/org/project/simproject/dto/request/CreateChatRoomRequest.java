@@ -12,9 +12,8 @@ import org.project.simproject.domain.ChatRoom;
 public class CreateChatRoomRequest {
     private String name;
 
-    private String masterId;
 
-    public ChatRoom toEntity() {
+    public ChatRoom toEntity(String masterId) {
         return ChatRoom.builder()
                 .name(name)
                 .masterId(masterId)

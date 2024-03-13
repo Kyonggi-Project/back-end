@@ -3,9 +3,11 @@ package org.project.simproject.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.project.simproject.domain.User;
 import org.project.simproject.dto.request.CreateChatRoomRequest;
 import org.project.simproject.dto.response.ChatRoomResponse;
 import org.project.simproject.service.ChatRoomService;
+import org.project.simproject.service.TokenService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,11 +20,14 @@ import java.util.List;
 @Tag(name = "대화방", description = "대화방 기능")
 public class ChatRoomController {
     private final ChatRoomService chatRoomService;
+    private final TokenService tokenService;
 
     @Operation(summary = "대화방 만들기", description = "대화방 서비스에서 데이터베이스에 대화방 데이터 추가")
     @PostMapping("/addChatroom")
-    public ResponseEntity<ChatRoomResponse> addChatRoom(@RequestBody CreateChatRoomRequest createChatRoomRequest) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(chatRoomService.save(createChatRoomRequest));
+    public ResponseEntity<ChatRoomResponse> addChatRoom(@RequestBody CreateChatRoomRequest createChatRoomRequest,
+                                                        @CookieValue(value = "refresh_token", defaultValue = "cookie") String cookie) {
+        User user = tokenService.findByUserId(cookie);
+        return ResponseEntity.status(HttpStatus.CREATED).body(chatRoomService.save(createChatRoomRequest, user));
     }
 
     @Operation(summary = "모든 대화방 찾기", description = "대화방 서비스에서 데이터베이스에서 모든 대화방 데이터 찾기")

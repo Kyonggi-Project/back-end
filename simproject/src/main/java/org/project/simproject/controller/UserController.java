@@ -38,10 +38,10 @@ public class UserController {
     }
     //특정 유저 정보 보기
     @Operation(summary = "특정 유저 정보", description = "유저 서비스에서 특정 유저의 정보를 이메일로 조회")
-    @GetMapping("/profile/email/{email}")
-    public ResponseEntity<UserResponse> getProfileByEmail(@PathVariable String email)
+    @GetMapping("/profile/email/{nickname}")
+    public ResponseEntity<UserResponse> getProfileByEmail(@PathVariable String nickname)
     {
-        User showUser = userService.findByEmail(email);
+        User showUser = userService.findByNickname(nickname);
         return new ResponseEntity<>(new UserResponse(showUser), HttpStatus.OK);
     }
 
@@ -53,16 +53,16 @@ public class UserController {
     }
 
     @Operation(summary = "특정 유저의 팔로워 목록 보기", description = "FollowService에서 실행")
-    @GetMapping("/follower/{email}")
-    public ResponseEntity<List<UserResponse>> getFollower(@PathVariable String email){
-        List<UserResponse> list = followService.findFollowers(email);
+    @GetMapping("/follower/{nickname}")
+    public ResponseEntity<List<UserResponse>> getFollower(@PathVariable String nickname){
+        List<UserResponse> list = followService.findFollowers(nickname);
         return ResponseEntity.status(HttpStatus.OK).body(list);
     }
 
     @Operation(summary = "특정 유저의 팔로잉 목록 보기", description = "FollowService에서 실행")
-    @GetMapping("/following/{email}")
-    public ResponseEntity<List<UserResponse>> getFollowing(@PathVariable String email){
-        List<UserResponse> list = followService.findFollowees(email);
+    @GetMapping("/following/{nickname}")
+    public ResponseEntity<List<UserResponse>> getFollowing(@PathVariable String nickname){
+        List<UserResponse> list = followService.findFollowees(nickname);
         return ResponseEntity.status(HttpStatus.OK).body(list);
     }
 
