@@ -1,5 +1,6 @@
 package org.project.simproject.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.project.simproject.domain.Comment;
@@ -13,6 +14,7 @@ public class CommentResponse {
     private String nickname;
     private String content;
     private int likesCount;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
     private LocalDateTime updatedAt;
 
     public CommentResponse(Comment comment){
