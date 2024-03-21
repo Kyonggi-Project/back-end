@@ -2,10 +2,7 @@ package org.project.simproject.config;
 
 import lombok.RequiredArgsConstructor;
 import org.project.simproject.config.jwt.JwtTokenProvider;
-import org.project.simproject.config.oauth.AuthSuccessHandler;
-import org.project.simproject.config.oauth.OAuth2CookieRepository;
-import org.project.simproject.config.oauth.OAuth2SuccessHandler;
-import org.project.simproject.config.oauth.OAuth2UserCustomService;
+import org.project.simproject.config.oauth.*;
 import org.project.simproject.repository.RefreshTokenRepository;
 import org.project.simproject.service.UserService;
 import org.springframework.context.annotation.Bean;
@@ -77,6 +74,7 @@ public class OAuthSecurityConfig {
         http.formLogin()
                 .loginPage("/login")
                 .defaultSuccessUrl("/")
+                .failureHandler(new CustomAuthenticationFailureHandler())
                 .successHandler(authSuccessHandler())
                 .and()
                 .logout()

@@ -1,5 +1,6 @@
 package org.project.simproject.config.oauth;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +10,7 @@ import org.project.simproject.domain.User;
 import org.project.simproject.repository.RefreshTokenRepository;
 import org.project.simproject.service.UserService;
 import org.project.simproject.util.CookieUtil;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -16,6 +18,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @Component
@@ -23,7 +27,7 @@ public class AuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     public static final String REFRESH_TOKEN_COOKIE_NAME = "refresh_token";
     public static final Duration REFRESH_TOKEN_DURATION = Duration.ofDays(14);
     public static final Duration ACCESS_TOKEN_DURATION = Duration.ofMinutes(30);
-    public static final String REDIRECT_PATH = "/swagger-ui/index.html";         // TargetUrl 추후 설정
+    public static final String REDIRECT_PATH = "http://localhost:8080/swagger-ui/index.html";         // TargetUrl 추후 설정
 
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
@@ -41,8 +45,14 @@ public class AuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         String accessToken = jwtTokenProvider.createToken(user, ACCESS_TOKEN_DURATION);
         String targetUrl = getTargetUrl(accessToken);
 
+        Map<String, String> responseData = new HashMap<>();
+        responseData.put("redirectUrl", targetUrl);
 
-        getRedirectStrategy().sendRedirect(request, response, targetUrl);
+        String jsonResponse = new ObjectMapper().writeValueAsString(responseData);
+
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(jsonResponse);
     }
 
     private void saveRefreshToken(User user, String newRefreshToken) {
