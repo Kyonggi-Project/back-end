@@ -77,9 +77,9 @@ public class CrawlingService {
 
             List<WebElement> movieItems = driver.findElements(By.cssSelector("div.MovieItem"));
 
-            List<WebElement> anchorTags = new ArrayList<>();
-            for(WebElement movieItem : movieItems){
-                anchorTags.add(movieItem.findElement(By.tagName("a")));
+                List<WebElement> anchorTags = new ArrayList<>();
+                for(WebElement movieItem : movieItems){
+                    anchorTags.add(movieItem.findElement(By.tagName("a")));
             }
 
             for (WebElement anchorTag : anchorTags) {
