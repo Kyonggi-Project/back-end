@@ -27,7 +27,7 @@ public class AuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     public static final String REFRESH_TOKEN_COOKIE_NAME = "refresh_token";
     public static final Duration REFRESH_TOKEN_DURATION = Duration.ofDays(14);
     public static final Duration ACCESS_TOKEN_DURATION = Duration.ofMinutes(30);
-    public static final String REDIRECT_PATH = "http://localhost:8080/swagger-ui/index.html";         // TargetUrl 추후 설정
+    public static final String REDIRECT_PATH = "http://localhost:3000/userprofile";         // TargetUrl 추후 설정
 
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
