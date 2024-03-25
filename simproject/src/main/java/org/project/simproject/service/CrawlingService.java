@@ -8,11 +8,14 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -29,11 +32,11 @@ public class CrawlingService {
     @Value("${driver.chrome.driver_path}")
     private String WEB_DRIVER_PATH;
 
+    @Value("${crawling.url}")
+    private String crawlingUrl;
+
     public void startCrawling() throws IOException, InterruptedException {
-
-        String url = "https://m.kinolights.com/discover/explore";
-
-        log.info("OTT 크롤링");
+        log.info("키노라이츠 디즈니 플러스 크롤링");
 
         System.setProperty("webdriver.chrome.driver", WEB_DRIVER_PATH);
 
@@ -46,35 +49,40 @@ public class CrawlingService {
 
         webDriver = new ChromeDriver(chromeOptions);
 
-        webDriver.get(url);
+        webDriver.get(crawlingUrl);
 
         webDriver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
 
-        // 넷플릭스 버튼 클릭
-        WebElement movieItem = webDriver.findElement(By.xpath("//*[@id=\"contents\"]/section/div[2]/div/div/div/div[2]/button"));
+        // 디즈니 플러스 작품 선택
+        WebElement movieItem = webDriver.findElement(By.xpath("//*[@id=\"contents\"]/section/div[2]/div/div/div/div[6]/button"));
         jse = (JavascriptExecutor) webDriver;
         jse.executeScript("arguments[0].click();", movieItem);
 
         webDriver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
 
-        System.out.println(webDriver.getTitle());
-
-        // 10번 스크롤하여 나온 모든 컨텐츠의 링크 저장 및 출력(Test)
-        scrollDownAndCollect(webDriver, jse);
+        // 크롤링 시작
+        crawlingStart(webDriver, jse);
 
         webDriver.close();
     }
 
-    // 키노라이츠 사이트 등록 컨텐츠 중 넷플릭스 컨텐츠만 크롤링(Test)
-    public static void scrollDownAndCollect(WebDriver driver, JavascriptExecutor js) throws InterruptedException {
+    // 크롤링을 시작하는 메소드
+    public static void crawlingStart(WebDriver driver, JavascriptExecutor js) throws InterruptedException {
 
-        for (int i = 0; i < 5; i++) { // 5번 스크롤 내리기
-            js.executeScript("window.scrollTo(0, document.body.scrollHeight);");
+        while (true){
+            long currentScrollHeight = (long) js.executeScript("return document.body.scrollHeight;");
+            long currentWindowHeight = (long) js.executeScript("return window.innerHeight;");
+            long currentScrollY = (long) js.executeScript("return window.scrollY;");
 
-            // 페이지 로딩까지 대기
-            Thread.sleep(1000);
+            // 스크롤이 불가능할 때까지 무한 스크롤
+            if (currentScrollHeight > (currentWindowHeight + currentScrollY)){
+                js.executeScript("window.scrollTo(0, document.body.scrollHeight);");
 
+                Thread.sleep(1000);
+                continue;
+            }
 
+            // 작품 목록 하이퍼링크 저장
             List<WebElement> movieItems = driver.findElements(By.cssSelector("div.MovieItem"));
 
             List<WebElement> anchorTags = new ArrayList<>();
@@ -82,11 +90,68 @@ public class CrawlingService {
                 anchorTags.add(movieItem.findElement(By.tagName("a")));
             }
 
+            List<String> hrefs = new ArrayList<>();
             for (WebElement anchorTag : anchorTags) {
-                System.out.println("찾은 <a> 태그: " + anchorTag.getAttribute("href"));
+                hrefs.add(anchorTag.getAttribute("href"));
             }
-            System.out.println();
-            System.out.println();
+
+            // 각 작품에 대한 정보 크롤링
+            for (String href : hrefs) {
+                driver.get(href);
+                driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
+
+                // 작품 기본 정보 크롤링(제목, 년도, 포스터, 백그라운드 이미지)
+                if(!driver.findElements(By.className("movie-title-wrap")).isEmpty()){
+                    getTitleAndYear(driver);
+                }
+                // 줄거리 크롤링
+                if (!driver.findElements(By.cssSelector("div.synopsis__text-wrap")).isEmpty()) {
+                    getSynopsis(driver, js);
+                }
+                // 작품 태그 크롤링
+                if(!driver.findElements(By.cssSelector("ul.metadata li.metadata__item")).isEmpty()){
+                    getTags(driver);
+                }
+            }
+            break;
+        }
+    }
+
+    // 작품 기본정보 크롤링하는 메소드
+    public static void getTitleAndYear(WebDriver driver){
+        WebElement title = driver.findElement(By.className("title-kr"));
+        WebElement year = driver.findElements(By.className("metadata-item")).get(1);
+        String poster = driver.findElement(By.className("movie-poster")).getAttribute("data-src");
+        String backgroundImage = driver.findElement(By.cssSelector("div.backdrop img")).getAttribute("data-src");
+
+        System.out.println(title.getText());
+        System.out.println(year.getText());
+        System.out.println(poster);
+        System.out.println(backgroundImage);
+    }
+
+    // 줄거리 크롤링하는 메소드
+    public static void getSynopsis(WebDriver driver, JavascriptExecutor js){
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofMillis(100));
+
+        try { // 줄거리가 길 경우, 더보기 버튼 클릭한 후, 줄거리 크롤링
+            WebElement more = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div.synopsis__text-wrap div.text button")));
+            js.executeScript("arguments[0].click();", more);
+
+            WebElement synopsis = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div.text span")));
+            System.out.println(synopsis.getText());
+        } catch (Exception e) {
+            WebElement synopsis = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div.text span")));
+            System.out.println(synopsis.getText());
+        }
+    }
+
+    // 작품 태그 크롤링하는 메소드
+    public static void getTags(WebDriver driver){
+        List<WebElement> tags = driver.findElements(By.cssSelector("ul.metadata li.metadata__item"));
+
+        for(WebElement tag : tags){
+            System.out.println(tag.getText());
         }
     }
 }
