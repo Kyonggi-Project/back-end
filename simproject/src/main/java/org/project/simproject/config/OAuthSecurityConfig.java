@@ -59,12 +59,12 @@ public class OAuthSecurityConfig {
         http.oauth2Login()
                 .loginPage("/oauthLogin")
                 .authorizationEndpoint()
-                //.baseUri("/oauth2/authorize")     // 사용자 인증 엔드 포인트 설정
+                .baseUri("/oauth2/authorize")     // 사용자 인증 엔드 포인트 설정
                 .authorizationRequestRepository(oAuth2CookieRepository())
                 .and()
-                //.redirectionEndpoint()            // 리다이렉트 엔드 포인트 설정
-                //.baseUri("/oauth2/callback/*")    // 리다이렉트 URI
-                //.and()
+                .redirectionEndpoint()            // 리다이렉트 엔드 포인트 설정
+                .baseUri("/oauth2/callback/*")    // 리다이렉트 URI
+                .and()
                 .successHandler(oAuth2SuccessHandler())
                 .userInfoEndpoint()
                 .userService(oAuth2UserCustomService);
