@@ -18,12 +18,12 @@ public class Netflix {
 
     String category;
 
-    Long rank;
+    Long ranking;
 
     @Builder
-    Netflix(String title, String category, Long rank) {
+    Netflix(String title, String category, Long ranking) {
         this.title = title;
         this.category = category;
-        this.rank = rank;
+        this.ranking = ranking;
     }
 }
