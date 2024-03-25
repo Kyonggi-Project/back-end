@@ -25,6 +25,8 @@ public class KinolightsCrawlingService {
 
     private WebDriver WEB_DRIVER;
 
+    private JavascriptExecutor JS_EXECUTOR;
+
     private WebDriverWait WAIT;
 
     @Value("${driver.chrome.driver_path}")
@@ -32,15 +34,46 @@ public class KinolightsCrawlingService {
 
     private final String KINOLIGHTS_URL = "https://m.kinolights.com/discover/explore";
 
-    public void crawling() {
+    public void crawlingMovies() throws InterruptedException {
         init();
 
         WEB_DRIVER.get(KINOLIGHTS_URL);
         log.info("Access Success");
+/*        List<WebElement> OTTButtons = new ArrayList<>();
+
+        for (int i = 2; i < 5; i++) {
+            OTTButtons.add(WEB_DRIVER.findElement(By.xpath("//*[@id=\"contents\"]/section/div[2]/div/div/div/div[" + i + "]")));
+            log.info("Crawling Button Success");
+        }
+
+        for (WebElement OTTButton : OTTButtons) {
+
+            scroll();
+
+            List<String> hrefList = collectHref();
+
+            int count = 0;
+
+            for (String hrefLink : hrefList) {
+                WEB_DRIVER.get(hrefLink);
+                crawlingInfo(count++);
+            }
+        }*/
+
+        Thread.sleep(5000);
+        
+        // Netflix 버튼 클릭
+        WebElement buttonElement = WEB_DRIVER.findElement(By.xpath("//*[@id=\"contents\"]/section/div[2]/div/div/div/div[2]/button"));
+
+        // 버튼을 클릭하는 JavaScript 코드 실행
+        JS_EXECUTOR.executeScript("arguments[0].click();", buttonElement);
+
+        log.info("NETFLIX Crawling Start");
 
         scroll();
 
         List<String> hrefList = collectHref();
+
 
         int count = 0;
 
@@ -64,13 +97,13 @@ public class KinolightsCrawlingService {
 //        chromeOptions.addArguments("--disable-gpu");                // gpu 비활성화(headless 적용하기 위해 필요)
 
         WEB_DRIVER = new ChromeDriver(chromeOptions);
+        JS_EXECUTOR=(JavascriptExecutor) WEB_DRIVER;
 
         WAIT = new WebDriverWait(WEB_DRIVER, Duration.ofSeconds(3));
     }
 
     public void scroll() {
-        JavascriptExecutor js = (JavascriptExecutor) WEB_DRIVER;
-        js.executeScript("window.scrollTo(0, document.body.scrollHeight)");
+        JS_EXECUTOR.executeScript("window.scrollTo(0, document.body.scrollHeight)");
 
         WebDriverWait scrollWait = new WebDriverWait(WEB_DRIVER, Duration.ofSeconds(1)); // 최대 30초까지 대기
 
@@ -85,7 +118,7 @@ public class KinolightsCrawlingService {
                 found = true; // 요소를 찾았으므로 found 변수를 true로 설정하여 반복문 종료
             } catch (TimeoutException e) {
                 // 요소가 발견되지 않은 경우 스크롤을 추가로 내리기
-                js.executeScript("window.scrollTo(0, document.body.scrollHeight)");
+                JS_EXECUTOR.executeScript("window.scrollTo(0, document.body.scrollHeight)");
             }
         }
         log.info("Scroll Success");
@@ -181,6 +214,5 @@ public class KinolightsCrawlingService {
         }
 
         log.info(count + ": [" + title + "] (" + year + ")");
-//        webDriver.navigate().back();
     }
 }
