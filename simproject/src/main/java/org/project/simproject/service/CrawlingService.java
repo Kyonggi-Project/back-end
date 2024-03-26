@@ -105,12 +105,20 @@ public class CrawlingService {
                     getTitleAndYear(driver);
                 }
                 // 줄거리 크롤링
-                if (!driver.findElements(By.cssSelector("div.synopsis__text-wrap")).isEmpty()) {
+                if (!driver.findElements(By.cssSelector("div.text span")).isEmpty()) {
                     getSynopsis(driver, js);
                 }
                 // 작품 태그 크롤링
                 if(!driver.findElements(By.cssSelector("ul.metadata li.metadata__item")).isEmpty()){
                     getTags(driver);
+                }
+                // 출연진 크롤링
+                if(!driver.findElements(By.id("actorList")).isEmpty()){
+                    getActors(driver);
+                }
+                // 제작진 크롤링
+                if(!driver.findElements(By.id("staffList")).isEmpty()){
+                    getStaffs(driver);
                 }
             }
             break;
@@ -135,10 +143,14 @@ public class CrawlingService {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofMillis(100));
 
         try { // 줄거리가 길 경우, 더보기 버튼 클릭한 후, 줄거리 크롤링
-            WebElement more = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div.synopsis__text-wrap div.text button")));
-            js.executeScript("arguments[0].click();", more);
-
             WebElement synopsis = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div.text span")));
+
+            if(synopsis.getText().contains("...")){
+                WebElement more = wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("div.synopsis__text-wrap div.text button")));
+                js.executeScript("arguments[0].click();", more);
+
+            }
+            synopsis = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div.text span")));
             System.out.println(synopsis.getText());
         } catch (Exception e) {
             WebElement synopsis = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div.text span")));
@@ -152,6 +164,42 @@ public class CrawlingService {
 
         for(WebElement tag : tags){
             System.out.println(tag.getText());
+        }
+    }
+
+    // 작품에 출연한 출연진 크롤링(최대 5명)
+    public static void getActors(WebDriver driver){
+        int count = 0;
+
+        WebElement list = driver.findElement(By.id("actorList"));
+        try{
+            List<WebElement> actors = list.findElements(By.cssSelector("div.person.list__avatar div.name"));
+
+            for(WebElement actor : actors){
+                count++;
+                System.out.println(actor.getText());
+                if(count == 5) break;
+            }
+        } catch (Exception e){
+
+        }
+    }
+
+    // 작품에 참여한 제작진 크롤링(최대 5명)
+    public static void getStaffs(WebDriver driver){
+        int count = 0;
+
+        WebElement list = driver.findElement(By.id("staffList"));
+        try{
+            List<WebElement> staffs = list.findElements(By.cssSelector("div.person.list__avatar div.name"));
+
+            for(WebElement staff : staffs){
+                count++;
+                System.out.println(staff.getText());
+                if(count == 5) break;
+            }
+        } catch (Exception e){
+
         }
     }
 }
