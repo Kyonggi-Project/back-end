@@ -7,6 +7,8 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.project.simproject.domain.Movie;
+import org.project.simproject.repository.MovieRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
@@ -34,31 +36,13 @@ public class KinolightsCrawlingService {
 
     private final String KINOLIGHTS_URL = "https://m.kinolights.com/discover/explore";
 
+    private final MovieRepository movieRepository;
+
     public void crawlingMovies() throws InterruptedException {
         init();
 
         WEB_DRIVER.get(KINOLIGHTS_URL);
         log.info("Access Success");
-/*        List<WebElement> OTTButtons = new ArrayList<>();
-
-        for (int i = 2; i < 5; i++) {
-            OTTButtons.add(WEB_DRIVER.findElement(By.xpath("//*[@id=\"contents\"]/section/div[2]/div/div/div/div[" + i + "]")));
-            log.info("Crawling Button Success");
-        }
-
-        for (WebElement OTTButton : OTTButtons) {
-
-            scroll();
-
-            List<String> hrefList = collectHref();
-
-            int count = 0;
-
-            for (String hrefLink : hrefList) {
-                WEB_DRIVER.get(hrefLink);
-                crawlingInfo(count++);
-            }
-        }*/
 
         Thread.sleep(5000);
         
@@ -73,7 +57,6 @@ public class KinolightsCrawlingService {
         scroll();
 
         List<String> hrefList = collectHref();
-
 
         int count = 0;
 
@@ -129,7 +112,6 @@ public class KinolightsCrawlingService {
         log.info("Get MovieList Success");
         log.info("Start get Info");
 
-
         List<String> hrefList = new ArrayList<>();
 
         for (WebElement movie : movieList) {
@@ -147,26 +129,30 @@ public class KinolightsCrawlingService {
 
         WebElement metadataElement = WEB_DRIVER.findElement(By.cssSelector("p.metadata"));
         String year = metadataElement.findElement(By.cssSelector("span.metadata-item:last-child")).getText();
+        log.info(count + ": [" + title + "] (" + year + ")");
 
         // 작품 특징
         List<WebElement> tagList = WEB_DRIVER.findElements(By.cssSelector("ul.metadata li.metadata__item"));
-
+        List<String> seriesGenres = new ArrayList<>();
         for (WebElement tagElement : tagList) {
             String seriesGenre = tagElement.getText();
+            seriesGenres.add(seriesGenre);
+            log.info(seriesGenre);
         }
 
         // 줄거리
         if (!WEB_DRIVER.findElements(By.cssSelector("div.synopsis__text-wrap div.text span")).isEmpty()) {
             WebElement synopsisElement = WEB_DRIVER.findElement(By.cssSelector("div.synopsis__text-wrap div.text span"));
             String synopsis = synopsisElement.getText();
+            log.info(synopsis);
         }
 
         // 배우 정보 저장
+        Map<String, String> actorCharacterMap = new HashMap<>();
         if (!WEB_DRIVER.findElements(By.id("actorList")).isEmpty()) {
+            log.info("Start Crawling Actors");
             WebElement actorList = WEB_DRIVER.findElement(By.id("actorList"));
             List<WebElement> castElements = actorList.findElements(By.cssSelector("div.person.list__avatar"));
-
-            Map<String, String> actorCharacterMap = new HashMap<>();
 
             if (!castElements.isEmpty()) {
                 for (WebElement castElement : castElements) {
@@ -189,11 +175,11 @@ public class KinolightsCrawlingService {
         }
 
         // 제작진 정보 저장
+        Map<String, String> staffMap = new HashMap<>();
         if (!WEB_DRIVER.findElements(By.id("staffList")).isEmpty()) {
+            log.info("Start Crawling Staffs");
             WebElement staffList = WEB_DRIVER.findElement(By.id("staffList"));
             List<WebElement> staffElements = staffList.findElements(By.cssSelector("div.person.list__avatar"));
-
-            Map<String, String> staffMap = new HashMap<>();
 
             for (WebElement staffElement : staffElements) {
                 String name = staffElement.findElement(By.cssSelector("div.name")).getText();
@@ -209,9 +195,25 @@ public class KinolightsCrawlingService {
                     // character 요소가 존재하지 않는 경우, character 값을 빈 문자열로 유지
                 }
 
+                if (name.contains(".")) {
+                    name = name.replace(".", "");
+                }
                 staffMap.put(name, position);
             }
         }
+
+        // Movie 객체 생성 및 데이터 설정
+        Movie movie = new Movie();
+        movie.setTitle(title);
+        movie.setYear(year);
+        movie.setPosterImgUrl(posterImgUrl);
+        movie.setBackgroundImgUrl(backgroundImgUrl);
+        movie.setSeriesGenres(seriesGenres);
+        movie.setActors(actorCharacterMap);
+        movie.setStaffs(staffMap);
+
+        // MongoDB에 저장
+        movieRepository.save(movie);
 
         log.info(count + ": [" + title + "] (" + year + ")");
     }

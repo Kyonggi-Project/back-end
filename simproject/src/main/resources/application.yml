@@ -25,6 +25,11 @@ spring:
     url: ${SPRING_DATASOURCE_URL}
     username: root
     password: ${SPRING_DATASOURCE_PASSWORD}
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: test
   profiles :
     active : local
     group :
