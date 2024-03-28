@@ -1,9 +1,7 @@
 package org.project.simproject.domain;
 
 import jakarta.persistence.Id;
-import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -26,5 +24,11 @@ public class Movie {
     private List<String> seriesGenres = new ArrayList<>();
     private Map<String, String> actors = new HashMap<>();
     private Map<String, String> staffs = new HashMap<>();
+    private List<String> ottList = new ArrayList<>();
+
+    public void addOtt(String ott) {
+        ottList.add(ott);
+    }
+
 }
 
