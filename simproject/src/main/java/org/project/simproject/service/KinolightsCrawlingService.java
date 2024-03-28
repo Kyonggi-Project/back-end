@@ -36,33 +36,37 @@ public class KinolightsCrawlingService {
 
     private final String KINOLIGHTS_URL = "https://m.kinolights.com/discover/explore";
 
+    List<String> OTT_LIST = new ArrayList<>();
+
     private final MovieRepository movieRepository;
 
     public void crawlingMovies() throws InterruptedException {
         init();
 
-        WEB_DRIVER.get(KINOLIGHTS_URL);
-        log.info("Access Success");
+        int j = 2;
+        for (String ott : OTT_LIST) {
+            WEB_DRIVER.get(KINOLIGHTS_URL);
+            WebElement buttonElement = WEB_DRIVER.findElement(By.xpath("//*[@id=\"contents\"]/section/div[2]/div/div/div/div[" + j++ + "]/button"));
+            Thread.sleep(5000);
+            JS_EXECUTOR.executeScript("arguments[0].click();", buttonElement);
 
-        Thread.sleep(5000);
-        
-        // Netflix 버튼 클릭
-        WebElement buttonElement = WEB_DRIVER.findElement(By.xpath("//*[@id=\"contents\"]/section/div[2]/div/div/div/div[2]/button"));
+            log.info(ott + " Crawling Start");
 
-        // 버튼을 클릭하는 JavaScript 코드 실행
-        JS_EXECUTOR.executeScript("arguments[0].click();", buttonElement);
+            scroll();
 
-        log.info("NETFLIX Crawling Start");
+            List<String> hrefList = collectHref();
 
-        scroll();
+            int count = 0;
 
-        List<String> hrefList = collectHref();
-
-        int count = 0;
-
-        for (String hrefLink : hrefList) {
-            WEB_DRIVER.get(hrefLink);
-            crawlingInfo(count++);
+            for (String hrefLink : hrefList) {
+                WEB_DRIVER.get(hrefLink);
+                try {
+                    crawlingInfo(count++, ott);
+                } catch (Exception e) {
+                    log.error("Error: Crawling " + ott + " - " +  count);
+                    log.error("ErrorMessage: " + e.getMessage());
+                }
+            }
         }
 
         // 웹 드라이버 종료
@@ -76,13 +80,18 @@ public class KinolightsCrawlingService {
 
         chromeOptions.addArguments("--remote-allow-origins=*");     // 웹 브라우저 Origin 허용
         chromeOptions.addArguments("--disable-popup-blocking");     // 팝업창 안띄우게 설정
-//        chromeOptions.addArguments("headless");                     // 브라우저 안띄우게 설정
-//        chromeOptions.addArguments("--disable-gpu");                // gpu 비활성화(headless 적용하기 위해 필요)
+        chromeOptions.addArguments("headless");                     // 브라우저 안띄우게 설정
+        chromeOptions.addArguments("--disable-gpu");                // gpu 비활성화(headless 적용하기 위해 필요)
 
         WEB_DRIVER = new ChromeDriver(chromeOptions);
-        JS_EXECUTOR=(JavascriptExecutor) WEB_DRIVER;
+        JS_EXECUTOR = (JavascriptExecutor) WEB_DRIVER;
 
         WAIT = new WebDriverWait(WEB_DRIVER, Duration.ofSeconds(3));
+
+        OTT_LIST.add("Netflix");
+        OTT_LIST.add("Tving");
+        OTT_LIST.add("Coupang Play");
+        OTT_LIST.add("Wavve");
     }
 
     public void scroll() {
@@ -109,8 +118,8 @@ public class KinolightsCrawlingService {
 
     public List<String> collectHref() {
         List<WebElement> movieList = WEB_DRIVER.findElements(By.cssSelector("div.MovieItem.grid"));
-        log.info("Get MovieList Success");
-        log.info("Start get Info");
+//        log.info("Get MovieList Success");
+//        log.info("Start get Info");
 
         List<String> hrefList = new ArrayList<>();
 
@@ -121,15 +130,27 @@ public class KinolightsCrawlingService {
         return hrefList;
     }
 
-    public void crawlingInfo(int count) {
+    public void crawlingInfo(int count, String ott) {
         WebElement titleElement = WAIT.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("div.movie-title-wrap h2.title-kr")));
         String title = titleElement.getText();
+
+        if (movieRepository.existsByTitle(title)) {
+            Movie updateMovie = movieRepository.findByTitle(title);
+            if (updateMovie.getOttList().contains(ott)) {
+                return;
+            } else {
+                updateMovie.addOtt(ott);
+                movieRepository.save(updateMovie);
+                return;
+            }
+        }
+
         String posterImgUrl = WEB_DRIVER.findElement(By.cssSelector("div.poster img.movie-poster")).getAttribute("src");
         String backgroundImgUrl = WEB_DRIVER.findElement(By.cssSelector("div.movie-image-area img")).getAttribute("src");
 
         WebElement metadataElement = WEB_DRIVER.findElement(By.cssSelector("p.metadata"));
         String year = metadataElement.findElement(By.cssSelector("span.metadata-item:last-child")).getText();
-        log.info(count + ": [" + title + "] (" + year + ")");
+//        log.info(count + ": [" + title + "] (" + year + ")");
 
         // 작품 특징
         List<WebElement> tagList = WEB_DRIVER.findElements(By.cssSelector("ul.metadata li.metadata__item"));
@@ -137,20 +158,21 @@ public class KinolightsCrawlingService {
         for (WebElement tagElement : tagList) {
             String seriesGenre = tagElement.getText();
             seriesGenres.add(seriesGenre);
-            log.info(seriesGenre);
+//            log.info(seriesGenre);
         }
 
         // 줄거리
+        String synopsis = "";
         if (!WEB_DRIVER.findElements(By.cssSelector("div.synopsis__text-wrap div.text span")).isEmpty()) {
             WebElement synopsisElement = WEB_DRIVER.findElement(By.cssSelector("div.synopsis__text-wrap div.text span"));
-            String synopsis = synopsisElement.getText();
-            log.info(synopsis);
+            synopsis = synopsisElement.getText();
+//            log.info(synopsis);
         }
 
         // 배우 정보 저장
         Map<String, String> actorCharacterMap = new HashMap<>();
         if (!WEB_DRIVER.findElements(By.id("actorList")).isEmpty()) {
-            log.info("Start Crawling Actors");
+//            log.info("Start Crawling Actors");
             WebElement actorList = WEB_DRIVER.findElement(By.id("actorList"));
             List<WebElement> castElements = actorList.findElements(By.cssSelector("div.person.list__avatar"));
 
@@ -168,6 +190,9 @@ public class KinolightsCrawlingService {
                     } catch (NoSuchElementException e) {
                         // character 요소가 존재하지 않는 경우, character 값을 빈 문자열로 유지
                     }
+                    if (name.contains(".")) {
+                        name = name.replace(".", "");
+                    }
 
                     actorCharacterMap.put(name, character);
                 }
@@ -177,7 +202,7 @@ public class KinolightsCrawlingService {
         // 제작진 정보 저장
         Map<String, String> staffMap = new HashMap<>();
         if (!WEB_DRIVER.findElements(By.id("staffList")).isEmpty()) {
-            log.info("Start Crawling Staffs");
+//            log.info("Start Crawling Staffs");
             WebElement staffList = WEB_DRIVER.findElement(By.id("staffList"));
             List<WebElement> staffElements = staffList.findElements(By.cssSelector("div.person.list__avatar"));
 
@@ -206,15 +231,17 @@ public class KinolightsCrawlingService {
         Movie movie = new Movie();
         movie.setTitle(title);
         movie.setYear(year);
+        movie.setSynopsis(synopsis);
         movie.setPosterImgUrl(posterImgUrl);
         movie.setBackgroundImgUrl(backgroundImgUrl);
         movie.setSeriesGenres(seriesGenres);
         movie.setActors(actorCharacterMap);
         movie.setStaffs(staffMap);
+        movie.addOtt(ott);
 
         // MongoDB에 저장
         movieRepository.save(movie);
 
-        log.info(count + ": [" + title + "] (" + year + ")");
+        log.info("[" + ott + "] " + count + ": [" + title + "] (" + year + ")");
     }
 }
