@@ -10,12 +10,17 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.project.simproject.domain.Movie;
+import org.project.simproject.domain.Ranking;
+import org.project.simproject.domain.RankingInfo;
+import org.project.simproject.repository.MovieRepository;
 import org.project.simproject.repository.NetflixRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,8 +50,12 @@ public class NetflixService {
 
     private final NetflixRepository netflixRepository;
 
+    private final MovieRepository movieRepository;
+
     public void crawlingMostWatchedNetflix() throws InterruptedException {
         init();
+
+        LocalDate crawlingDate = LocalDate.now();
 
         WEB_DRIVER.get(NETFLIX_URL);
 
@@ -54,44 +63,59 @@ public class NetflixService {
 
         Thread.sleep(5000);
 
-        WebElement mostWatchedElement = WEB_DRIVER.findElement(By.cssSelector("div[data-list-context='mostWatched']"));
-        String category = mostWatchedElement.findElement(By.cssSelector(".row-header-title")).getText();
-        log.info(category);
+        scroll();
 
-        List<WebElement> mostWatchedList = new ArrayList<>();
-        List<String> mostWatchedNames = new ArrayList<>();
+        // 오늘의 대한민국 TOP10과 영화 TOP10 두 가지 카테고리 크롤링
+        List<WebElement> mostWatchedElements = WEB_DRIVER.findElements(By.cssSelector("div[data-list-context='mostWatched']"));
+        log.info(mostWatchedElements.toString());
+//        WebElement mostWatchedElement = WEB_DRIVER.findElement(By.cssSelector("div[data-list-context='mostWatched']"));
 
-        // Top10 제목 크롤링
-        int count = 1;  // Top10 크롤링을 위한 10개 카운팅
-        int i = 0;
-        while (count <= 10) {
-            if (mostWatchedElement.findElements(By.cssSelector("div.slider-item.slider-item-" + i)).isEmpty()) {
-                mostWatchedElement.findElement(By.xpath("//span[@class='handle handleNext active']")).click();
-                i = 0;
-                continue;
+        for (WebElement mostWatchedElement : mostWatchedElements) {
+            String category = mostWatchedElement.findElement(By.cssSelector(".row-header-title")).getText();
+            log.info(category);
+
+//            List<WebElement> mostWatchedList = new ArrayList<>();
+            List<Ranking> mostWatchedMovies = new ArrayList<>();
+
+            // Top10 제목 크롤링
+            int count = 1;  // Top10 크롤링을 위한 10개 카운팅
+            int i = 0;
+            while (count <= 10) {
+                if (mostWatchedElement.findElements(By.cssSelector("div.slider-item.slider-item-" + i)).isEmpty()) {
+                    mostWatchedElement.findElement(By.xpath("//span[@class='handle handleNext active']")).click();
+                    i = 0;
+                    continue;
+                }
+                WebElement element = mostWatchedElement.findElement(By.cssSelector("div.slider-item.slider-item-" + i++));
+                String title = element.findElement(By.cssSelector("p.fallback-text")).getText();
+
+                // 중복 추가 방지
+                if (title.isEmpty() || mostWatchedMovies.stream().anyMatch(r -> r.getMovie().getTitle().equals(title))) {
+                    continue;
+                }
+
+                log.info(count + ": " + title);
+                int rank = count++;
+                Movie movie = movieRepository.findByTitle(title); // 영화 제목으로 MongoDB에서 해당 영화 정보를 가져옴
+                if (movie != null) {
+                    Ranking rankingMovie = Ranking.builder()
+                            .movie(movie)
+                            .rank(rank)
+                            .build();
+                    mostWatchedMovies.add(rankingMovie);
+                }
+
+
+                RankingInfo rankingInfo = new RankingInfo();
+                rankingInfo.setOtt("Netflix");
+                rankingInfo.setCategory(category);
+                rankingInfo.setRankings(mostWatchedMovies);
+                rankingInfo.setDate(crawlingDate);
+
             }
-            WebElement element = mostWatchedElement.findElement(By.cssSelector("div.slider-item.slider-item-" + i++));
-            String title = element.findElement(By.cssSelector("p.fallback-text")).getText();
-            if (mostWatchedNames.contains(title) || title.isEmpty())
-                continue;
-            mostWatchedNames.add(title);
-            log.info(count++ + ": " + title);
 
-            /*
-            String imageUrl = element.findElement(By.cssSelector("img.boxart-image-in-padded-container")).getText();
-
-            Netflix netflix = Netflix.builder()
-                    .title(title)
-                    .category(category)
-                    .ranking((long) count++)
-                    .build();
-
-            netflixRepository.save(netflix);*/
+            WEB_DRIVER.quit();
         }
-
-        log.info(mostWatchedNames.toString());
-
-        WEB_DRIVER.quit();
     }
 
     public void init() {
@@ -125,6 +149,18 @@ public class NetflixService {
 
         WAIT.until(ExpectedConditions.elementToBeClickable(profileButton)).click();
         log.info("Click Profile Success");
+    }
+
+    public void scroll() throws InterruptedException {
+        JS_EXECUTOR.executeScript("window.scrollTo(0, document.body.scrollHeight)");
+
+        WebDriverWait scrollWait = new WebDriverWait(WEB_DRIVER, Duration.ofSeconds(1)); // 최대 30초까지 대기
+
+        for (int i = 0; i < 10; i++) {
+            JS_EXECUTOR.executeScript("window.scrollTo(0, document.body.scrollHeight)");
+            Thread.sleep(1000);
+        }
+        log.info("Scroll Success");
     }
 
     public void getInfoByModal() {
