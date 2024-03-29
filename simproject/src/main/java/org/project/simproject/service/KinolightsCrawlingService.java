@@ -164,7 +164,12 @@ public class KinolightsCrawlingService {
         // 줄거리
         String synopsis = "";
         if (!WEB_DRIVER.findElements(By.cssSelector("div.synopsis__text-wrap div.text span")).isEmpty()) {
-            WebElement synopsisElement = WEB_DRIVER.findElement(By.cssSelector("div.synopsis__text-wrap div.text span"));
+//            WebElement synopsisElement = WEB_DRIVER.findElement(By.cssSelector("div.synopsis__text-wrap div.text span"));
+            WebElement synopsisElement = WEB_DRIVER.findElement(By.cssSelector("div.synopsis__text-wrap"));
+            if (!synopsisElement.findElements(By.tagName("button")).isEmpty()) {
+                WebElement buttonElement = synopsisElement.findElement(By.tagName("button"));
+                JS_EXECUTOR.executeScript("arguments[0].click();", buttonElement);
+            }
             synopsis = synopsisElement.getText();
 //            log.info(synopsis);
         }
