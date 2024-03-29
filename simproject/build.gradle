@@ -44,7 +44,7 @@ dependencies {
 
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'     // oauth2.0 관련 기능 제공
 
-    implementation 'org.seleniumhq.selenium:selenium-java:4.18.1'                    // selenium 관련 기능 제공(가장 최신)
+    implementation 'org.seleniumhq.selenium:selenium-java:4.19.0'                    // selenium 관련 기능 제공(가장 최신)
 
 }
 
