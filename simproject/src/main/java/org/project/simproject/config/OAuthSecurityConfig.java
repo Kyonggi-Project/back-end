@@ -55,16 +55,16 @@ public class OAuthSecurityConfig {
                 .requestMatchers("/api/**").permitAll()
                 .anyRequest().permitAll();
 
-        // localhost:3000에서 오는 사용자 인증 처리 요청 처리 부분 우선 주석 처리
+        // localhost:3000에서 오는 사용자 인증 처리 요청 처리 부분
         http.oauth2Login()
                 .loginPage("/oauthLogin")
                 .authorizationEndpoint()
-                //.baseUri("/oauth2/authorize")     // 사용자 인증 엔드 포인트 설정
+                .baseUri("/oauth2/authorize")     // 사용자 인증 엔드 포인트 설정
                 .authorizationRequestRepository(oAuth2CookieRepository())
                 .and()
-                //.redirectionEndpoint()            // 리다이렉트 엔드 포인트 설정
-                //.baseUri("/oauth2/callback/*")    // 리다이렉트 URI
-                //.and()
+                .redirectionEndpoint()            // 리다이렉트 엔드 포인트 설정
+                .baseUri("/oauth2/callback/*")    // 리다이렉트 URI
+                .and()
                 .successHandler(oAuth2SuccessHandler())
                 .userInfoEndpoint()
                 .userService(oAuth2UserCustomService);
