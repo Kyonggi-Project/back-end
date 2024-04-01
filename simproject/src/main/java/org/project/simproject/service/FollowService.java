@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.project.simproject.domain.Follow;
 import org.project.simproject.domain.User;
 import org.project.simproject.dto.response.UserResponse;
-import org.project.simproject.repository.FollowRepository;
+import org.project.simproject.repository.entityRepo.FollowRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

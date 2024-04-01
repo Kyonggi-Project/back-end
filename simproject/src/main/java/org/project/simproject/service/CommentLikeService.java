@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.project.simproject.domain.Comment;
 import org.project.simproject.domain.CommentLike;
 import org.project.simproject.domain.User;
-import org.project.simproject.repository.CommentLikeRepository;
+import org.project.simproject.repository.entityRepo.CommentLikeRepository;
 import org.springframework.stereotype.Service;
 
 @Service

@@ -1,4 +1,4 @@
-package org.project.simproject.repository;
+package org.project.simproject.repository.entityRepo;
 
 import org.project.simproject.domain.Tag;
 import org.springframework.data.jpa.repository.JpaRepository;

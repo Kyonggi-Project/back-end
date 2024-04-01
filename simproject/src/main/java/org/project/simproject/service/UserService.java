@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.project.simproject.domain.User;
 import org.project.simproject.dto.request.AddUserRequest;
 import org.project.simproject.dto.request.ModifyRequest;
-import org.project.simproject.repository.UserRepository;
+import org.project.simproject.repository.entityRepo.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

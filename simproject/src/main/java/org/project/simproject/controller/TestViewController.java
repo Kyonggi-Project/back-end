@@ -6,7 +6,7 @@ import org.project.simproject.domain.User;
 import org.project.simproject.dto.request.AddUserRequest;
 import org.project.simproject.dto.response.ChatRoomResponse;
 import org.project.simproject.dto.response.UserResponse;
-import org.project.simproject.repository.ChatRoomRepository;
+import org.project.simproject.repository.entityRepo.ChatRoomRepository;
 import org.project.simproject.service.ChatRoomService;
 import org.project.simproject.service.TokenService;
 import org.project.simproject.service.UserService;

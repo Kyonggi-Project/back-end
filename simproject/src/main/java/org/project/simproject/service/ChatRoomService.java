@@ -6,7 +6,7 @@ import org.project.simproject.domain.ChatRoom;
 import org.project.simproject.domain.User;
 import org.project.simproject.dto.request.CreateChatRoomRequest;
 import org.project.simproject.dto.response.ChatRoomResponse;
-import org.project.simproject.repository.ChatRoomRepository;
+import org.project.simproject.repository.entityRepo.ChatRoomRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

@@ -7,7 +7,7 @@ import org.project.simproject.domain.Comment;
 import org.project.simproject.domain.User;
 import org.project.simproject.dto.request.AddCommentRequest;
 import org.project.simproject.dto.request.ModifyCommentRequest;
-import org.project.simproject.repository.CommentRepository;
+import org.project.simproject.repository.entityRepo.CommentRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

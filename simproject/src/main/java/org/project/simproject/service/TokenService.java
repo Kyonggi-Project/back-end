@@ -3,7 +3,7 @@ package org.project.simproject.service;
 import lombok.RequiredArgsConstructor;
 import org.project.simproject.config.jwt.JwtTokenProvider;
 import org.project.simproject.domain.User;
-import org.project.simproject.repository.RefreshTokenRepository;
+import org.project.simproject.repository.entityRepo.RefreshTokenRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;

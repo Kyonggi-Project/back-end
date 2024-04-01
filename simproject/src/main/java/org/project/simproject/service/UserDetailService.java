@@ -1,7 +1,7 @@
 package org.project.simproject.service;
 
 import lombok.RequiredArgsConstructor;
-import org.project.simproject.repository.UserRepository;
+import org.project.simproject.repository.entityRepo.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;

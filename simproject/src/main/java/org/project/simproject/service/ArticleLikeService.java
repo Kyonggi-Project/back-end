@@ -6,7 +6,7 @@ import org.project.simproject.domain.Article;
 import org.project.simproject.domain.ArticleLike;
 import org.project.simproject.domain.User;
 import org.project.simproject.dto.response.ArticleResponse;
-import org.project.simproject.repository.ArticleLikeRepository;
+import org.project.simproject.repository.entityRepo.ArticleLikeRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
