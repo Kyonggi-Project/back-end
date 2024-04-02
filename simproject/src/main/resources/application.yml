@@ -25,6 +25,9 @@ spring:
     url: ${SPRING_DATASOURCE_URL}
     username: root
     password: ${SPRING_DATASOURCE_PASSWORD}
+  data:
+    mongodb:
+      uri: ${MONGO_DATABASE_URI}
   profiles :
     active : local
     group :
@@ -33,3 +36,4 @@ spring:
         - jwt
         - oauth2
         - crawling
+        - mongo

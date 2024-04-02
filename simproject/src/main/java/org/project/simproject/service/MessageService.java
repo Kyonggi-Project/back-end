@@ -2,10 +2,9 @@ package org.project.simproject.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.project.simproject.domain.Message;
 import org.project.simproject.dto.request.AddMessageRequest;
 import org.project.simproject.dto.response.MessageResponse;
-import org.project.simproject.repository.MessageRepository;
+import org.project.simproject.repository.entityRepo.MessageRepository;
 import org.project.simproject.util.ChatMessageStatus;
 import org.springframework.stereotype.Service;
 

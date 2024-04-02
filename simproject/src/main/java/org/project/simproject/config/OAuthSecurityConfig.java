@@ -3,7 +3,7 @@ package org.project.simproject.config;
 import lombok.RequiredArgsConstructor;
 import org.project.simproject.config.jwt.JwtTokenProvider;
 import org.project.simproject.config.oauth.*;
-import org.project.simproject.repository.RefreshTokenRepository;
+import org.project.simproject.repository.entityRepo.RefreshTokenRepository;
 import org.project.simproject.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

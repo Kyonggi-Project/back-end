@@ -2,7 +2,7 @@ package org.project.simproject.config.oauth;
 
 import lombok.RequiredArgsConstructor;
 import org.project.simproject.domain.User;
-import org.project.simproject.repository.UserRepository;
+import org.project.simproject.repository.entityRepo.UserRepository;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;

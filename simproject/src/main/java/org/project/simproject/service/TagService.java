@@ -6,8 +6,8 @@ import org.project.simproject.domain.Article;
 import org.project.simproject.domain.ArticleTagRelation;
 import org.project.simproject.domain.Tag;
 import org.project.simproject.dto.response.ArticleResponse;
-import org.project.simproject.repository.ArticleTagRelationRepository;
-import org.project.simproject.repository.TagRepository;
+import org.project.simproject.repository.entityRepo.ArticleTagRelationRepository;
+import org.project.simproject.repository.entityRepo.TagRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

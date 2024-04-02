@@ -7,11 +7,9 @@ import org.project.simproject.domain.User;
 import org.project.simproject.dto.request.AddArticleRequest;
 import org.project.simproject.dto.request.ModifyArticleRequest;
 import org.project.simproject.dto.response.ArticleResponse;
-import org.project.simproject.repository.ArticleRepository;
-import org.project.simproject.repository.UserRepository;
+import org.project.simproject.repository.entityRepo.ArticleRepository;
+import org.project.simproject.repository.entityRepo.UserRepository;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 

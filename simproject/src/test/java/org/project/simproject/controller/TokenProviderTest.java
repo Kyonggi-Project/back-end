@@ -7,7 +7,7 @@ import org.project.simproject.config.jwt.JwtFactory;
 import org.project.simproject.config.jwt.JwtTokenProvider;
 import org.project.simproject.config.jwt.Properties;
 import org.project.simproject.domain.User;
-import org.project.simproject.repository.UserRepository;
+import org.project.simproject.repository.entityRepo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.Authentication;
