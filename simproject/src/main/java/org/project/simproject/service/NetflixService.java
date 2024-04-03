@@ -10,17 +10,13 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.project.simproject.domain.Movie;
-import org.project.simproject.domain.Ranking;
-import org.project.simproject.domain.RankingInfo;
-import org.project.simproject.repository.MovieRepository;
-import org.project.simproject.repository.NetflixRepository;
+import org.project.simproject.repository.mongoRepo.MovieRepository;
+import org.project.simproject.repository.mongoRepo.RankingInfoRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,14 +44,14 @@ public class NetflixService {
     @Value("${netflix.pwd}")
     private String NETFLIX_PWD;
 
-    private final NetflixRepository netflixRepository;
-
     private final MovieRepository movieRepository;
+
+    private final RankingInfoRepository rankingInfoRepository;
 
     public void crawlingMostWatchedNetflix() throws InterruptedException {
         init();
 
-        LocalDate crawlingDate = LocalDate.now();
+//        LocalDate crawlingDate = LocalDate.now();
 
         WEB_DRIVER.get(NETFLIX_URL);
 
@@ -67,55 +63,60 @@ public class NetflixService {
 
         // 오늘의 대한민국 TOP10과 영화 TOP10 두 가지 카테고리 크롤링
         List<WebElement> mostWatchedElements = WEB_DRIVER.findElements(By.cssSelector("div[data-list-context='mostWatched']"));
-        log.info(mostWatchedElements.toString());
-//        WebElement mostWatchedElement = WEB_DRIVER.findElement(By.cssSelector("div[data-list-context='mostWatched']"));
 
         for (WebElement mostWatchedElement : mostWatchedElements) {
             String category = mostWatchedElement.findElement(By.cssSelector(".row-header-title")).getText();
             log.info(category);
 
-//            List<WebElement> mostWatchedList = new ArrayList<>();
-            List<Ranking> mostWatchedMovies = new ArrayList<>();
+//            List<Movie> mostWatchedMovies = new ArrayList<>();
+            List<String> mostWatchedMovies = new ArrayList<>();
 
             // Top10 제목 크롤링
             int count = 1;  // Top10 크롤링을 위한 10개 카운팅
             int i = 0;
             while (count <= 10) {
+                // 다음 요소가 존재하지 않을 시, 리스트를 다음으로 넘김
                 if (mostWatchedElement.findElements(By.cssSelector("div.slider-item.slider-item-" + i)).isEmpty()) {
-                    mostWatchedElement.findElement(By.xpath("//span[@class='handle handleNext active']")).click();
+                    mostWatchedElement.findElement(By.cssSelector("span.handle.handleNext.active")).click();
                     i = 0;
                     continue;
                 }
+
+//                // 다음 요소가 존재하지 않을 시, 리스트를 다음으로 넘김
+//                if (mostWatchedElement.findElements(By.cssSelector("div.slider-item.slider-item-" + i)).isEmpty()) {
+//                    WebElement nextButton = mostWatchedElement.findElement(By.cssSelector("span.handle.handleNext.active"));
+//                    nextButton.click();
+//                    Thread.sleep(1000); // 클릭 후에 다음 요소가 로드될 때까지 충분히 대기
+//                    i = 0;
+//                    continue;
+//                }
+
                 WebElement element = mostWatchedElement.findElement(By.cssSelector("div.slider-item.slider-item-" + i++));
                 String title = element.findElement(By.cssSelector("p.fallback-text")).getText();
+//                Movie movie = movieRepository.findByTitle(title);
+                String movie = title;
 
                 // 중복 추가 방지
-                if (title.isEmpty() || mostWatchedMovies.stream().anyMatch(r -> r.getMovie().getTitle().equals(title))) {
+                if (title.isEmpty() || mostWatchedMovies.contains(movie)) {
                     continue;
                 }
 
+                mostWatchedMovies.add(movie);
+
                 log.info(count + ": " + title);
-                int rank = count++;
-                Movie movie = movieRepository.findByTitle(title); // 영화 제목으로 MongoDB에서 해당 영화 정보를 가져옴
-                if (movie != null) {
-                    Ranking rankingMovie = Ranking.builder()
-                            .movie(movie)
-                            .rank(rank)
-                            .build();
-                    mostWatchedMovies.add(rankingMovie);
-                }
 
-
-                RankingInfo rankingInfo = new RankingInfo();
-                rankingInfo.setOtt("Netflix");
-                rankingInfo.setCategory(category);
-                rankingInfo.setRankings(mostWatchedMovies);
-                rankingInfo.setDate(crawlingDate);
-
+                count++;
             }
 
-            WEB_DRIVER.quit();
+//            RankingInfo rankingInfo = new RankingInfo();
+//            rankingInfo.setOtt("Netflix");
+//            rankingInfo.setCategory(category);
+//            rankingInfo.setRankingList(mostWatchedMovies);
+//                rankingInfo.setDate(crawlingDate);
+
+//            rankingInfoRepository.save(rankingInfo);
         }
+        WEB_DRIVER.quit();
     }
 
     public void init() {
@@ -161,45 +162,6 @@ public class NetflixService {
             Thread.sleep(1000);
         }
         log.info("Scroll Success");
-    }
-
-    public void getInfoByModal() {
-        // Modal 창에서 정보를 알려주는 div 선택
-        // Modal창을 선택하는 방법 추가 탐색 필요
-        WebElement modalElement = WEB_DRIVER.findElement(By.cssSelector("div.previewModal--detailsMetadata.detail-modal.has-smaller-buttons[data-uia='previewModal--detailsMetadata']"));
-        String year = modalElement.findElement(By.cssSelector("div.year")).getText();
-        List<String> actors = new ArrayList<>();            // 출연
-        List<String> genres = new ArrayList<>();            // 장르
-        List<String> seriesGenres = new ArrayList<>();      // 시리즈 특징
-
-        // 출연자 이름 저장
-        WebElement actorsElement = modalElement.findElement(By.cssSelector("div.previewModal--tags[data-uia='previewModal-tags-person']"));
-        for (WebElement actorElement : actorsElement.findElements(By.cssSelector("span.tag-item"))) {
-            String actor = actorElement.getText();
-            if (actor.equals("더 보기") || actor.isEmpty())
-                break;
-            actors.add(actor.replaceAll(",", ""));
-        }
-
-        // 장르 저장
-        WebElement genresElement = modalElement.findElement(By.cssSelector("div.previewModal--tags[data-uia='previewModal--tags-genre']"));
-        for (WebElement genreElement : genresElement.findElements(By.cssSelector("span.tag-item"))) {
-            String genre = genreElement.getText();
-            if (genre.equals("더 보기") || genre.isEmpty())
-                break;
-            genres.add(genre.replaceAll(",", ""));
-        }
-
-        // 시리즈 특징 저장
-        WebElement seriesGenresElement = modalElement.findElement(By.cssSelector("div.previewModal--tags[data-uia='previewModal-tags-genre']"));
-        for (WebElement seriesGenreElement : seriesGenresElement.findElements(By.cssSelector("span.tag-item"))) {
-            String seriesGenre = seriesGenreElement.getText();
-            if (seriesGenre.equals("더 보기") || seriesGenre.isEmpty())
-                break;
-            seriesGenres.add(seriesGenre.replaceAll(",", ""));
-        }
-
-
     }
 
 }

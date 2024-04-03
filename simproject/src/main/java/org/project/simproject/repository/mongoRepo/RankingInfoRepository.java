@@ -1,4 +1,4 @@
-package org.project.simproject.repository;
+package org.project.simproject.repository.mongoRepo;
 
 import org.project.simproject.domain.RankingInfo;
 import org.springframework.data.mongodb.repository.MongoRepository;

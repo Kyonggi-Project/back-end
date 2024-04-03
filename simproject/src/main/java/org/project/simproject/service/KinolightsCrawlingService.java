@@ -8,7 +8,7 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.project.simproject.domain.Movie;
-import org.project.simproject.repository.MovieRepository;
+import org.project.simproject.repository.mongoRepo.MovieRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
@@ -149,15 +149,15 @@ public class KinolightsCrawlingService {
         String backgroundImgUrl = WEB_DRIVER.findElement(By.cssSelector("div.movie-image-area img")).getAttribute("src");
 
         WebElement metadataElement = WEB_DRIVER.findElement(By.cssSelector("p.metadata"));
-        String year = metadataElement.findElement(By.cssSelector("span.metadata-item:last-child")).getText();
+        int year = Integer.parseInt(metadataElement.findElement(By.cssSelector("span.metadata-item:last-child")).getText());
 //        log.info(count + ": [" + title + "] (" + year + ")");
 
         // 작품 특징
-        List<WebElement> tagList = WEB_DRIVER.findElements(By.cssSelector("ul.metadata li.metadata__item"));
-        List<String> seriesGenres = new ArrayList<>();
-        for (WebElement tagElement : tagList) {
+        List<WebElement> tagElementList = WEB_DRIVER.findElements(By.cssSelector("ul.metadata li.metadata__item"));
+        List<String> tagList = new ArrayList<>();
+        for (WebElement tagElement : tagElementList) {
             String seriesGenre = tagElement.getText();
-            seriesGenres.add(seriesGenre);
+            tagList.add(seriesGenre);
 //            log.info(seriesGenre);
         }
 
@@ -237,12 +237,16 @@ public class KinolightsCrawlingService {
         movie.setTitle(title);
         movie.setYear(year);
         movie.setSynopsis(synopsis);
-        movie.setPosterImgUrl(posterImgUrl);
-        movie.setBackgroundImgUrl(backgroundImgUrl);
-        movie.setSeriesGenres(seriesGenres);
-        movie.setActors(actorCharacterMap);
-        movie.setStaffs(staffMap);
+        movie.setPosterImg(posterImgUrl);
+        movie.setBackgroundImg(backgroundImgUrl);
+        movie.setTagList(tagList);
+        movie.setActorList(actorCharacterMap);
+        movie.setStaffList(staffMap);
         movie.addOtt(ott);
+
+        movie.setScore(0);
+        movie.setReviewCount(0);
+        movie.setRating(0);
 
         // MongoDB에 저장
         movieRepository.save(movie);

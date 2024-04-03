@@ -17,18 +17,20 @@ public class Movie {
     @Id
     private String id;
     private String title;
-    private String year;
+    private int year;
     private String synopsis;
-    private String posterImgUrl;
-    private String backgroundImgUrl;
-    private List<String> seriesGenres = new ArrayList<>();
-    private Map<String, String> actors = new HashMap<>();
-    private Map<String, String> staffs = new HashMap<>();
+    private String posterImg;
+    private String backgroundImg;
+    private List<String> tagList = new ArrayList<>();
+    private Map<String, String> actorList = new HashMap<>();
+    private Map<String, String> staffList = new HashMap<>();
     private List<String> ottList = new ArrayList<>();
+    private double score;
+    private int reviewCount;
+    private int rating;
 
     public void addOtt(String ott) {
         ottList.add(ott);
     }
 
 }
-

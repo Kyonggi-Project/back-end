@@ -27,9 +27,7 @@ spring:
     password: ${SPRING_DATASOURCE_PASSWORD}
   data:
     mongodb:
-      host: localhost
-      port: 27017
-      database: test
+      uri: ${MONGO_DATABASE_URI}
   profiles :
     active : local
     group :
@@ -38,3 +36,4 @@ spring:
         - jwt
         - oauth2
         - crawling
+        - mongo
