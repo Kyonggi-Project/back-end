@@ -10,6 +10,8 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.project.simproject.domain.OTT;
+import org.project.simproject.repository.mongoRepo.OTTRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -34,6 +37,8 @@ public class CrawlingService {
 
     @Value("${crawling.url}")
     private String crawlingUrl;
+
+    private final OTTRepository ottRepository;
 
     public void startCrawling() throws IOException, InterruptedException {
         log.info("키노라이츠 디즈니 플러스 크롤링");
@@ -61,13 +66,13 @@ public class CrawlingService {
         webDriver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
 
         // 크롤링 시작
-        crawlingStart(webDriver, jse);
+        crawlingStart(webDriver, jse, ottRepository);
 
         webDriver.close();
     }
 
     // 크롤링을 시작하는 메소드
-    public static void crawlingStart(WebDriver driver, JavascriptExecutor js) throws InterruptedException {
+    public static void crawlingStart(WebDriver driver, JavascriptExecutor js, OTTRepository ottRepository) throws InterruptedException {
 
         while (true){
             long currentScrollHeight = (long) js.executeScript("return document.body.scrollHeight;");
@@ -97,49 +102,85 @@ public class CrawlingService {
 
             // 각 작품에 대한 정보 크롤링
             for (String href : hrefs) {
+                OTT ott;
                 driver.get(href);
                 driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
 
+                HashMap<String, String> basicInfo = new HashMap<>();
                 // 작품 기본 정보 크롤링(제목, 년도, 포스터, 백그라운드 이미지)
                 if(!driver.findElements(By.className("movie-title-wrap")).isEmpty()){
-                    getTitleAndYear(driver);
+                    WebElement title = driver.findElement(By.className("title-kr"));
+                    if(ottRepository.existsOTTByTitle(title.getText())){
+                        ott = ottRepository.findOTTByTitle(title.getText());
+                        if (!ott.getOttList().contains("Disney Plus")) {
+                            ott.addOTTList("Disney Plus");
+                        }
+                        continue;
+                    }
+                    else {
+                        basicInfo = getTitleAndYear(driver);
+                    }
                 }
+                String synopsis = "";
                 // 줄거리 크롤링
                 if (!driver.findElements(By.cssSelector("div.text span")).isEmpty()) {
-                    getSynopsis(driver, js);
+                    synopsis = getSynopsis(driver, js);
                 }
+                List<String> tagList = new ArrayList<>();
                 // 작품 태그 크롤링
                 if(!driver.findElements(By.cssSelector("ul.metadata li.metadata__item")).isEmpty()){
-                    getTags(driver);
+                    tagList = getTags(driver);
                 }
+                HashMap<String, String> actorList = new HashMap<>();
                 // 출연진 크롤링
                 if(!driver.findElements(By.id("actorList")).isEmpty()){
-                    getActors(driver);
+                    actorList = getActors(driver);
                 }
+                HashMap<String, String> staffList = new HashMap<>();
                 // 제작진 크롤링
                 if(!driver.findElements(By.id("staffList")).isEmpty()){
-                    getStaffs(driver);
+                    staffList = getStaffs(driver);
                 }
+
+                ott = OTT.builder()
+                        .title(basicInfo.get("title"))
+                        .year(Integer.parseInt(basicInfo.get("year")))
+                        .posterImg(basicInfo.get("posterImg"))
+                        .backgroundImg(basicInfo.get("backgroundImg"))
+                        .synopsis(synopsis)
+                        .tagList(tagList)
+                        .actorList(actorList)
+                        .staffList(staffList)
+                        .score(0.0)
+                        .reviewCount(0)
+                        .rating(0)
+                        .build();
+                ott.addOTTList("Disney Plus");
+
+                ottRepository.save(ott);
             }
             break;
         }
     }
 
     // 작품 기본정보 크롤링하는 메소드
-    public static void getTitleAndYear(WebDriver driver){
+    public static HashMap<String, String> getTitleAndYear(WebDriver driver){
         WebElement title = driver.findElement(By.className("title-kr"));
         WebElement year = driver.findElements(By.className("metadata-item")).get(1);
         String poster = driver.findElement(By.className("movie-poster")).getAttribute("data-src");
         String backgroundImage = driver.findElement(By.cssSelector("div.backdrop img")).getAttribute("data-src");
 
-        System.out.println(title.getText());
-        System.out.println(year.getText());
-        System.out.println(poster);
-        System.out.println(backgroundImage);
+        HashMap<String, String> basicInfo = new HashMap<>();
+        basicInfo.put("title", title.getText());
+        basicInfo.put("year", year.getText());
+        basicInfo.put("posterImg", poster);
+        basicInfo.put("backgroundImg", backgroundImage);
+
+        return basicInfo;
     }
 
     // 줄거리 크롤링하는 메소드
-    public static void getSynopsis(WebDriver driver, JavascriptExecutor js){
+    public static String getSynopsis(WebDriver driver, JavascriptExecutor js){
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofMillis(100));
 
         try { // 줄거리가 길 경우, 더보기 버튼 클릭한 후, 줄거리 크롤링
@@ -151,55 +192,82 @@ public class CrawlingService {
 
             }
             synopsis = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div.text span")));
-            System.out.println(synopsis.getText());
+            return synopsis.getText();
         } catch (Exception e) {
             WebElement synopsis = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div.text span")));
-            System.out.println(synopsis.getText());
+            return synopsis.getText();
         }
     }
 
     // 작품 태그 크롤링하는 메소드
-    public static void getTags(WebDriver driver){
+    public static List<String> getTags(WebDriver driver){
         List<WebElement> tags = driver.findElements(By.cssSelector("ul.metadata li.metadata__item"));
+        List<String> tagList = new ArrayList<>();
 
         for(WebElement tag : tags){
-            System.out.println(tag.getText());
+            tagList.add(tag.getText());
         }
+
+        return tagList;
     }
 
     // 작품에 출연한 출연진 크롤링(최대 5명)
-    public static void getActors(WebDriver driver){
+    public static HashMap<String, String> getActors(WebDriver driver){
         int count = 0;
+        HashMap<String, String> actorList = new HashMap<>();
 
         WebElement list = driver.findElement(By.id("actorList"));
-        try{
-            List<WebElement> actors = list.findElements(By.cssSelector("div.person.list__avatar div.name"));
+        List<WebElement> actors = list.findElements(By.cssSelector("div.person.list__avatar"));
 
+        if(!actors.isEmpty()){
             for(WebElement actor : actors){
                 count++;
-                System.out.println(actor.getText());
+                String name = actor.findElement(By.cssSelector("div.name")).getText();
+                if(name.contains(".")) name = name.replace(".", " ");
+                try{
+                    WebElement characterElement = actor.findElement(By.cssSelector("div.character"));
+                    String character = characterElement.getText();
+                    if(character.contains(".")) character = character.replace(".", " ");
+
+                    actorList.put(name, character);
+
+                } catch (Exception e){
+                    actorList.put(name, "");
+                }
                 if(count == 5) break;
             }
-        } catch (Exception e){
-
         }
+
+        return actorList;
     }
 
     // 작품에 참여한 제작진 크롤링(최대 5명)
-    public static void getStaffs(WebDriver driver){
+    public static HashMap<String, String> getStaffs(WebDriver driver){
         int count = 0;
+        HashMap<String, String> staffList = new HashMap<>();
 
         WebElement list = driver.findElement(By.id("staffList"));
-        try{
-            List<WebElement> staffs = list.findElements(By.cssSelector("div.person.list__avatar div.name"));
+        List<WebElement> staffs = list.findElements(By.cssSelector("div.person.list__avatar"));
 
+        if(!staffs.isEmpty()){
             for(WebElement staff : staffs){
                 count++;
-                System.out.println(staff.getText());
+                String name = staff.findElement(By.cssSelector("div.name")).getText();
+                if(name.contains(".")) name = name.replace(".", " ");
+                try{
+                    WebElement characterElement = staff.findElement(By.cssSelector("div.character"));
+                    String character = characterElement.getText();
+                    if(character.contains(".")) character = character.replace(".", " ");
+
+                    staffList.put(name, character);
+
+                } catch (Exception e){
+                    staffList.put(name, "");
+                }
                 if(count == 5) break;
             }
-        } catch (Exception e){
-
         }
+
+        return staffList;
     }
 }
