@@ -22,9 +22,10 @@ public class RankingInfo {
     private List<OTT> rankingList = new ArrayList<>();
 
     @Builder
-    public RankingInfo(String ott, String category){
+    public RankingInfo(String ott, String category, List<OTT> rankingList){
         this.ott = ott;
         this.category = category;
+        this.rankingList = rankingList;
     }
 
     public void addRankingList(OTT ott){
