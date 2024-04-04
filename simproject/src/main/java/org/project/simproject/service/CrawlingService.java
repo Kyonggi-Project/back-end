@@ -66,13 +66,13 @@ public class CrawlingService {
         webDriver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
 
         // 크롤링 시작
-        crawlingStart(webDriver, jse, ottRepository);
+        crawlingStart(webDriver, jse);
 
         webDriver.close();
     }
 
     // 크롤링을 시작하는 메소드
-    public static void crawlingStart(WebDriver driver, JavascriptExecutor js, OTTRepository ottRepository) throws InterruptedException {
+    public void crawlingStart(WebDriver driver, JavascriptExecutor js) throws InterruptedException {
 
         while (true){
             long currentScrollHeight = (long) js.executeScript("return document.body.scrollHeight;");
@@ -164,7 +164,7 @@ public class CrawlingService {
     }
 
     // 작품 기본정보 크롤링하는 메소드
-    public static HashMap<String, String> getTitleAndYear(WebDriver driver){
+    public HashMap<String, String> getTitleAndYear(WebDriver driver){
         WebElement title = driver.findElement(By.className("title-kr"));
         WebElement year = driver.findElements(By.className("metadata-item")).get(1);
         String poster = driver.findElement(By.className("movie-poster")).getAttribute("data-src");
@@ -180,7 +180,7 @@ public class CrawlingService {
     }
 
     // 줄거리 크롤링하는 메소드
-    public static String getSynopsis(WebDriver driver, JavascriptExecutor js){
+    public String getSynopsis(WebDriver driver, JavascriptExecutor js){
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofMillis(100));
 
         try { // 줄거리가 길 경우, 더보기 버튼 클릭한 후, 줄거리 크롤링
@@ -200,7 +200,7 @@ public class CrawlingService {
     }
 
     // 작품 태그 크롤링하는 메소드
-    public static List<String> getTags(WebDriver driver){
+    public List<String> getTags(WebDriver driver){
         List<WebElement> tags = driver.findElements(By.cssSelector("ul.metadata li.metadata__item"));
         List<String> tagList = new ArrayList<>();
 
@@ -212,7 +212,7 @@ public class CrawlingService {
     }
 
     // 작품에 출연한 출연진 크롤링(최대 5명)
-    public static HashMap<String, String> getActors(WebDriver driver){
+    public HashMap<String, String> getActors(WebDriver driver){
         int count = 0;
         HashMap<String, String> actorList = new HashMap<>();
 
@@ -242,7 +242,7 @@ public class CrawlingService {
     }
 
     // 작품에 참여한 제작진 크롤링(최대 5명)
-    public static HashMap<String, String> getStaffs(WebDriver driver){
+    public HashMap<String, String> getStaffs(WebDriver driver){
         int count = 0;
         HashMap<String, String> staffList = new HashMap<>();
 
