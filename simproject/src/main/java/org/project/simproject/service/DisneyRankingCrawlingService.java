@@ -63,7 +63,7 @@ public class DisneyRankingCrawlingService {
 
         Thread.sleep(1000);
 
-        if(rankingInfoRepository.existsRankingInfoByOtt(ott)){
+        if(!rankingInfoRepository.existsRankingInfoByOtt(ott)){
             createRanking(webDriver, ott);
         }
         else{
@@ -95,6 +95,7 @@ public class DisneyRankingCrawlingService {
                 .build();
 
         rankingInfoRepository.save(rankingInfo);
+        log.info("rankinginfo 추가 완료");
     }
 
     public void updateRanking(WebDriver driver, String ott){
@@ -112,5 +113,9 @@ public class DisneyRankingCrawlingService {
                 if(count == 10) break;
             }
         }
+
+        rankingInfoRepository.save(rankingInfo);
+
+        log.info("rankinginfo 업데이트 완료");
     }
 }

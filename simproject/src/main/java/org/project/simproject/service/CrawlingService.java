@@ -114,6 +114,7 @@ public class CrawlingService {
                         ott = ottRepository.findOTTByTitle(title.getText());
                         if (!ott.getOttList().contains("Disney Plus")) {
                             ott.addOTTList("Disney Plus");
+                            ottRepository.save(ott);
                         }
                         continue;
                     }
