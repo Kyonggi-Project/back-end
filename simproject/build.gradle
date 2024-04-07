@@ -46,6 +46,10 @@ dependencies {
 
     implementation 'org.seleniumhq.selenium:selenium-java:4.19.0'                    // selenium 관련 기능 제공(가장 최신)
 
+    implementation 'com.google.cloud:google-cloud-language:2.21.0'                  // google 언어 분석 API 기능 제공
+    implementation 'com.google.auth:google-auth-library-oauth2-http:1.18.0'         // google 언어 분석 API 기능 제공
+    implementation 'com.fasterxml.jackson.core:jackson-databind'                    // json 파일 직렬/역직렬화 기능 제공
+
 }
 
 test {

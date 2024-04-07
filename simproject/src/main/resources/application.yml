@@ -28,6 +28,9 @@ spring:
   data:
     mongodb:
       uri: ${MONGO_DATABASE_URI}
+  google:
+    cloud:
+      project-id: springboot-developer-410908
   profiles :
     active : local
     group :
