@@ -61,7 +61,7 @@ public class DisneyRankingCrawlingService {
         jse = (JavascriptExecutor) webDriver;
         jse.executeScript("arguments[0].click();", rankingItem);
 
-        Thread.sleep(1000);
+        webDriver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
 
         if(!rankingInfoRepository.existsRankingInfoByOtt(ott)){
             createRanking(webDriver, ott);
