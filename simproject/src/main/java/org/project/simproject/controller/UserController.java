@@ -4,16 +4,21 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.project.simproject.domain.User;
+import org.project.simproject.domain.WatchList;
 import org.project.simproject.dto.request.AddUserRequest;
 import org.project.simproject.dto.request.ModifyRequest;
 import org.project.simproject.dto.response.UserResponse;
 import org.project.simproject.service.FollowService;
+import org.project.simproject.service.TokenService;
 import org.project.simproject.service.UserService;
+import org.project.simproject.service.WatchListService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,6 +28,8 @@ public class UserController {
 
     private final UserService userService;
     private final FollowService followService;
+    private final TokenService tokenService;
+    private final WatchListService watchListService;
 
     //유저 추가
     @Operation(summary = "유저 추가", description = "유저 서비스에서 유저를 추가")
@@ -36,13 +43,19 @@ public class UserController {
             return ResponseEntity.internalServerError().body(null);
         }
     }
-    //특정 유저 정보 보기
-    @Operation(summary = "특정 유저 정보", description = "유저 서비스에서 특정 유저의 정보를 이메일로 조회")
-    @GetMapping("/profile/email/{nickname}")
-    public ResponseEntity<UserResponse> getProfileByEmail(@PathVariable String nickname)
-    {
-        User showUser = userService.findByNickname(nickname);
-        return new ResponseEntity<>(new UserResponse(showUser), HttpStatus.OK);
+
+    //로그인 유저 마이페이지 보기
+    @Operation(summary = "로그인 유저 정보", description = "유저 서비스에서 로그인 유저의 정보를 조회")
+    @GetMapping("/profile/myPage")
+    public ResponseEntity<Map<String, Object>> getProfileByEmail(@CookieValue(value = "refresh_token", defaultValue = "cookie") String cookie) {
+        User user = tokenService.findByUserId(cookie);
+        WatchList watchList = watchListService.findByEmail(user.getEmail());
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("user", user);
+        data.put("watchList", watchList);
+
+        return ResponseEntity.status(HttpStatus.OK).body(data);
     }
 
     @Operation(summary = "특정 닉네임의 유저 보기", description = "유저 서비스에서 특정 유저의 정보를 닉네임으로 조회")

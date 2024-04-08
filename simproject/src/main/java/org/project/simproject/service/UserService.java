@@ -3,9 +3,11 @@ package org.project.simproject.service;
 
 import lombok.RequiredArgsConstructor;
 import org.project.simproject.domain.User;
+import org.project.simproject.domain.WatchList;
 import org.project.simproject.dto.request.AddUserRequest;
 import org.project.simproject.dto.request.ModifyRequest;
 import org.project.simproject.repository.entityRepo.UserRepository;
+import org.project.simproject.repository.mongoRepo.WatchListRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,10 +16,16 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final WatchListRepository watchListRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Transactional
     public User save(AddUserRequest addUserRequest) {
+        watchListRepository.save(
+                WatchList.builder()
+                        .email(addUserRequest.getEmail())
+                        .build()
+        );
         return userRepository.save(
                 User.builder()
                         .email(addUserRequest.getEmail())

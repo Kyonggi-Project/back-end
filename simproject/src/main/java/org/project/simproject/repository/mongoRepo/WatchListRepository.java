@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface WatchListRepository extends MongoRepository<WatchList, String> {
-
+    WatchList findWatchListByEmail(String email);
 }
