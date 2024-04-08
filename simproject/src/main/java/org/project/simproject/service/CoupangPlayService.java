@@ -62,69 +62,39 @@ public class CoupangPlayService {
 
         scroll();
 
+        Actions actions = new Actions(WEB_DRIVER);
+
 //        String Top20Series = "이번 주 인기작 TOP 20";
 //        String Top20Movies = "이번 주 인기 영화 TOP 20";
 
         List<WebElement> mostWatchedElements = WEB_DRIVER.findElements(By.xpath("//*/text()[contains(., 'Top 20')]/ancestor::div"));
 
-        for (WebElement mostWatchedElement : mostWatchedElements) {
+        for (int i = 0; i < mostWatchedElements.size(); i++) {
+            WebElement mostWatchedElement = mostWatchedElements.get(i);
             String category = mostWatchedElement.findElement(By.cssSelector("h1.top-titles")).getText();
             log.info(category);
+            JS_EXECUTOR.executeScript("arguments[0].scrollIntoView({behavior: 'auto', block: 'center', inline: 'center'});", mostWatchedElement); // mostWatchedElement를 화면 가운데로 이동
 
-            List<WebElement> movieElements = mostWatchedElement.findElements(By.cssSelector("div[data-cy='carouselThumbnail']"));
-            log.info("Get Movie List Success" + movieElements.size());
+            List<String> titleList = new ArrayList<>();
+            String div = "/div";
+            for (int j = 1; j <= 20; j++) {
+                WebElement movieElement = WEB_DRIVER.findElement(By.xpath("." + div.repeat(4 - i) + "[" + j + "]"));
+                log.info("[" + category + "] Visit Success: " + j);
+                Thread.sleep(1000);
+                actions.moveToElement(movieElement).perform();
+                String title = WEB_DRIVER.findElement(By.cssSelector("#previewModalWrapper")).getText().split("\\r?\\n")[0];
 
-//            List<Movie> mostWatchedMovies = new ArrayList<>();
-            List<String> mostWatchedMovies = new ArrayList<>();
-
-            Thread.sleep(1000);
-
-            int count = 1;  // Top20 크롤링을 위한 20개 카운팅
-            int i = 0;
-            while (count <= 20) {
-                WebElement movieElement = movieElements.get(i++);
-                try {
-                    Actions actions = new Actions(WEB_DRIVER);
-                    actions.moveToElement(movieElement).perform();
-/*                    String title = WEB_DRIVER.findElement(By.cssSelector("div.PreviewModalHeader_previewModalTextHeader__Z90IE")).getText();
-                    if (mostWatchedMovies.contains(title)) {
-                        continue;
-                    }
-                    mostWatchedMovies.add(title);
-                    log.info(title);*/
-                } catch (Exception e) {
-                    mostWatchedElement.findElement(By.cssSelector("div#right")).click();
-                    log.info("Success Click Right Button");
-                }
-            }
-
-/*
-            while (count <= 20) {
-                // 다음 요소가 존재하지 않을 시, 리스트를 다음으로 넘김
-                if (mostWatchedElement.findElements(By.cssSelector("div.slider-item.slider-item-" + i)).isEmpty()) {
-                    mostWatchedElement.findElement(By.cssSelector("span.handle.handleNext.active")).click();
-                    i = 0;
+                if (title.isEmpty() || titleList.contains(title)) {
+                    log.info("Retry: " + title);
+                    j--;
                     continue;
                 }
 
-                WebElement element = mostWatchedElement.findElement(By.cssSelector("div.slider-item.slider-item-" + i++));
-                String title = element.findElement(By.cssSelector("p.fallback-text")).getText();
-//                Movie movie = movieRepository.findByTitle(title);
-                String movie = title;
-
-                // 중복 추가 방지
-                if (title.isEmpty() || mostWatchedMovies.contains(movie)) {
-                    continue;
-                }
-
-                mostWatchedMovies.add(movie);
-
-                log.info(count + ": " + title);
-
-                count++;
+                titleList.add(title);
+                log.info(title);
+                Thread.sleep(1000);
+                actions.moveToElement(WEB_DRIVER.findElement(By.xpath("//*[@id=\"__next\"]/div[1]/a/img"))).perform();
             }
-*/
-
 //            RankingInfo rankingInfo = new RankingInfo();
 //            rankingInfo.setOtt("Netflix");
 //            rankingInfo.setCategory(category);
@@ -144,6 +114,7 @@ public class CoupangPlayService {
 
         chromeOptions.addArguments("--remote-allow-origins=*");     // 웹 브라우저 Origin 허용
         chromeOptions.addArguments("--disable-popup-blocking");     // 팝업창 안띄우게 설정
+        chromeOptions.addArguments("--disable-blink-features=AutomationControlled");
 //        chromeOptions.addArguments("headless");                     // 브라우저 안띄우게 설정
 //        chromeOptions.addArguments("--disable-gpu");                // gpu 비활성화(headless 적용하기 위해 필요)
 
