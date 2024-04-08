@@ -52,7 +52,7 @@ public class UserController {
         WatchList watchList = watchListService.findByEmail(user.getEmail());
 
         Map<String, Object> data = new HashMap<>();
-        data.put("user", user);
+        data.put("user", new UserResponse(user));
         data.put("watchList", watchList);
 
         return ResponseEntity.status(HttpStatus.OK).body(data);
@@ -60,9 +60,15 @@ public class UserController {
 
     @Operation(summary = "특정 닉네임의 유저 보기", description = "유저 서비스에서 특정 유저의 정보를 닉네임으로 조회")
     @GetMapping("/profile/nickname/{nickname}")
-    public ResponseEntity<UserResponse> getProfileByNickname(@PathVariable String nickname){
+    public ResponseEntity<Map<String, Object>> getProfileByNickname(@PathVariable String nickname){
         User user = userService.findByNickname(nickname);
-        return ResponseEntity.status(HttpStatus.OK).body(new UserResponse(user));
+        WatchList watchList = watchListService.findByEmail(user.getEmail());
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("user", new UserResponse(user));
+        data.put("watchList", watchList);
+
+        return ResponseEntity.status(HttpStatus.OK).body(data);
     }
 
     @Operation(summary = "특정 유저의 팔로워 목록 보기", description = "FollowService에서 실행")
