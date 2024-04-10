@@ -10,7 +10,21 @@ import org.springframework.stereotype.Service;
 public class WatchListService {
     private final WatchListRepository watchListRepository;
 
+    public void save(String email){
+        watchListRepository.save(
+                WatchList.builder()
+                        .email(email)
+                        .build()
+        );
+    }
+
     public WatchList findByEmail(String email){
         return watchListRepository.findWatchListByEmail(email);
+    }
+
+    public void delete(String email){
+        WatchList watchList = watchListRepository.findWatchListByEmail(email);
+
+        watchListRepository.delete(watchList);
     }
 }

@@ -9,13 +9,13 @@ import org.project.simproject.dto.request.AddUserRequest;
 import org.project.simproject.dto.request.ModifyRequest;
 import org.project.simproject.dto.response.UserResponse;
 import org.project.simproject.service.FollowService;
-import org.project.simproject.service.TokenService;
 import org.project.simproject.service.UserService;
 import org.project.simproject.service.WatchListService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +28,6 @@ public class UserController {
 
     private final UserService userService;
     private final FollowService followService;
-    private final TokenService tokenService;
     private final WatchListService watchListService;
 
     //유저 추가
@@ -47,8 +46,8 @@ public class UserController {
     //로그인 유저 마이페이지 보기
     @Operation(summary = "로그인 유저 정보", description = "유저 서비스에서 로그인 유저의 정보를 조회")
     @GetMapping("/profile/myPage")
-    public ResponseEntity<Map<String, Object>> getProfileByEmail(@CookieValue(value = "refresh_token", defaultValue = "cookie") String cookie) {
-        User user = tokenService.findByUserId(cookie);
+    public ResponseEntity<Map<String, Object>> getProfileByEmail(Principal principal) {
+        User user = userService.findByEmail(principal.getName());
         WatchList watchList = watchListService.findByEmail(user.getEmail());
 
         Map<String, Object> data = new HashMap<>();
@@ -88,17 +87,17 @@ public class UserController {
     //현재 유저 수정
     @Operation(summary = "유저 정보 수정", description = "유저 서비스에서 현재 유저의 정보를 수정")
     @PutMapping("/update")
-    public ResponseEntity<User> modifyUser(@RequestParam String email, @RequestBody ModifyRequest modifyRequest) {
-        User modifyuser = userService.modify(email,modifyRequest);
+    public ResponseEntity<User> modifyUser(Principal principal, @RequestBody ModifyRequest modifyRequest) {
+        User modifyuser = userService.modify(principal.getName(), modifyRequest);
         return new ResponseEntity<>(modifyuser,HttpStatus.OK);
     }
 
     //유저 삭제
     @Operation(summary = "유저 삭제", description = "유저 서비스에서 해당 유저를 삭제")
     @DeleteMapping("/delete")
-    public ResponseEntity<String> deleteUser(@RequestParam Long id) {
+    public ResponseEntity<String> deleteUser(Principal principal) {
         try {
-            userService.delete(id);
+            userService.delete(principal.getName());
             return ResponseEntity.ok("The user was deleted.");
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("You can't delete a user.");
