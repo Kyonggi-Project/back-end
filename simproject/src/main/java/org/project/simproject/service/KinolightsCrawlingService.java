@@ -3,6 +3,7 @@ package org.project.simproject.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.*;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -14,10 +15,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -60,12 +58,13 @@ public class KinolightsCrawlingService {
 
             for (String hrefLink : hrefList) {
                 WEB_DRIVER.get(hrefLink);
-                try {
+                crawlingInfo(count++, ott);
+/*                try {
                     crawlingInfo(count++, ott);
                 } catch (Exception e) {
-                    log.error("Error: Crawling " + ott + " - " +  count);
+                    log.error("Error: Crawling " + ott + " - " + count);
                     log.error("ErrorMessage: " + e.getMessage());
-                }
+                }*/
             }
         }
 
@@ -148,18 +147,9 @@ public class KinolightsCrawlingService {
         String posterImgUrl = WEB_DRIVER.findElement(By.cssSelector("div.poster img.movie-poster")).getAttribute("src");
         String backgroundImgUrl = WEB_DRIVER.findElement(By.cssSelector("div.movie-image-area img")).getAttribute("src");
 
-        WebElement metadataElement = WEB_DRIVER.findElement(By.cssSelector("p.metadata"));
-        int year = Integer.parseInt(metadataElement.findElement(By.cssSelector("span.metadata-item:last-child")).getText());
+        WebElement metadataYearElement = WEB_DRIVER.findElement(By.cssSelector("p.metadata"));
+        int year = Integer.parseInt(metadataYearElement.findElement(By.cssSelector("span.metadata-item:last-child")).getText());
 //        log.info(count + ": [" + title + "] (" + year + ")");
-
-        // 작품 특징
-        List<WebElement> tagElementList = WEB_DRIVER.findElements(By.cssSelector("ul.metadata li.metadata__item"));
-        List<String> tagList = new ArrayList<>();
-        for (WebElement tagElement : tagElementList) {
-            String seriesGenre = tagElement.getText();
-            tagList.add(seriesGenre);
-//            log.info(seriesGenre);
-        }
 
         // 줄거리
         String synopsis = "";
@@ -174,11 +164,30 @@ public class KinolightsCrawlingService {
 //            log.info(synopsis);
         }
 
+        // 메타데이터
+        Map<String, String> metadataMap = new HashMap<>();
+        List<String> genreList = new ArrayList<>();
+        WebElement metadata = WEB_DRIVER.findElement(By.cssSelector("ul.metadata"));
+        List<WebElement> metadataElements = metadata.findElements(By.cssSelector("li.metadata__item"));
+        for (WebElement metadataElement : metadataElements) {
+            if (!metadataElement.isDisplayed()) {
+                continue; // 화면에 표시되지 않으면 건너뜁니다.
+            }
+            String itemTitle = metadataElement.findElement(By.cssSelector("span.item__title")).getText();
+            String itemBody = metadataElement.findElement(By.cssSelector("span.item__body")).getText();
+            if (itemTitle.equals("장르")) {
+                String[] genres  = itemBody.split(",\\s*");
+                genreList.addAll(Arrays.asList(genres));
+                continue;
+            }
+            metadataMap.put(itemTitle, itemBody);
+        }
+
         // 배우 정보 저장
         Map<String, String> actorCharacterMap = new HashMap<>();
-        if (!WEB_DRIVER.findElements(By.id("actorList")).isEmpty()) {
+        WebElement actorList = WEB_DRIVER.findElement(By.cssSelector("div.person__actor"));
+        if (!actorList.findElements(By.cssSelector("div.person.list__avatar")).isEmpty()) {
 //            log.info("Start Crawling Actors");
-            WebElement actorList = WEB_DRIVER.findElement(By.id("actorList"));
             List<WebElement> castElements = actorList.findElements(By.cssSelector("div.person.list__avatar"));
 
             if (!castElements.isEmpty()) {
@@ -188,9 +197,7 @@ public class KinolightsCrawlingService {
                     String character = "";
 
                     try {
-                        // character 요소를 찾음
                         characterElement = castElement.findElement(By.cssSelector("div.character"));
-                        // character 요소의 텍스트를 가져옴
                         character = characterElement.getText();
                     } catch (NoSuchElementException e) {
                         // character 요소가 존재하지 않는 경우, character 값을 빈 문자열로 유지
@@ -206,25 +213,20 @@ public class KinolightsCrawlingService {
 
         // 제작진 정보 저장
         Map<String, String> staffMap = new HashMap<>();
-        if (!WEB_DRIVER.findElements(By.id("staffList")).isEmpty()) {
+        WebElement staffList = WEB_DRIVER.findElement(By.cssSelector("div.person__staff"));
+        if (!staffList.findElements(By.cssSelector("div.staff")).isEmpty()) {
 //            log.info("Start Crawling Staffs");
-            WebElement staffList = WEB_DRIVER.findElement(By.id("staffList"));
-            List<WebElement> staffElements = staffList.findElements(By.cssSelector("div.person.list__avatar"));
+            WebElement staffElement = staffList.findElement(By.cssSelector("div.staff"));
+            List<WebElement> staffNameElements = staffElement.findElements(By.cssSelector("div.names__name"));
 
-            for (WebElement staffElement : staffElements) {
-                String name = staffElement.findElement(By.cssSelector("div.name")).getText();
-                WebElement characterElement;
+            for (WebElement staffNameElement : staffNameElements) {
+                String name = staffNameElement.findElement(By.tagName("span")).getText();
                 String position = "";
-
                 try {
-                    // character 요소를 찾음
-                    characterElement = staffElement.findElement(By.cssSelector("div.character"));
-                    // character 요소의 텍스트를 가져옴
-                    position = characterElement.getText();
+                    position = staffElement.findElement(By.cssSelector("span.staff__title")).getText();
                 } catch (NoSuchElementException e) {
                     // character 요소가 존재하지 않는 경우, character 값을 빈 문자열로 유지
                 }
-
                 if (name.contains(".")) {
                     name = name.replace(".", "");
                 }
@@ -233,20 +235,35 @@ public class KinolightsCrawlingService {
         }
 
         // Movie 객체 생성 및 데이터 설정
-        Movie movie = new Movie();
+        Movie movie = Movie.builder()
+                .title(title)
+                .year(year)
+                .synopsis(synopsis)
+                .posterImg(posterImgUrl)
+                .backgroundImg(backgroundImgUrl)
+                .tagList(genreList)
+                .metadata(metadataMap)
+                .actorList(actorCharacterMap)
+                .staffList(staffMap)
+                .score(0)
+                .reviewCount(0)
+                .rating(0)
+                .build();
+
+/*        Movie movie = new Movie();
         movie.setTitle(title);
         movie.setYear(year);
         movie.setSynopsis(synopsis);
         movie.setPosterImg(posterImgUrl);
         movie.setBackgroundImg(backgroundImgUrl);
-        movie.setTagList(tagList);
+        movie.setTagList(genreList);
         movie.setActorList(actorCharacterMap);
         movie.setStaffList(staffMap);
         movie.addOtt(ott);
 
         movie.setScore(0);
         movie.setReviewCount(0);
-        movie.setRating(0);
+        movie.setRating(0);*/
 
         // MongoDB에 저장
         movieRepository.save(movie);
