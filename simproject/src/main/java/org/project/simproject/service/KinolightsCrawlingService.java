@@ -185,85 +185,78 @@ public class KinolightsCrawlingService {
 
         // 배우 정보 저장
         Map<String, String> actorCharacterMap = new HashMap<>();
-        WebElement actorList = WEB_DRIVER.findElement(By.cssSelector("div.person__actor"));
-        if (!actorList.findElements(By.cssSelector("div.person.list__avatar")).isEmpty()) {
+        try {
+            WebElement actorList = WEB_DRIVER.findElement(By.cssSelector("div.person__actor"));
+            if (!actorList.findElements(By.cssSelector("div.person.list__avatar")).isEmpty()) {
 //            log.info("Start Crawling Actors");
-            List<WebElement> castElements = actorList.findElements(By.cssSelector("div.person.list__avatar"));
+                List<WebElement> castElements = actorList.findElements(By.cssSelector("div.person.list__avatar"));
 
-            if (!castElements.isEmpty()) {
-                for (WebElement castElement : castElements) {
-                    String name = castElement.findElement(By.cssSelector("div.name")).getText();
-                    WebElement characterElement;
-                    String character = "";
+                if (!castElements.isEmpty()) {
+                    for (WebElement castElement : castElements) {
+                        String name = castElement.findElement(By.cssSelector("div.name")).getText();
+                        WebElement characterElement;
+                        String character = "";
 
+                        try {
+                            characterElement = castElement.findElement(By.cssSelector("div.character"));
+                            character = characterElement.getText();
+                        } catch (NoSuchElementException e) {
+                            // character 요소가 존재하지 않는 경우, character 값을 빈 문자열로 유지
+                        }
+                        if (name.contains(".")) {
+                            name = name.replace(".", "");
+                        }
+
+                        actorCharacterMap.put(name, character);
+                    }
+                }
+            }
+        } catch (Exception e) {}
+
+
+        // 제작진 정보 저장
+        Map<String, String> staffMap = new HashMap<>();
+        try {
+            WebElement staffList = WEB_DRIVER.findElement(By.cssSelector("div.person__staff"));
+            if (!staffList.findElements(By.cssSelector("div.staff")).isEmpty()) {
+//            log.info("Start Crawling Staffs");
+                WebElement staffElement = staffList.findElement(By.cssSelector("div.staff"));
+                List<WebElement> staffNameElements = staffElement.findElements(By.cssSelector("div.names__name"));
+
+                for (WebElement staffNameElement : staffNameElements) {
+                    String name = staffNameElement.findElement(By.tagName("span")).getText();
+                    String position = "";
                     try {
-                        characterElement = castElement.findElement(By.cssSelector("div.character"));
-                        character = characterElement.getText();
+                        position = staffElement.findElement(By.cssSelector("span.staff__title")).getText();
                     } catch (NoSuchElementException e) {
                         // character 요소가 존재하지 않는 경우, character 값을 빈 문자열로 유지
                     }
                     if (name.contains(".")) {
                         name = name.replace(".", "");
                     }
-
-                    actorCharacterMap.put(name, character);
+                    staffMap.put(name, position);
                 }
             }
-        }
+        } catch (Exception e) {}
 
-        // 제작진 정보 저장
-        Map<String, String> staffMap = new HashMap<>();
-        WebElement staffList = WEB_DRIVER.findElement(By.cssSelector("div.person__staff"));
-        if (!staffList.findElements(By.cssSelector("div.staff")).isEmpty()) {
-//            log.info("Start Crawling Staffs");
-            WebElement staffElement = staffList.findElement(By.cssSelector("div.staff"));
-            List<WebElement> staffNameElements = staffElement.findElements(By.cssSelector("div.names__name"));
-
-            for (WebElement staffNameElement : staffNameElements) {
-                String name = staffNameElement.findElement(By.tagName("span")).getText();
-                String position = "";
-                try {
-                    position = staffElement.findElement(By.cssSelector("span.staff__title")).getText();
-                } catch (NoSuchElementException e) {
-                    // character 요소가 존재하지 않는 경우, character 값을 빈 문자열로 유지
-                }
-                if (name.contains(".")) {
-                    name = name.replace(".", "");
-                }
-                staffMap.put(name, position);
-            }
-        }
 
         // Movie 객체 생성 및 데이터 설정
-        Movie movie = Movie.builder()
-                .title(title)
-                .year(year)
-                .synopsis(synopsis)
-                .posterImg(posterImgUrl)
-                .backgroundImg(backgroundImgUrl)
-                .tagList(genreList)
-                .metadata(metadataMap)
-                .actorList(actorCharacterMap)
-                .staffList(staffMap)
-                .score(0)
-                .reviewCount(0)
-                .rating(0)
-                .build();
 
-/*        Movie movie = new Movie();
+        Movie movie = new Movie();
         movie.setTitle(title);
         movie.setYear(year);
         movie.setSynopsis(synopsis);
         movie.setPosterImg(posterImgUrl);
         movie.setBackgroundImg(backgroundImgUrl);
         movie.setTagList(genreList);
+        movie.setMetadata(metadataMap);
         movie.setActorList(actorCharacterMap);
         movie.setStaffList(staffMap);
         movie.addOtt(ott);
 
         movie.setScore(0);
         movie.setReviewCount(0);
-        movie.setRating(0);*/
+        movie.setRating(0);
 
         // MongoDB에 저장
         movieRepository.save(movie);
