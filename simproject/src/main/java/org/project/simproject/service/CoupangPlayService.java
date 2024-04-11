@@ -78,19 +78,21 @@ public class CoupangPlayService {
             List<String> titleList = new ArrayList<>();
             String div = "/div";
             for (int j = 1; j <= 20; j++) {
-                WebElement movieElement = WEB_DRIVER.findElement(By.xpath("." + div.repeat(4 - i) + "[" + j + "]"));
+                WebElement movieElement = mostWatchedElement.findElement(By.xpath("." + div.repeat(4 - i) + "[" + j + "]"));
+//                WebElement movieElement = mostWatchedElement.findElement(By.xpath("./div/div/div[" + j + "]"));
                 log.info("[" + category + "] Visit Success: " + j);
                 Thread.sleep(1000);
                 actions.moveToElement(movieElement).perform();
+                Thread.sleep(1000);
                 String title = WEB_DRIVER.findElement(By.cssSelector("#previewModalWrapper")).getText().split("\\r?\\n")[0];
 
-                if (title.isEmpty() || titleList.contains(title)) {
+/*                if (title.isEmpty() || titleList.contains(title)) {
                     log.info("Retry: " + title);
                     j--;
                     continue;
                 }
 
-                titleList.add(title);
+                titleList.add(title);*/
                 log.info(title);
                 Thread.sleep(1000);
                 actions.moveToElement(WEB_DRIVER.findElement(By.xpath("//*[@id=\"__next\"]/div[1]/a/img"))).perform();

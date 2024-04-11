@@ -1,7 +1,6 @@
 package org.project.simproject.domain;
 
 import jakarta.persistence.Id;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -14,7 +13,6 @@ import java.util.Map;
 @Document(collection = "movies")
 @Getter
 @Setter
-@Builder
 public class Movie {
     @Id
     private String id;
