@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.project.simproject.dto.request.ModifyOTTReviewRequest;
 
 import java.time.LocalDateTime;
 
@@ -42,6 +43,12 @@ public class OTTReview {
 
     public void deleteLike(){
         this.likesCount--;
+    }
+
+    public void modify(ModifyOTTReviewRequest request){
+        this.content = request.getContent();
+        this.score = request.getScore();
+        this.updatedAt = LocalDateTime.now();
     }
 
     @Builder

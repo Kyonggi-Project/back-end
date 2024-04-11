@@ -6,6 +6,7 @@ import org.project.simproject.domain.OTT;
 import org.project.simproject.domain.OTTReview;
 import org.project.simproject.domain.User;
 import org.project.simproject.dto.request.AddOTTReviewRequest;
+import org.project.simproject.dto.request.ModifyOTTReviewRequest;
 import org.project.simproject.dto.response.OTTReviewResponse;
 import org.project.simproject.repository.entityRepo.OTTReviewRepository;
 import org.springframework.stereotype.Service;
@@ -17,7 +18,7 @@ import java.util.List;
 public class OTTReviewService {
     private final OTTReviewRepository ottReviewRepository;
 
-    // 추후 OTT 컨텐츠 평점 계산 기능 추가 필요
+    // 추후 OTT 컨텐츠 평점을 재계산하는 코드 추가 예정
     @Transactional
     public OTTReview save(User user, OTT ott, AddOTTReviewRequest request){
         return ottReviewRepository.save(request.toEntity(user, ott.getId()));
@@ -42,8 +43,17 @@ public class OTTReviewService {
                 .toList();
     }
 
-    // 작성한 리뷰 수정 메서드 추가(내용, 평점 등 바꿀 수 있는 컬럼 확인 필요)
+    // 추후 평점을 변경했을 시, 컨텐츠 평점을 재계산하는 코드 추가 예정
+    @Transactional
+    public OTTReview modify(Long id, User user, ModifyOTTReviewRequest request){
+        OTTReview ottReview = ottReviewRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Not Found Review"));
 
+        authorizeArticleAuthor(ottReview, user);
+        ottReview.modify(request);
+
+        return ottReview;
+    }
 
     @Transactional
     public void delete(Long id, User user){
