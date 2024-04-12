@@ -41,11 +41,15 @@ public class OAuth2UserCustomService extends DefaultOAuth2UserService {
                         .email(email)
                         .nickname(nickname)
                         .build());
-        watchListRepository.save(
-                WatchList.builder()
-                        .email(email)
-                        .build()
-        );
+
+        if(!watchListRepository.existsWatchListByEmail(email)){
+            watchListRepository.save(
+                    WatchList.builder()
+                            .email(email)
+                            .build()
+            );
+        }
+
         return userRepository.save(user);
     }
 }
