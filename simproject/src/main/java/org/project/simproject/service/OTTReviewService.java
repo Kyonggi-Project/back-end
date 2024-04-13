@@ -18,9 +18,11 @@ import java.util.List;
 public class OTTReviewService {
     private final OTTReviewRepository ottReviewRepository;
 
-    // 추후 OTT 컨텐츠 평점을 재계산하는 코드 추가 예정
+    private final OTTService ottService;
+
     @Transactional
     public OTTReview save(User user, OTT ott, AddOTTReviewRequest request){
+        ottService.addScore(ott, request.getScore());
         return ottReviewRepository.save(request.toEntity(user, ott.getId()));
     }
 
@@ -43,14 +45,20 @@ public class OTTReviewService {
                 .toList();
     }
 
-    // 추후 평점을 변경했을 시, 컨텐츠 평점을 재계산하는 코드 추가 예정
     @Transactional
     public OTTReview modify(Long id, User user, ModifyOTTReviewRequest request){
         OTTReview ottReview = ottReviewRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found Review"));
 
         authorizeArticleAuthor(ottReview, user);
-        ottReview.modify(request);
+
+        if(ottReview.getScore() == request.getScore()) ottReview.modify(request);
+        else {
+            OTT ott = ottService.findById(ottReview.getOttId());
+
+            ottService.reCalculationScore(ott, ottReview.getScore(), request.getScore());
+            ottReview.modify(request);
+        }
 
         return ottReview;
     }

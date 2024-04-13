@@ -31,6 +31,15 @@ public class OTT {
     private int reviewCount;
     private int rating;
 
+    public void addOTTList(String ott){
+        this.ottList.add(ott);
+    }
+
+    public void modifyScore(int reviewCount, double score){
+        this.reviewCount = reviewCount;
+        this.score = score / reviewCount;
+    }
+
     @Builder
     public OTT(String title, int year, String posterImg, String backgroundImg, List<String> tagList, String synopsis,
                HashMap<String, String> actorList, HashMap<String, String> staffList, double score, int reviewCount,
@@ -46,10 +55,6 @@ public class OTT {
         this.score = score;
         this.reviewCount = reviewCount;
         this.rating = rating;
-    }
-
-    public void addOTTList(String ott){
-        this.ottList.add(ott);
     }
 
 }
