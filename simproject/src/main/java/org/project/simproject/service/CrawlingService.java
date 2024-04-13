@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -122,24 +123,29 @@ public class CrawlingService {
                         basicInfo = getTitleAndYear(driver);
                     }
                 }
+
                 String synopsis = "";
                 // 줄거리 크롤링
                 if (!driver.findElements(By.cssSelector("div.text span")).isEmpty()) {
                     synopsis = getSynopsis(driver, js);
                 }
-                List<String> tagList = new ArrayList<>();
+
+                HashMap<String, String> metadataMap = new HashMap<>();
+                List<String> genreList = new ArrayList<>();
                 // 작품 태그 크롤링
-                if(!driver.findElements(By.cssSelector("ul.metadata li.metadata__item")).isEmpty()){
-                    tagList = getTags(driver);
+                if(!driver.findElements(By.cssSelector("ul.metadata")).isEmpty()){
+                    getTags(driver, metadataMap, genreList);
                 }
+
                 HashMap<String, String> actorList = new HashMap<>();
                 // 출연진 크롤링
-                if(!driver.findElements(By.id("actorList")).isEmpty()){
+                if(!driver.findElements(By.cssSelector("div.person__actor")).isEmpty()){
                     actorList = getActors(driver);
                 }
+
                 HashMap<String, String> staffList = new HashMap<>();
                 // 제작진 크롤링
-                if(!driver.findElements(By.id("staffList")).isEmpty()){
+                if(!driver.findElements(By.cssSelector("div.person__staff")).isEmpty()){
                     staffList = getStaffs(driver);
                 }
 
@@ -149,16 +155,18 @@ public class CrawlingService {
                         .posterImg(basicInfo.get("posterImg"))
                         .backgroundImg(basicInfo.get("backgroundImg"))
                         .synopsis(synopsis)
-                        .tagList(tagList)
+                        .tagList(genreList)
+                        .metaData(metadataMap)
                         .actorList(actorList)
                         .staffList(staffList)
                         .score(0.0)
                         .reviewCount(0)
-                        .rating(0)
+                        .rating(0.0f)
                         .build();
                 ott.addOTTList("Disney Plus");
 
                 ottRepository.save(ott);
+                log.info("DB 저장 완료" + basicInfo.get("title"));
             }
             break;
         }
@@ -201,15 +209,22 @@ public class CrawlingService {
     }
 
     // 작품 태그 크롤링하는 메소드
-    public List<String> getTags(WebDriver driver){
-        List<WebElement> tags = driver.findElements(By.cssSelector("ul.metadata li.metadata__item"));
-        List<String> tagList = new ArrayList<>();
-
-        for(WebElement tag : tags){
-            tagList.add(tag.getText());
+    public void getTags(WebDriver driver, HashMap<String, String> metadataMap, List<String> genreList){
+        WebElement metadata = driver.findElement(By.cssSelector("ul.metadata"));
+        List<WebElement> metadataElements = metadata.findElements(By.cssSelector("li.metadata__item"));
+        for (WebElement metadataElement : metadataElements) {
+            if (!metadataElement.isDisplayed()) {
+                continue; // 화면에 표시되지 않으면 건너뜁니다.
+            }
+            String itemTitle = metadataElement.findElement(By.cssSelector("span.item__title")).getText();
+            String itemBody = metadataElement.findElement(By.cssSelector("span.item__body")).getText();
+            if (itemTitle.equals("장르")) {
+                String[] genres  = itemBody.split(",\\s*");
+                genreList.addAll(Arrays.asList(genres));
+                continue;
+            }
+            metadataMap.put(itemTitle, itemBody);
         }
-
-        return tagList;
     }
 
     // 작품에 출연한 출연진 크롤링(최대 5명)
@@ -217,18 +232,18 @@ public class CrawlingService {
         int count = 0;
         HashMap<String, String> actorList = new HashMap<>();
 
-        WebElement list = driver.findElement(By.id("actorList"));
+        WebElement list = driver.findElement(By.cssSelector("div.person__actor"));
         List<WebElement> actors = list.findElements(By.cssSelector("div.person.list__avatar"));
 
         if(!actors.isEmpty()){
             for(WebElement actor : actors){
                 count++;
                 String name = actor.findElement(By.cssSelector("div.name")).getText();
-                if(name.contains(".")) name = name.replace(".", " ");
+                if(name.contains(".")) name = name.replace(".", "");
                 try{
                     WebElement characterElement = actor.findElement(By.cssSelector("div.character"));
                     String character = characterElement.getText();
-                    if(character.contains(".")) character = character.replace(".", " ");
+                    if(character.contains(".")) character = character.replace(".", "");
 
                     actorList.put(name, character);
 
@@ -247,18 +262,19 @@ public class CrawlingService {
         int count = 0;
         HashMap<String, String> staffList = new HashMap<>();
 
-        WebElement list = driver.findElement(By.id("staffList"));
-        List<WebElement> staffs = list.findElements(By.cssSelector("div.person.list__avatar"));
+        WebElement list = driver.findElement(By.cssSelector("div.person__staff"));
+        WebElement director = list.findElements(By.cssSelector("div.staff")).get(0);
+        List<WebElement> staffs = director.findElements(By.cssSelector("a.names__name"));
 
         if(!staffs.isEmpty()){
             for(WebElement staff : staffs){
                 count++;
-                String name = staff.findElement(By.cssSelector("div.name")).getText();
-                if(name.contains(".")) name = name.replace(".", " ");
+                String name = staff.findElement(By.tagName("span")).getText();
+                if(name.contains(".")) name = name.replace(".", "");
                 try{
-                    WebElement characterElement = staff.findElement(By.cssSelector("div.character"));
+                    WebElement characterElement = director.findElement(By.cssSelector("span.staff__title"));
                     String character = characterElement.getText();
-                    if(character.contains(".")) character = character.replace(".", " ");
+                    if(character.contains(".")) character = character.replace(".", "");
 
                     staffList.put(name, character);
 

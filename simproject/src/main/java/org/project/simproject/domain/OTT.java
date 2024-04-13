@@ -23,13 +23,14 @@ public class OTT {
     private String posterImg;
     private String backgroundImg;
     private List<String> tagList = new ArrayList<>();
+    private HashMap<String, String> metaData = new HashMap<>();
     private String synopsis;
     private HashMap<String, String> actorList = new HashMap<>();
     private HashMap<String, String> staffList = new HashMap<>();
     private List<String> ottList = new ArrayList<>();
     private double score;
     private int reviewCount;
-    private int rating;
+    private float rating;
 
     public void addOTTList(String ott){
         this.ottList.add(ott);
@@ -41,14 +42,15 @@ public class OTT {
     }
 
     @Builder
-    public OTT(String title, int year, String posterImg, String backgroundImg, List<String> tagList, String synopsis,
-               HashMap<String, String> actorList, HashMap<String, String> staffList, double score, int reviewCount,
-               int rating){
+    public OTT(String title, int year, String posterImg, String backgroundImg, List<String> tagList, HashMap<String, String> metaData,
+               String synopsis, HashMap<String, String> actorList, HashMap<String, String> staffList, double score, int reviewCount,
+               float rating){
         this.title = title;
         this.year = year;
         this.posterImg = posterImg;
         this.backgroundImg = backgroundImg;
         this.tagList = tagList;
+        this.metaData = metaData;
         this.synopsis = synopsis;
         this.actorList = actorList;
         this.staffList = staffList;
