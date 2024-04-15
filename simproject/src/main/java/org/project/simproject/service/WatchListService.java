@@ -2,6 +2,7 @@ package org.project.simproject.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.project.simproject.domain.OTT;
 import org.project.simproject.domain.WatchList;
 import org.project.simproject.repository.mongoRepo.WatchListRepository;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,22 @@ public class WatchListService {
 
     public WatchList findByEmail(String email){
         return watchListRepository.findWatchListByEmail(email);
+    }
+
+    @Transactional
+    public void addBookmark(OTT ott, String email){
+        WatchList watchList = watchListRepository.findWatchListByEmail(email);
+
+        watchList.addBookmark(ott);
+        watchListRepository.save(watchList);
+    }
+
+    @Transactional
+    public void deleteBookmark(OTT ott, String email){
+        WatchList watchList = watchListRepository.findWatchListByEmail(email);
+
+        watchList.deleteBookmark(ott);
+        watchListRepository.save(watchList);
     }
 
     @Transactional

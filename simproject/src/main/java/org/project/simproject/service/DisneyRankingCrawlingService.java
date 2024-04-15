@@ -63,19 +63,14 @@ public class DisneyRankingCrawlingService {
 
         webDriver.get(crawlingUrl);
 
-        webDriver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
-
-        WebElement rankingItem = webDriver.findElement(By.xpath("//*[@id=\"disneyDailyRankingButton\"]"));
-        jse = (JavascriptExecutor) webDriver;
-        jse.executeScript("arguments[0].click();", rankingItem);
-
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("p.info__title")));
 
         if(!rankingInfoRepository.existsRankingInfoByOtt(ott)){
             createRanking(webDriver, ott);
         }
         else{
-            updateRanking(webDriver, ott);
+            RankingInfo rankingInfo = rankingInfoRepository.findRankingInfoByOtt(ott);
+            updateRanking(webDriver, rankingInfo);
         }
 
 
@@ -109,10 +104,9 @@ public class DisneyRankingCrawlingService {
     }
 
     @Transactional
-    public void updateRanking(WebDriver driver, String ott){
+    public void updateRanking(WebDriver driver, RankingInfo rankingInfo){
         int count = 0;
         List<WebElement> ranking = driver.findElements(By.cssSelector("p.info__title"));
-        RankingInfo rankingInfo = rankingInfoRepository.findRankingInfoByOtt(ott);
 
         rankingInfo.deleteRankingList();
 

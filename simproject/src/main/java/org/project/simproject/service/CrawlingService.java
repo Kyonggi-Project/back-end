@@ -139,13 +139,13 @@ public class CrawlingService {
 
                 HashMap<String, String> actorList = new HashMap<>();
                 // 출연진 크롤링
-                if(!driver.findElements(By.cssSelector("div.person__actor")).isEmpty()){
+                if(!driver.findElements(By.cssSelector("div.person.list__avatar")).isEmpty()){
                     actorList = getActors(driver);
                 }
 
                 HashMap<String, String> staffList = new HashMap<>();
                 // 제작진 크롤링
-                if(!driver.findElements(By.cssSelector("div.person__staff")).isEmpty()){
+                if(!driver.findElements(By.cssSelector("div.staff")).isEmpty()){
                     staffList = getStaffs(driver);
                 }
 
@@ -166,7 +166,7 @@ public class CrawlingService {
                 ott.addOTTList("Disney Plus");
 
                 ottRepository.save(ott);
-                log.info("DB 저장 완료" + basicInfo.get("title"));
+                log.info("DB 저장 완료 : " + basicInfo.get("title"));
             }
             break;
         }
