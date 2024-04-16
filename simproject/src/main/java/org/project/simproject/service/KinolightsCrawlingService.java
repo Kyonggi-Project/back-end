@@ -32,20 +32,29 @@ public class KinolightsCrawlingService {
     @Value("${driver.chrome.driver_path}")
     private String WEB_DRIVER_PATH;
 
-    private final String KINOLIGHTS_URL = "https://m.kinolights.com/discover/explore";
+    @Value("${kinolights.url.url}")
+    private String KINOLIGHTS_URL;
 
-    List<String> OTT_LIST = new ArrayList<>();
 
     private final MovieRepository movieRepository;
 
     public void crawlingMovies() throws InterruptedException {
         init();
 
-        int j = 2;
-        for (String ott : OTT_LIST) {
+        String[] ottArray = new String[7];
+
+        ottArray[2] = "Netflix";
+        ottArray[4] = "Coupang Play";
+        ottArray[5] = "Wavve";
+        ottArray[6] = "Disney Plus";
+
+        for (int i = 2; i < 7; i++) {
+            if (i == 3) continue;   // Tving 건너뛰기
+
             WEB_DRIVER.get(KINOLIGHTS_URL);
-            WebElement buttonElement = WEB_DRIVER.findElement(By.xpath("//*[@id=\"contents\"]/section/div[2]/div/div/div/div[" + j++ + "]/button"));
             Thread.sleep(5000);
+            String ott = ottArray[i];
+            WebElement buttonElement = WEB_DRIVER.findElement(By.xpath("//*[@id=\"contents\"]/section/div[2]/div/div/div/div[" + i++ + "]/button"));
             JS_EXECUTOR.executeScript("arguments[0].click();", buttonElement);
 
             log.info(ott + " Crawling Start");
@@ -85,12 +94,9 @@ public class KinolightsCrawlingService {
         WEB_DRIVER = new ChromeDriver(chromeOptions);
         JS_EXECUTOR = (JavascriptExecutor) WEB_DRIVER;
 
-        WAIT = new WebDriverWait(WEB_DRIVER, Duration.ofSeconds(3));
+        WAIT = new WebDriverWait(WEB_DRIVER, Duration.ofSeconds(10));
 
-        OTT_LIST.add("Netflix");
-        OTT_LIST.add("Tving");
-        OTT_LIST.add("Coupang Play");
-        OTT_LIST.add("Wavve");
+        log.info("Initialize Success");
     }
 
     public void scroll() {
@@ -211,7 +217,7 @@ public class KinolightsCrawlingService {
                     }
                 }
             }
-        } catch (Exception e) {}
+        } catch (NoSuchElementException e) {}   // 출연진 정보가 존재하지 않는 경우, 건너뛰기 
 
 
         // 제작진 정보 저장
@@ -237,11 +243,10 @@ public class KinolightsCrawlingService {
                     staffMap.put(name, position);
                 }
             }
-        } catch (Exception e) {}
+        } catch (NoSuchElementException e) {}   // 제작진 정보가 존재하지 않는 경우, 건너뛰기
 
 
         // Movie 객체 생성 및 데이터 설정
-
         Movie movie = new Movie();
         movie.setTitle(title);
         movie.setYear(year);
