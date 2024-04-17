@@ -28,7 +28,7 @@ public class OTTReviewLikeController {
             return ResponseEntity.ok("OTTReviewLike toggled successfully.");
         }catch (Exception e){
             return ResponseEntity.internalServerError()
-                    .body("CommentLike toggled failed. ErrorMessage : " + e.getMessage());
+                    .body("OTTReviewLike toggled failed. ErrorMessage : " + e.getMessage());
         }
     }
 }
