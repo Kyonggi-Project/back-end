@@ -6,6 +6,9 @@ import org.project.simproject.domain.OTT;
 import org.project.simproject.repository.mongoRepo.OTTRepository;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 @Service
 @RequiredArgsConstructor
 public class OTTService {
@@ -28,7 +31,22 @@ public class OTTService {
         double score = (lastScore * reviewCount) + userScore;
         reviewCount++;
 
-        ott.modifyScore(reviewCount, score);
+        ott.modifyScore(reviewCount,
+                new BigDecimal(score / reviewCount).setScale(2, RoundingMode.HALF_UP).doubleValue());
+
+        ottRepository.save(ott);
+    }
+
+    @Transactional
+    public void deleteScore(OTT ott, double userScore){
+        int reviewCount = ott.getReviewCount();
+        double lastScore = ott.getScore();
+
+        double score = (lastScore * reviewCount) - userScore;
+        reviewCount--;
+
+        ott.modifyScore(reviewCount,
+                new BigDecimal(score / reviewCount).setScale(2, RoundingMode.HALF_UP).doubleValue());
 
         ottRepository.save(ott);
     }
@@ -40,7 +58,8 @@ public class OTTService {
 
         double score = (lastScore * reviewCount) - lastUserScore + updateUserScore;
 
-        ott.modifyScore(reviewCount, score);
+        ott.modifyScore(reviewCount,
+                new BigDecimal(score / reviewCount).setScale(2, RoundingMode.HALF_UP).doubleValue());
 
         ottRepository.save(ott);
     }

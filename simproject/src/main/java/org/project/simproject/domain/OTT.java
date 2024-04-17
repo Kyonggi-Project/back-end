@@ -38,7 +38,7 @@ public class OTT {
 
     public void modifyScore(int reviewCount, double score){
         this.reviewCount = reviewCount;
-        this.score = score / reviewCount;
+        this.score = score;
     }
 
     @Builder

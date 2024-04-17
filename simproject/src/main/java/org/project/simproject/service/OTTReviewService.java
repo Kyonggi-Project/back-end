@@ -31,8 +31,8 @@ public class OTTReviewService {
                 .orElseThrow(() -> new IllegalArgumentException("Not Found Review"));
     }
 
-    public List<OTTReviewResponse> findByOTTId(OTT ott){
-        return ottReviewRepository.findOTTReviewByOttIdOrderByScore(ott.getId())
+    public List<OTTReviewResponse> findByOTTId(String ottId){
+        return ottReviewRepository.findOTTReviewByOttIdOrderByScoreDesc(ottId)
                 .stream()
                 .map(OTTReviewResponse::new)
                 .toList();
@@ -67,8 +67,10 @@ public class OTTReviewService {
     public void delete(Long id, User user){
         OTTReview ottReview = ottReviewRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found Review"));
+        OTT ott = ottService.findById(ottReview.getOttId());
 
         authorizeArticleAuthor(ottReview, user);
+        ottService.deleteScore(ott, ottReview.getScore());
         ottReviewRepository.delete(ottReview);
     }
 
