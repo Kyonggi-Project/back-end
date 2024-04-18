@@ -21,7 +21,7 @@ public class Movie {
     private String synopsis;
     private String posterImg;
     private String backgroundImg;
-    private List<String> tagList = new ArrayList<>();
+    private List<String> genreList = new ArrayList<>();
     private Map<String, String> metadata = new HashMap<>();
     private Map<String, String> actorList = new HashMap<>();
     private Map<String, String> staffList = new HashMap<>();
@@ -31,7 +31,8 @@ public class Movie {
     private int rating;
 
     public void addOtt(String ott) {
-        ottList.add(ott);
+        if (!ottList.contains(ott)) {
+            ottList.add(ott);
+        }
     }
-
 }
