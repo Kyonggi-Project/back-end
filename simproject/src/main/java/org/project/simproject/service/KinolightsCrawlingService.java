@@ -250,6 +250,7 @@ public class KinolightsCrawlingService {
             WebElement synopsisElement = WEB_DRIVER.findElement(By.cssSelector("div.synopsis__text-wrap"));
             if (!synopsisElement.findElements(By.tagName("button")).isEmpty()) {
                 WebElement buttonElement = synopsisElement.findElement(By.tagName("button"));
+                WAIT.until(ExpectedConditions.elementToBeClickable(buttonElement));
                 JS_EXECUTOR.executeScript("arguments[0].click();", buttonElement);
             }
             synopsis = synopsisElement.getText();
