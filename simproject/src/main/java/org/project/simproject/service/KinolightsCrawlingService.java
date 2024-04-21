@@ -73,6 +73,10 @@ public class KinolightsCrawlingService {
             for (String hrefLink : hrefList) {
                 WEB_DRIVER.get(hrefLink);
 
+                if (!WEB_DRIVER.findElements(By.cssSelector("div.modal-layer")).isEmpty()) {
+                    closeModal();
+                }
+
                 String title = null;
                 try {
                     title = getTitle();
@@ -127,6 +131,11 @@ public class KinolightsCrawlingService {
                 List<String> hrefList = collectHref(ottNewMovies);
                 for (String hrefLink : hrefList) {
                     WEB_DRIVER.get(hrefLink);
+
+                    if (!WEB_DRIVER.findElements(By.cssSelector("div.modal-layer")).isEmpty()) {
+                        closeModal();
+                    }
+
                     String title = getTitle();
                     if (newMovieTitleList.contains(title)) {
                         Movie updateMovie = movieRepository.findByTitle(title);
@@ -219,23 +228,18 @@ public class KinolightsCrawlingService {
         return hrefList;
     }
 
+    public void closeModal() {
+        WebElement modalElement = WEB_DRIVER.findElement(By.cssSelector("div.modal-layer"));
+        modalElement.findElement(By.cssSelector("div.container__footer > button")).click();
+        log.info("Closing Modal");
+    }
+
     public String getTitle() {
         WebElement titleElement = WAIT.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("div.movie-title-wrap h2.title-kr")));
         return titleElement.getText();
     }
 
     public Movie crawlingInfo(int count, String title, String ott) {
-/*        if (movieRepository.existsByTitle(title)) {
-            Movie updateMovie = movieRepository.findByTitle(title);
-            if (updateMovie.getOttList().contains(ott)) {
-                return;
-            } else {
-                updateMovie.addOtt(ott);
-                movieRepository.save(updateMovie);
-                return;
-            }
-        }*/
-
         String posterImgUrl = WEB_DRIVER.findElement(By.cssSelector("div.poster img.movie-poster")).getAttribute("src");
         String backgroundImgUrl = WEB_DRIVER.findElement(By.cssSelector("div.movie-image-area img")).getAttribute("src");
 
@@ -252,6 +256,7 @@ public class KinolightsCrawlingService {
                 WebElement buttonElement = synopsisElement.findElement(By.tagName("button"));
                 WAIT.until(ExpectedConditions.elementToBeClickable(buttonElement));
                 JS_EXECUTOR.executeScript("arguments[0].click();", buttonElement);
+                log.info("Clicked Synopsis Button");
             }
             synopsis = synopsisElement.getText();
 //            log.info(synopsis);
@@ -308,13 +313,14 @@ public class KinolightsCrawlingService {
         // 제작진 정보 저장
         Map<String, String> staffMap = new HashMap<>();
         if (!WEB_DRIVER.findElements(By.cssSelector("div.staff")).isEmpty()) {
-//            log.info("Start Crawling Staffs");
+            log.info("Start Crawling Staffs");
             WebElement staffList = WEB_DRIVER.findElement(By.cssSelector("div.person__staff"));
             WebElement staffElement = staffList.findElement(By.cssSelector("div.staff"));
-            List<WebElement> staffNameElements = staffElement.findElements(By.cssSelector("div.names__name"));
+            List<WebElement> staffNameElements = staffElement.findElements(By.cssSelector("a.names__name"));
 
             for (WebElement staffNameElement : staffNameElements) {
                 String name = staffNameElement.findElement(By.tagName("span")).getText();
+                log.info("Staff: " + name);
                 String position = "";
                 try {
                     position = staffElement.findElement(By.cssSelector("span.staff__title")).getText();
@@ -341,13 +347,6 @@ public class KinolightsCrawlingService {
         movie.setActorList(actorCharacterMap);
         movie.setStaffList(staffMap);
         movie.addOtt(ott);
-
-/*        movie.setScore(0);
-        movie.setReviewCount(0);
-        movie.setRating(0);
-
-        // MongoDB에 저장
-        movieRepository.save(movie);*/
 
         log.info("[" + ott + "] " + count + ": [" + title + "] (" + year + ")");
 
