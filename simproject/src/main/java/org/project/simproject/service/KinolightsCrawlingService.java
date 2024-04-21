@@ -176,8 +176,8 @@ public class KinolightsCrawlingService {
 
         chromeOptions.addArguments("--remote-allow-origins=*");     // 웹 브라우저 Origin 허용
         chromeOptions.addArguments("--disable-popup-blocking");     // 팝업창 안띄우게 설정
-//        chromeOptions.addArguments("headless");                     // 브라우저 안띄우게 설정
-//        chromeOptions.addArguments("--disable-gpu");                // gpu 비활성화(headless 적용하기 위해 필요)
+        chromeOptions.addArguments("headless");                     // 브라우저 안띄우게 설정
+        chromeOptions.addArguments("--disable-gpu");                // gpu 비활성화(headless 적용하기 위해 필요)
 
         WEB_DRIVER = new ChromeDriver(chromeOptions);
         JS_EXECUTOR = (JavascriptExecutor) WEB_DRIVER;
@@ -256,7 +256,7 @@ public class KinolightsCrawlingService {
                 WebElement buttonElement = synopsisElement.findElement(By.tagName("button"));
                 WAIT.until(ExpectedConditions.elementToBeClickable(buttonElement));
                 JS_EXECUTOR.executeScript("arguments[0].click();", buttonElement);
-                log.info("Clicked Synopsis Button");
+//                log.info("Clicked Synopsis Button");
             }
             synopsis = synopsisElement.getText();
 //            log.info(synopsis);
@@ -313,14 +313,14 @@ public class KinolightsCrawlingService {
         // 제작진 정보 저장
         Map<String, String> staffMap = new HashMap<>();
         if (!WEB_DRIVER.findElements(By.cssSelector("div.staff")).isEmpty()) {
-            log.info("Start Crawling Staffs");
+//            log.info("Start Crawling Staffs");
             WebElement staffList = WEB_DRIVER.findElement(By.cssSelector("div.person__staff"));
             WebElement staffElement = staffList.findElement(By.cssSelector("div.staff"));
             List<WebElement> staffNameElements = staffElement.findElements(By.cssSelector("a.names__name"));
 
             for (WebElement staffNameElement : staffNameElements) {
                 String name = staffNameElement.findElement(By.tagName("span")).getText();
-                log.info("Staff: " + name);
+//                log.info("Staff: " + name);
                 String position = "";
                 try {
                     position = staffElement.findElement(By.cssSelector("span.staff__title")).getText();
