@@ -28,3 +28,4 @@ application-oauth2.yml
 application-db.properties
 application-crawling.properties
 application-mongo.properties
+application-sentiment.properties
