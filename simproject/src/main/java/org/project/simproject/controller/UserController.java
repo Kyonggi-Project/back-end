@@ -4,16 +4,21 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.project.simproject.domain.User;
+import org.project.simproject.domain.WatchList;
 import org.project.simproject.dto.request.AddUserRequest;
 import org.project.simproject.dto.request.ModifyRequest;
 import org.project.simproject.dto.response.UserResponse;
 import org.project.simproject.service.FollowService;
 import org.project.simproject.service.UserService;
+import org.project.simproject.service.WatchListService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,6 +28,7 @@ public class UserController {
 
     private final UserService userService;
     private final FollowService followService;
+    private final WatchListService watchListService;
 
     //유저 추가
     @Operation(summary = "유저 추가", description = "유저 서비스에서 유저를 추가")
@@ -36,20 +42,32 @@ public class UserController {
             return ResponseEntity.internalServerError().body(null);
         }
     }
-    //특정 유저 정보 보기
-    @Operation(summary = "특정 유저 정보", description = "유저 서비스에서 특정 유저의 정보를 이메일로 조회")
-    @GetMapping("/profile/email/{nickname}")
-    public ResponseEntity<UserResponse> getProfileByEmail(@PathVariable String nickname)
-    {
-        User showUser = userService.findByNickname(nickname);
-        return new ResponseEntity<>(new UserResponse(showUser), HttpStatus.OK);
+
+    //로그인 유저 마이페이지 보기
+    @Operation(summary = "로그인 유저 정보", description = "유저 서비스에서 로그인 유저의 정보를 조회")
+    @GetMapping("/profile/myPage")
+    public ResponseEntity<Map<String, Object>> getProfileByEmail(Principal principal) {
+        User user = userService.findByEmail(principal.getName());
+        WatchList watchList = watchListService.findByEmail(user.getEmail());
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("user", new UserResponse(user));
+        data.put("watchList", watchList);
+
+        return ResponseEntity.status(HttpStatus.OK).body(data);
     }
 
     @Operation(summary = "특정 닉네임의 유저 보기", description = "유저 서비스에서 특정 유저의 정보를 닉네임으로 조회")
     @GetMapping("/profile/nickname/{nickname}")
-    public ResponseEntity<UserResponse> getProfileByNickname(@PathVariable String nickname){
+    public ResponseEntity<Map<String, Object>> getProfileByNickname(@PathVariable String nickname){
         User user = userService.findByNickname(nickname);
-        return ResponseEntity.status(HttpStatus.OK).body(new UserResponse(user));
+        WatchList watchList = watchListService.findByEmail(user.getEmail());
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("user", new UserResponse(user));
+        data.put("watchList", watchList);
+
+        return ResponseEntity.status(HttpStatus.OK).body(data);
     }
 
     @Operation(summary = "특정 유저의 팔로워 목록 보기", description = "FollowService에서 실행")
@@ -69,17 +87,17 @@ public class UserController {
     //현재 유저 수정
     @Operation(summary = "유저 정보 수정", description = "유저 서비스에서 현재 유저의 정보를 수정")
     @PutMapping("/update")
-    public ResponseEntity<User> modifyUser(@RequestParam String email, @RequestBody ModifyRequest modifyRequest) {
-        User modifyuser = userService.modify(email,modifyRequest);
+    public ResponseEntity<User> modifyUser(Principal principal, @RequestBody ModifyRequest modifyRequest) {
+        User modifyuser = userService.modify(principal.getName(), modifyRequest);
         return new ResponseEntity<>(modifyuser,HttpStatus.OK);
     }
 
     //유저 삭제
     @Operation(summary = "유저 삭제", description = "유저 서비스에서 해당 유저를 삭제")
     @DeleteMapping("/delete")
-    public ResponseEntity<String> deleteUser(@RequestParam Long id) {
+    public ResponseEntity<String> deleteUser(Principal principal) {
         try {
-            userService.delete(id);
+            userService.delete(principal.getName());
             return ResponseEntity.ok("The user was deleted.");
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("You can't delete a user.");

@@ -14,10 +14,13 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final WatchListService watchListService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Transactional
     public User save(AddUserRequest addUserRequest) {
+        watchListService.save(addUserRequest.getEmail());
+
         return userRepository.save(
                 User.builder()
                         .email(addUserRequest.getEmail())
@@ -51,8 +54,10 @@ public class UserService {
     }
 
     @Transactional
-    public void delete(Long id) {
-        User user = userRepository.findById(id)
+    public void delete(String email) {
+        watchListService.delete(email);
+
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
         userRepository.delete(user);
     }

@@ -16,11 +16,8 @@ public class TokenService {
     private final RefreshTokenRepository refreshTokenRepository;
 
     public String createNewAccessToken(String refreshToken){
-        if(!jwtTokenProvider.validateToken(refreshToken)) throw new IllegalArgumentException("Token Not Found");
-        else{
-            User user = refreshTokenRepository.findByRefreshToken(refreshToken).getUserId();
-            return jwtTokenProvider.createToken(user, Duration.ofMinutes(15));
-        }
+        User user = findByUserId(refreshToken);
+        return jwtTokenProvider.createToken(user, Duration.ofMinutes(15));
     }
 
     public User findByUserId(String refreshToken){
