@@ -10,7 +10,9 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.project.simproject.repository.mongoRepo.MovieRepository;
+import org.project.simproject.domain.OTT;
+import org.project.simproject.domain.RankingInfo;
+import org.project.simproject.repository.mongoRepo.OTTRepository;
 import org.project.simproject.repository.mongoRepo.RankingInfoRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
@@ -44,7 +46,9 @@ public class NetflixService {
     @Value("${netflix.pwd}")
     private String NETFLIX_PWD;
 
-    private final MovieRepository movieRepository;
+//    private final MovieRepository movieRepository;
+
+    private final OTTRepository ottRepository;
 
     private final RankingInfoRepository rankingInfoRepository;
 
@@ -68,8 +72,7 @@ public class NetflixService {
             String category = mostWatchedElement.findElement(By.cssSelector(".row-header-title")).getText();
             log.info(category);
 
-//            List<Movie> mostWatchedMovies = new ArrayList<>();
-            List<String> mostWatchedMovies = new ArrayList<>();
+            List<OTT> mostWatchedMovies = new ArrayList<>();
 
             // Top10 제목 크롤링
             int count = 1;  // Top10 크롤링을 위한 10개 카운팅
@@ -82,19 +85,9 @@ public class NetflixService {
                     continue;
                 }
 
-//                // 다음 요소가 존재하지 않을 시, 리스트를 다음으로 넘김
-//                if (mostWatchedElement.findElements(By.cssSelector("div.slider-item.slider-item-" + i)).isEmpty()) {
-//                    WebElement nextButton = mostWatchedElement.findElement(By.cssSelector("span.handle.handleNext.active"));
-//                    nextButton.click();
-//                    Thread.sleep(1000); // 클릭 후에 다음 요소가 로드될 때까지 충분히 대기
-//                    i = 0;
-//                    continue;
-//                }
-
                 WebElement element = mostWatchedElement.findElement(By.cssSelector("div.slider-item.slider-item-" + i++));
                 String title = element.findElement(By.cssSelector("p.fallback-text")).getText();
-//                Movie movie = movieRepository.findByTitle(title);
-                String movie = title;
+                OTT movie = ottRepository.findOTTByTitle(title);
 
                 // 중복 추가 방지
                 if (title.isEmpty() || mostWatchedMovies.contains(movie)) {
@@ -108,13 +101,15 @@ public class NetflixService {
                 count++;
             }
 
-//            RankingInfo rankingInfo = new RankingInfo();
-//            rankingInfo.setOtt("Netflix");
-//            rankingInfo.setCategory(category);
-//            rankingInfo.setRankingList(mostWatchedMovies);
+            // RankingInfo 객체 생성
+            RankingInfo rankingInfo = RankingInfo.builder()
+                    .ott("Netflix")
+                    .category(category)
+                    .rankingList(mostWatchedMovies)
+                    .build();
 //                rankingInfo.setDate(crawlingDate);
 
-//            rankingInfoRepository.save(rankingInfo);
+            rankingInfoRepository.save(rankingInfo);
         }
         WEB_DRIVER.quit();
     }
@@ -146,7 +141,7 @@ public class NetflixService {
 
         Thread.sleep(3000);
 
-        WebElement profileButton = WEB_DRIVER.findElement(By.xpath("//*[@id=\"appMountPoint\"]/div/div/div[1]/div[1]/div[2]/div/div/ul/li[3]/div/a"));
+        WebElement profileButton = WEB_DRIVER.findElement(By.xpath("//*[@id=\"appMountPoint\"]/div/div/div[1]/div[1]/div[2]/div/div/ul/li[1]/div/a"));  // li[n]을 통해 n번째 프로필 버튼 클릭
 
         WAIT.until(ExpectedConditions.elementToBeClickable(profileButton)).click();
         log.info("Click Profile Success");

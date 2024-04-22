@@ -9,8 +9,8 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.project.simproject.domain.Movie;
-import org.project.simproject.repository.mongoRepo.MovieRepository;
+import org.project.simproject.domain.OTT;
+import org.project.simproject.repository.mongoRepo.OTTRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
@@ -38,7 +38,7 @@ public class KinolightsCrawlingService {
 
     String[] OTT_ARRAY = new String[7];
 
-    private final MovieRepository movieRepository;
+    private final OTTRepository ottRepository;
 
     @Transactional
     public void crawlingMovies() throws InterruptedException {
@@ -81,22 +81,31 @@ public class KinolightsCrawlingService {
                 try {
                     title = getTitle();
                 } catch (Exception e) {
-                    log.error("Error in getTitle(): "+e.getMessage());
+                    log.error("Error in getTitle(): " + e.getMessage());
                     continue;
                 }
 
-                if (movieRepository.existsByTitle(title)) {
+                if (ottRepository.existsOTTByTitle(title)) {
                     log.info("[" + ott + "] " + count++ + ": [" + title + "] (in DB)");
-                    Movie updateMovie = movieRepository.findByTitle(title);
+                    OTT updateMovie = ottRepository.findOTTByTitle(title);
+                    if (updateMovie.getOttList().contains(ott)) {
+                        continue;
+                    } else {
+                        updateMovie.addOTTList(ott);
+                        ottRepository.save(updateMovie);
+                        continue;
+                    }
+                }
+/*                    OTT updateMovie = movieRepository.findByTitle(title);
                     updateMovie.addOtt(ott);
                     movieRepository.save(updateMovie);
-                    continue;
-                }
-                Movie movie = crawlingInfo(count++, title, ott);
+                    continue;*/
+
+                OTT movie = crawlingInfo(count++, title, ott);
                 movie.setScore(0);
                 movie.setReviewCount(0);
                 movie.setRating(0);
-                movieRepository.save(movie);
+                ottRepository.save(movie);
             }
         }
 
@@ -137,29 +146,47 @@ public class KinolightsCrawlingService {
                     }
 
                     String title = getTitle();
+                    
+                    // 이미 오늘의 신작 크롤링 시, 크롤링된 작품일 경우 OTT만 추가
                     if (newMovieTitleList.contains(title)) {
-                        Movie updateMovie = movieRepository.findByTitle(title);
-                        updateMovie.addOtt(ott);
-                        movieRepository.save(updateMovie);
+                        OTT updateMovie = ottRepository.findOTTByTitle(title);
+                        if (ottRepository.existsOTTByTitle(title)) {
+                            OTT updatedMovie = ottRepository.findOTTByTitle(title);
+                            if (updateMovie.getOttList().contains(ott)) {
+                                continue;
+                            } else {
+                                updatedMovie.addOTTList(ott);
+                                ottRepository.save(updateMovie);
+                                continue;
+                            }
+                        }
+                        ottRepository.save(updateMovie);
                         continue;
                     }
                     
-                    Movie movie = crawlingInfo(count++, title, ott);
+/*                    if (newMovieTitleList.contains(title)) {
+                        OTT updateMovie = ottRepository.findOTTByTitle(title);
+                        updateMovie.addOTTList(ott);
+                        ottRepository.save(updateMovie);
+                        continue;
+                    }*/
+
+                    OTT movie = crawlingInfo(count++, title, ott);
                     
                     /*DB에 해당 Movie가 저장되어 있다면,
                     DB에 저장되어 있는 Score, ReviewCount, Rating을 이용해 새로 저장*/
-                    if (movieRepository.existsByTitle(title)) {
-                        Movie updateMovie = movieRepository.findByTitle(title);
+                    if (ottRepository.existsOTTByTitle(title)) {
+                        OTT updateMovie = ottRepository.findOTTByTitle(title);
                         movie.setScore(updateMovie.getScore());
                         movie.setReviewCount(updateMovie.getReviewCount());
                         movie.setRating(updateMovie.getRating());
-                        movieRepository.delete(updateMovie);    // 새로 저장하게 되므로, 이전 기록은 삭제
+                        ottRepository.delete(updateMovie);    // 새로 저장하게 되므로, 이전 기록은 삭제
                     } else {    // 만약 DB에 존재하지 않는다면, 모두 0으로 초기화
                         movie.setScore(0);
                         movie.setReviewCount(0);
                         movie.setRating(0);
                     }
-                    movieRepository.save(movie);
+                    ottRepository.save(movie);
                     newMovieTitleList.add(title);
                 }
             }
@@ -239,7 +266,7 @@ public class KinolightsCrawlingService {
         return titleElement.getText();
     }
 
-    public Movie crawlingInfo(int count, String title, String ott) {
+    public OTT crawlingInfo(int count, String title, String ott) {
         String posterImgUrl = WEB_DRIVER.findElement(By.cssSelector("div.poster img.movie-poster")).getAttribute("src");
         String backgroundImgUrl = WEB_DRIVER.findElement(By.cssSelector("div.movie-image-area img")).getAttribute("src");
 
@@ -263,7 +290,7 @@ public class KinolightsCrawlingService {
         }
 
         // 메타데이터
-        Map<String, String> metadataMap = new HashMap<>();
+        HashMap<String, String> metadataMap = new HashMap<>();
         List<String> genreList = new ArrayList<>();
         WebElement metadata = WEB_DRIVER.findElement(By.cssSelector("ul.metadata"));
         List<WebElement> metadataElements = metadata.findElements(By.cssSelector("li.metadata__item"));
@@ -282,7 +309,7 @@ public class KinolightsCrawlingService {
         }
 
         // 배우 정보 저장
-        Map<String, String> actorCharacterMap = new HashMap<>();
+        HashMap<String, String> actorCharacterMap = new HashMap<>();
         if (!WEB_DRIVER.findElements(By.cssSelector("div.person.list__avatar")).isEmpty()) {
 //            log.info("Start Crawling Actors");
             WebElement actorList = WEB_DRIVER.findElement(By.cssSelector("div.person__actor"));
@@ -311,7 +338,7 @@ public class KinolightsCrawlingService {
 
 
         // 제작진 정보 저장
-        Map<String, String> staffMap = new HashMap<>();
+        HashMap<String, String> staffMap = new HashMap<>();
         if (!WEB_DRIVER.findElements(By.cssSelector("div.staff")).isEmpty()) {
 //            log.info("Start Crawling Staffs");
             WebElement staffList = WEB_DRIVER.findElement(By.cssSelector("div.person__staff"));
@@ -336,7 +363,20 @@ public class KinolightsCrawlingService {
 
 
         // Movie 객체 생성 및 데이터 설정
-        Movie movie = new Movie();
+        OTT movie = OTT.builder()
+                .title(title)
+                .year(year)
+                .posterImg(posterImgUrl)
+                .backgroundImg(backgroundImgUrl)
+                .synopsis(synopsis)
+                .tagList(genreList)
+                .metaData(metadataMap)
+                .actorList(actorCharacterMap)
+                .staffList(staffMap)
+                .build();
+        movie.addOTTList(ott);
+
+/*        Movie movie = new Movie();
         movie.setTitle(title);
         movie.setYear(year);
         movie.setSynopsis(synopsis);
@@ -346,7 +386,7 @@ public class KinolightsCrawlingService {
         movie.setMetadata(metadataMap);
         movie.setActorList(actorCharacterMap);
         movie.setStaffList(staffMap);
-        movie.addOtt(ott);
+        movie.addOtt(ott);*/
 
         log.info("[" + ott + "] " + count + ": [" + title + "] (" + year + ")");
 
