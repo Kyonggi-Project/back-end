@@ -1,14 +1,19 @@
 package org.project.simproject.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.project.simproject.domain.Article;
 import org.project.simproject.domain.ArticleLike;
 import org.project.simproject.domain.User;
-import org.project.simproject.dto.ArticleResponse;
-import org.project.simproject.repository.ArticleLikeRepository;
+import org.project.simproject.dto.response.ArticleResponse;
+import org.project.simproject.repository.entityRepo.ArticleLikeRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
+import static org.project.simproject.util.ConvertPage.convertListToPage;
 
 @Service
 @RequiredArgsConstructor
@@ -19,14 +24,15 @@ public class ArticleLikeService {
     private final UserService userService;
     private final ArticleService articleService;
 
-    public void toggleArticleLike(Long articleId, Long userId) {
-        Article article = articleService.findToId(articleId);
-        User user = userService.findToId(userId);
+    @Transactional
+    public void toggle(Long articleId, Long userId) {
+        Article article = articleService.findById(articleId);
+        User user = userService.findById(userId);
 
         if (isLiked(article, user)) {
             ArticleLike deleteLike = articleLikeRepository.findArticleLikeByArticleAndUser(article, user);
 
-            article.likeDelete();
+            article.deleteLike();
             articleLikeRepository.delete(deleteLike);
         } else {
             ArticleLike newArticleLike = ArticleLike.builder()
@@ -34,17 +40,18 @@ public class ArticleLikeService {
                     .user(user)
                     .build();
 
-            article.likeAdd();
+            article.addLike();
             articleLikeRepository.save(newArticleLike);
         }
     }
 
-    public List<ArticleResponse> findLikeArticlesByUser(Long userId) {
-        return userService.findToId(userId).getArticleLikes()
+    public Page<ArticleResponse> findLikedArticlesByUser(Long userId, Pageable pageable) {
+        List<Article> list = userService.findById(userId).getArticleLikes()
                 .stream()
                 .map(ArticleLike::getArticle)
-                .map(ArticleResponse::new)
                 .toList();
+
+        return convertListToPage(list, pageable).map(ArticleResponse::new);
     }
 
     public boolean isLiked(Article article, User user) {

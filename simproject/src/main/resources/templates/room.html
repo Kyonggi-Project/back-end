@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base_layout}">
+
+<div layout:fragment="main" class="mt-5 p-4">
+
+    <div class="container">
+        <div id="chatting-room" class="border border-dark rounded-2 w-50" style="margin: 0 auto;">
+            <div class="p-2">
+                <div>
+                    <h1 th:text="${room.name}"></h1>
+                </div>
+                <div id="messages" class=" overflow-auto" style="height: 700px;">
+                </div>
+                <div class="input-group mt-1">
+                    <input type="text" id="msg" class="form-control" placeholder="메세지를 입력하세요.">
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary" type="button" id="btnSend">전송</button>
+                    </div>
+                </div>
+
+                <div class="mt-1">
+                    <a href="/chat/room/list" class="btn btn-outline-danger">Exit</a>
+                    <button class="btn btn-outline-secondary" type="button" id="btnLeave">퇴장하기</button>
+                </div>
+            </div>
+        </div>
+
+        <input type="text" id="roomId" th:value="${room.id}" />
+        <input type="text" id="loginId" th:value="${user.nickname}"/>
+
+
+    </div>
+</div>
+
+<th:block layout:fragment="myscripts">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <script src="/js/message.js"></script>
+</th:block>
+
+</html>

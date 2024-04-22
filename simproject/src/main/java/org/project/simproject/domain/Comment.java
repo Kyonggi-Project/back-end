@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-import org.project.simproject.dto.ModifyCommentRequest;
+import org.project.simproject.dto.request.ModifyCommentRequest;
 
 import java.time.LocalDateTime;
 
@@ -35,13 +35,12 @@ public class Comment {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @Builder
-    public Comment(Article articleId, User userId, String content){
-        this.articleId = articleId;
-        this.userId = userId;
-        this.content = content;
-        this.likesCount = 0;
-        this.updatedAt = LocalDateTime.now();
+    public void addLike(){
+        this.likesCount++;
+    }
+
+    public void deleteLike(){
+        this.likesCount--;
     }
 
     public void modify(ModifyCommentRequest request){
@@ -49,11 +48,12 @@ public class Comment {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public void likeAdd(){
-        this.likesCount++;
-    }
-
-    public void likeDelete(){
-        this.likesCount--;
+    @Builder
+    public Comment(Article articleId, User userId, String content){
+        this.articleId = articleId;
+        this.userId = userId;
+        this.content = content;
+        this.likesCount = 0;
+        this.updatedAt = LocalDateTime.now();
     }
 }

@@ -1,10 +1,11 @@
 package org.project.simproject.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.project.simproject.domain.Follow;
 import org.project.simproject.domain.User;
-import org.project.simproject.dto.UserResponse;
-import org.project.simproject.repository.FollowRepository;
+import org.project.simproject.dto.response.UserResponse;
+import org.project.simproject.repository.entityRepo.FollowRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,9 +16,10 @@ public class FollowService {
     private final FollowRepository followRepository;
     private final UserService userService;
 
+    @Transactional
     public void toggle(Long id, String followeeEmail){
-        User follower = userService.findToId(id);
-        User followee = userService.showUser(followeeEmail);
+        User follower = userService.findById(id);
+        User followee = userService.findByEmail(followeeEmail);
 
         if(isFollowed(follower, followee)){
             Follow follow = followRepository.findFollowByFollowerAndFollowee(follower, followee);
@@ -32,8 +34,8 @@ public class FollowService {
         }
     }
 
-    public List<UserResponse> findListOfFollower(String email){
-        User user = userService.showUser(email);
+    public List<UserResponse> findFollowers(String nickname){
+        User user = userService.findByNickname(nickname);
         return user.getFollowers()
                 .stream()
                 .map(Follow::getFollower)
@@ -41,8 +43,8 @@ public class FollowService {
                 .toList();
     }
 
-    public List<UserResponse> findListOfFollowee(String email){
-        User user = userService.showUser(email);
+    public List<UserResponse> findFollowees(String nickname){
+        User user = userService.findByNickname(nickname);
         return user.getFollowing()
                 .stream()
                 .map(Follow::getFollowee)

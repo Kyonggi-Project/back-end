@@ -17,12 +17,12 @@ public class CommentLikeController {
 
     @Operation(summary = "댓글 좋아요 토글", description = "좋아요 추가/삭제 여부는 Service 레이어에서 실행")
     @PostMapping("/toggle/{articleId}")
-    public ResponseEntity<String> toggleBookmark(
+    public ResponseEntity<String> toggleCommentLike(
             @RequestParam Long userId,
             @PathVariable Long articleId
     ) {
         try {
-            commentLikeService.toggleCommentLike(articleId, userId);
+            commentLikeService.toggle(articleId, userId);
             return ResponseEntity.ok("CommentLike toggled successfully.");
         } catch (Exception exception) {
             return ResponseEntity.internalServerError()

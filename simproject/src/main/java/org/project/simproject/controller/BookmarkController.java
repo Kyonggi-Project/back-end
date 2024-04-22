@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/bookmarks")
+@RequestMapping("/api/bookmark")
 @Tag(name = "북마크", description = "북마크 기능")
 public class BookmarkController {
 
@@ -22,7 +22,7 @@ public class BookmarkController {
             @PathVariable Long articleId
     ) {
         try {
-            bookmarkService.toggleBookmark(articleId, userId);
+            bookmarkService.toggle(articleId, userId);
             return ResponseEntity.ok("Bookmark toggled successfully.");
         } catch (Exception exception) {
             return ResponseEntity.internalServerError()

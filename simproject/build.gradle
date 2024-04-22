@@ -13,26 +13,42 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    runtimeOnly 'com.h2database:h2'
-    compileOnly 'org.projectlombok:lombok'
+    implementation 'org.springframework.boot:spring-boot-starter-web'               // Web 관련 기능 제공
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'          // Test 관련 기능 제공
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'          // JPA Data 관련 기능 제공
+//    runtimeOnly 'com.h2database:h2'                                                 // H2 Database - MySQL 연동 후 삭제
+    runtimeOnly "mysql:mysql-connector-java"                                        // MySQL connector 제공
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'      // mongoDB 관련 기능 제공
+    compileOnly 'org.projectlombok:lombok'                                          // 각종 Annotation 제공
     annotationProcessor 'org.projectlombok:lombok'
-    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-    //implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'         // 템플릿 작성 시, 타임리프 관련 기능 제공
+    implementation 'org.springframework.boot:spring-boot-starter-security'          // Spring Security
+
+    // Chatting 기능 의존성
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'         // WebSocket 기능 제공
+    implementation 'org.webjars:webjars-locator-core'                               // WebSocket
+    implementation 'org.webjars:stomp-websocket:2.3.4'                              // STOMP 프로토콜 제공
+    implementation 'org.webjars:sockjs-client:1.5.1'                                // SockJS 기능 제공
 
     implementation 'org.hibernate.validator:hibernate-validator:8.0.0.Final'        // Hibernate-Validator
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'        // OpenApi
 
-    //implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
-    //testImplementation 'org.springframework.security:spring-security-test'
+    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'          // 타임리프 관련 Security 제공
+    testImplementation 'org.springframework.security:spring-security-test'          // Security Test 제공
     testAnnotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.projectlombok:lombok'
 
-    implementation 'io.jsonwebtoken:jjwt:0.9.1'
-    implementation 'javax.xml.bind:jaxb-api:2.3.1'
-    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    implementation 'io.jsonwebtoken:jjwt:0.9.1'                                     // JWT
+    implementation 'javax.xml.bind:jaxb-api:2.3.1'                                  // XML 파일 처리
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'  // @ConfigurationProperties Annotation
+
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'     // oauth2.0 관련 기능 제공
+
+    implementation 'org.seleniumhq.selenium:selenium-java:4.19.0'                    // selenium 관련 기능 제공(가장 최신)
+
+    implementation 'com.google.cloud:google-cloud-language:2.21.0'                  // google 언어 분석 API 기능 제공
+    implementation 'com.google.auth:google-auth-library-oauth2-http:1.18.0'         // google 언어 분석 API 기능 제공
+    implementation 'com.fasterxml.jackson.core:jackson-databind'                    // json 파일 직렬/역직렬화 기능 제공
 
 }
 

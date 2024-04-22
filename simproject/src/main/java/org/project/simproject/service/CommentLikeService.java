@@ -1,10 +1,11 @@
 package org.project.simproject.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.project.simproject.domain.Comment;
 import org.project.simproject.domain.CommentLike;
 import org.project.simproject.domain.User;
-import org.project.simproject.repository.CommentLikeRepository;
+import org.project.simproject.repository.entityRepo.CommentLikeRepository;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,14 +17,15 @@ public class CommentLikeService {
     private final UserService userService;
     private final CommentService commentService;
 
-    public void toggleCommentLike(Long commentId, Long userId) {
-        Comment comment = commentService.findToId(commentId);
-        User user = userService.findToId(userId);
+    @Transactional
+    public void toggle(Long commentId, Long userId) {
+        Comment comment = commentService.findById(commentId);
+        User user = userService.findById(userId);
 
         if (isLiked(comment, user)) {
             CommentLike deleteLike = commentLikeRepository.findCommentLikeByCommentAndUser(comment, user);
 
-            comment.likeDelete();
+            comment.deleteLike();
             commentLikeRepository.delete(deleteLike);
         } else {
             CommentLike newCommentLike = CommentLike.builder()
@@ -31,7 +33,7 @@ public class CommentLikeService {
                     .user(user)
                     .build();
 
-            comment.likeAdd();
+            comment.addLike();
             commentLikeRepository.save(newCommentLike);
         }
     }

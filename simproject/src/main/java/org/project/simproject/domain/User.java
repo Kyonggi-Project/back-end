@@ -3,10 +3,10 @@ package org.project.simproject.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
-import org.project.simproject.dto.ModifyRequest;
-//import org.springframework.security.core.GrantedAuthority;
-//import org.springframework.security.core.authority.SimpleGrantedAuthority;
-//import org.springframework.security.core.userdetails.UserDetails;
+import org.project.simproject.dto.request.ModifyRequest;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,7 +18,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Table(name = "users")
-public class User /*implements UserDetails*/ {
+public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -49,20 +49,33 @@ public class User /*implements UserDetails*/ {
     @OneToMany(mappedBy = "user")
     private List<ArticleLike> articleLikes = new ArrayList<>();
 
-    /*@Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("user"));
-    }*/
-
-    @Builder
-    public User(String email, String password, String nickname){
-        this.email = email;
-        this.password = password;
-        this.nickname = nickname;
-        this.articlesCount = 0;
+    public void addArticle(){
+        this.articlesCount++;
     }
 
-    /*@Override
+    public void deleteArticle(){
+        this.articlesCount--;
+    }
+
+    public User update(String nickname){
+        this.nickname = nickname;
+        return this;
+    }
+
+    public void modify(ModifyRequest modifyRequest) {
+        if(modifyRequest.getPassword().equals("")) {
+            this.nickname = modifyRequest.getNickname();
+        }
+        else if(modifyRequest.getNickname().equals("")) {
+            this.password = modifyRequest.getPassword();
+        }
+    }
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority("user"));
+    }
+
+    @Override
     public String getPassword() {
         return password;
     }
@@ -74,38 +87,29 @@ public class User /*implements UserDetails*/ {
 
     @Override
     public boolean isAccountNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return false;
-    }*/
-
-    public void modify(ModifyRequest modifyRequest) {
-        if(modifyRequest.getPassword().equals("")) {
-            this.nickname = modifyRequest.getNickname();
-        }
-        else if(modifyRequest.getNickname().equals("")) {
-            this.password = modifyRequest.getPassword();
-        }
+        return true;
     }
 
-    public void articleAdd(){
-        this.articlesCount++;
-    }
-
-    public void articleDelete(){
-        this.articlesCount--;
+    @Builder
+    public User(String email, String password, String nickname){
+        this.email = email;
+        this.password = password;
+        this.nickname = nickname;
+        this.articlesCount = 0;
     }
 }
