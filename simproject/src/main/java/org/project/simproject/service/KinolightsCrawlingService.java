@@ -9,8 +9,8 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.project.simproject.domain.OTT;
-import org.project.simproject.repository.mongoRepo.OTTRepository;
+import org.project.simproject.domain.OTTContents;
+import org.project.simproject.repository.mongoRepo.OTTContentsRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
@@ -38,7 +38,7 @@ public class KinolightsCrawlingService {
 
     String[] OTT_ARRAY = new String[7];
 
-    private final OTTRepository ottRepository;
+    private final OTTContentsRepository ottRepository;
 
     @Transactional
     public void crawlingMovies() throws InterruptedException {
@@ -87,7 +87,7 @@ public class KinolightsCrawlingService {
 
                 if (ottRepository.existsOTTByTitle(title)) {
                     log.info("[" + ott + "] " + count++ + ": [" + title + "] (in DB)");
-                    OTT updateMovie = ottRepository.findOTTByTitle(title);
+                    OTTContents updateMovie = ottRepository.findOTTByTitle(title);
                     if (updateMovie.getOttList().contains(ott)) {
                         continue;
                     } else {
@@ -101,7 +101,7 @@ public class KinolightsCrawlingService {
                     movieRepository.save(updateMovie);
                     continue;*/
 
-                OTT movie = crawlingInfo(count++, title, ott);
+                OTTContents movie = crawlingInfo(count++, title, ott);
                 movie.setScore(0);
                 movie.setReviewCount(0);
                 movie.setRating(0);
@@ -149,9 +149,9 @@ public class KinolightsCrawlingService {
                     
                     // 이미 오늘의 신작 크롤링 시, 크롤링된 작품일 경우 OTT만 추가
                     if (newMovieTitleList.contains(title)) {
-                        OTT updateMovie = ottRepository.findOTTByTitle(title);
+                        OTTContents updateMovie = ottRepository.findOTTByTitle(title);
                         if (ottRepository.existsOTTByTitle(title)) {
-                            OTT updatedMovie = ottRepository.findOTTByTitle(title);
+                            OTTContents updatedMovie = ottRepository.findOTTByTitle(title);
                             if (updateMovie.getOttList().contains(ott)) {
                                 continue;
                             } else {
@@ -171,12 +171,12 @@ public class KinolightsCrawlingService {
                         continue;
                     }*/
 
-                    OTT movie = crawlingInfo(count++, title, ott);
+                    OTTContents movie = crawlingInfo(count++, title, ott);
                     
                     /*DB에 해당 Movie가 저장되어 있다면,
                     DB에 저장되어 있는 Score, ReviewCount, Rating을 이용해 새로 저장*/
                     if (ottRepository.existsOTTByTitle(title)) {
-                        OTT updateMovie = ottRepository.findOTTByTitle(title);
+                        OTTContents updateMovie = ottRepository.findOTTByTitle(title);
                         movie.setScore(updateMovie.getScore());
                         movie.setReviewCount(updateMovie.getReviewCount());
                         movie.setRating(updateMovie.getRating());
@@ -266,7 +266,7 @@ public class KinolightsCrawlingService {
         return titleElement.getText();
     }
 
-    public OTT crawlingInfo(int count, String title, String ott) {
+    public OTTContents crawlingInfo(int count, String title, String ott) {
         String posterImgUrl = WEB_DRIVER.findElement(By.cssSelector("div.poster img.movie-poster")).getAttribute("src");
         String backgroundImgUrl = WEB_DRIVER.findElement(By.cssSelector("div.movie-image-area img")).getAttribute("src");
 
@@ -363,13 +363,13 @@ public class KinolightsCrawlingService {
 
 
         // Movie 객체 생성 및 데이터 설정
-        OTT movie = OTT.builder()
+        OTTContents movie = OTTContents.builder()
                 .title(title)
                 .year(year)
                 .posterImg(posterImgUrl)
                 .backgroundImg(backgroundImgUrl)
                 .synopsis(synopsis)
-                .tagList(genreList)
+                .genreList(genreList)
                 .metaData(metadataMap)
                 .actorList(actorCharacterMap)
                 .staffList(staffMap)

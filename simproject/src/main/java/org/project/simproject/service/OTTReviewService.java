@@ -2,7 +2,7 @@ package org.project.simproject.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.project.simproject.domain.OTT;
+import org.project.simproject.domain.OTTContents;
 import org.project.simproject.domain.OTTReview;
 import org.project.simproject.domain.User;
 import org.project.simproject.dto.request.AddOTTReviewRequest;
@@ -21,7 +21,7 @@ public class OTTReviewService {
     private final OTTService ottService;
 
     @Transactional
-    public OTTReview save(User user, OTT ott, AddOTTReviewRequest request){
+    public OTTReview save(User user, OTTContents ott, AddOTTReviewRequest request){
         ottService.addScore(ott, request.getScore());
         return ottReviewRepository.save(request.toEntity(user, ott.getId()));
     }
@@ -54,7 +54,7 @@ public class OTTReviewService {
 
         if(ottReview.getScore() == request.getScore()) ottReview.modify(request);
         else {
-            OTT ott = ottService.findById(ottReview.getOttId());
+            OTTContents ott = ottService.findById(ottReview.getOttId());
 
             ottService.reCalculationScore(ott, ottReview.getScore(), request.getScore());
             ottReview.modify(request);
@@ -67,7 +67,7 @@ public class OTTReviewService {
     public void delete(Long id, User user){
         OTTReview ottReview = ottReviewRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found Review"));
-        OTT ott = ottService.findById(ottReview.getOttId());
+        OTTContents ott = ottService.findById(ottReview.getOttId());
 
         authorizeArticleAuthor(ottReview, user);
         ottService.deleteScore(ott, ottReview.getScore());

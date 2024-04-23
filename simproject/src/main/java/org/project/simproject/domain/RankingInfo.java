@@ -19,20 +19,20 @@ public class RankingInfo {
     private String id;
     private String ott;
     private String category;
-    private List<OTT> rankingList = new ArrayList<>();
+    private List<OTTContents> rankingList = new ArrayList<>();
 
-    @Builder
-    public RankingInfo(String ott, String category, List<OTT> rankingList){
-        this.ott = ott;
-        this.category = category;
-        this.rankingList = rankingList;
-    }
-
-    public void addRankingList(OTT ott){
+    public void addRankingList(OTTContents ott){
         this.rankingList.add(ott);
     }
 
     public void deleteRankingList(){
         this.rankingList.clear();
+    }
+
+    @Builder
+    public RankingInfo(String ott, String category, List<OTTContents> rankingList){
+        this.ott = ott;
+        this.category = category;
+        this.rankingList = rankingList;
     }
 }

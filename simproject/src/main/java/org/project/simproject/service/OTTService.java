@@ -2,8 +2,8 @@ package org.project.simproject.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.project.simproject.domain.OTT;
-import org.project.simproject.repository.mongoRepo.OTTRepository;
+import org.project.simproject.domain.OTTContents;
+import org.project.simproject.repository.mongoRepo.OTTContentsRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -12,19 +12,19 @@ import java.math.RoundingMode;
 @Service
 @RequiredArgsConstructor
 public class OTTService {
-    private final OTTRepository ottRepository;
+    private final OTTContentsRepository ottRepository;
 
-    public OTT findById(String id){
+    public OTTContents findById(String id){
         return ottRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found Contents"));
     }
 
-    public OTT findByTitle(String title){
+    public OTTContents findByTitle(String title){
         return ottRepository.findOTTByTitle(title);
     }
 
     @Transactional
-    public void addScore(OTT ott, double userScore){
+    public void addScore(OTTContents ott, double userScore){
         int reviewCount = ott.getReviewCount();
         double lastScore = ott.getScore();
 
@@ -38,7 +38,7 @@ public class OTTService {
     }
 
     @Transactional
-    public void deleteScore(OTT ott, double userScore){
+    public void deleteScore(OTTContents ott, double userScore){
         int reviewCount = ott.getReviewCount();
         double lastScore = ott.getScore();
 
@@ -52,7 +52,7 @@ public class OTTService {
     }
 
     @Transactional
-    public void reCalculationScore(OTT ott, double lastUserScore, double updateUserScore){
+    public void reCalculationScore(OTTContents ott, double lastUserScore, double updateUserScore){
         int reviewCount = ott.getReviewCount();
         double lastScore = ott.getScore();
 

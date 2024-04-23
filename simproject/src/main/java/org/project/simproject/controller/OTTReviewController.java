@@ -3,7 +3,7 @@ package org.project.simproject.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.project.simproject.domain.OTT;
+import org.project.simproject.domain.OTTContents;
 import org.project.simproject.domain.OTTReview;
 import org.project.simproject.domain.User;
 import org.project.simproject.dto.request.AddOTTReviewRequest;
@@ -33,7 +33,7 @@ public class OTTReviewController {
     @PostMapping("/add/{ottId}")
     public ResponseEntity<OTTReview> save(@PathVariable String ottId, @RequestParam Long userId,
                                           @RequestBody AddOTTReviewRequest request){
-        OTT ott = ottService.findById(ottId);
+        OTTContents ott = ottService.findById(ottId);
         User user = userService.findById(userId);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(ottReviewService.save(user, ott, request));

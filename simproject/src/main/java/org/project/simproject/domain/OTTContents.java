@@ -13,14 +13,14 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class OTT {
+public class OTTContents {
     @Id
     private String id;
     private String title;
     private int year;
     private String posterImg;
     private String backgroundImg;
-    private List<String> tagList = new ArrayList<>();
+    private List<String> genreList = new ArrayList<>();
     private HashMap<String, String> metaData = new HashMap<>();
     private String synopsis;
     private HashMap<String, String> actorList = new HashMap<>();
@@ -42,14 +42,14 @@ public class OTT {
     }
 
     @Builder
-    public OTT(String title, int year, String posterImg, String backgroundImg, List<String> tagList, HashMap<String, String> metaData,
-               String synopsis, HashMap<String, String> actorList, HashMap<String, String> staffList, double score, int reviewCount,
-               float rating){
+    public OTTContents(String title, int year, String posterImg, String backgroundImg, List<String> genreList, HashMap<String, String> metaData,
+                       String synopsis, HashMap<String, String> actorList, HashMap<String, String> staffList, double score, int reviewCount,
+                       float rating){
         this.title = title;
         this.year = year;
         this.posterImg = posterImg;
         this.backgroundImg = backgroundImg;
-        this.tagList = tagList;
+        this.genreList = genreList;
         this.metaData = metaData;
         this.synopsis = synopsis;
         this.actorList = actorList;

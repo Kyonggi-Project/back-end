@@ -18,18 +18,18 @@ public class WatchList {
     @Id
     private String id;
     private String email;
-    private List<OTT> bookmark = new ArrayList<>();
+    private List<OTTContents> bookmark = new ArrayList<>();
+
+    public void addBookmark(OTTContents ott){
+        this.bookmark.add(ott);
+    }
+
+    public void deleteBookmark(OTTContents ott){
+        this.bookmark.remove(ott);
+    }
 
     @Builder
     public WatchList(String email){
         this.email = email;
-    }
-
-    public void addBookmark(OTT ott){
-        this.bookmark.add(ott);
-    }
-
-    public void deleteBookmark(OTT ott){
-        this.bookmark.remove(ott);
     }
 }

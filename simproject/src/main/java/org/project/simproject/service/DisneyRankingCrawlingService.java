@@ -11,9 +11,9 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.project.simproject.domain.OTT;
+import org.project.simproject.domain.OTTContents;
 import org.project.simproject.domain.RankingInfo;
-import org.project.simproject.repository.mongoRepo.OTTRepository;
+import org.project.simproject.repository.mongoRepo.OTTContentsRepository;
 import org.project.simproject.repository.mongoRepo.RankingInfoRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -37,7 +36,7 @@ public class DisneyRankingCrawlingService {
 
     private final RankingInfoRepository rankingInfoRepository;
 
-    private final OTTRepository ottRepository;
+    private final OTTContentsRepository ottRepository;
 
     @Value("${driver.chrome.driver_path}")
     private String WEB_DRIVER_PATH;
@@ -80,13 +79,13 @@ public class DisneyRankingCrawlingService {
     @Transactional
     public void createRanking(WebDriver driver, String ott){
         int count = 0;
-        List<OTT> rankingList = new ArrayList<>();
+        List<OTTContents> rankingList = new ArrayList<>();
 
         List<WebElement> ranking = driver.findElements(By.cssSelector("p.info__title"));
 
         for(WebElement rank : ranking){
             if(ottRepository.existsOTTByTitle(rank.getText())){
-                OTT movie = ottRepository.findOTTByTitle(rank.getText());
+                OTTContents movie = ottRepository.findOTTByTitle(rank.getText());
                 rankingList.add(movie);
                 count++;
                 if(count == 10) break;
@@ -112,7 +111,7 @@ public class DisneyRankingCrawlingService {
 
         for(WebElement rank : ranking){
             if(ottRepository.existsOTTByTitle(rank.getText())){
-                OTT movie = ottRepository.findOTTByTitle(rank.getText());
+                OTTContents movie = ottRepository.findOTTByTitle(rank.getText());
                 rankingInfo.addRankingList(movie);
                 count++;
                 if(count == 10) break;

@@ -10,9 +10,9 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.project.simproject.domain.OTT;
+import org.project.simproject.domain.OTTContents;
 import org.project.simproject.domain.RankingInfo;
-import org.project.simproject.repository.mongoRepo.OTTRepository;
+import org.project.simproject.repository.mongoRepo.OTTContentsRepository;
 import org.project.simproject.repository.mongoRepo.RankingInfoRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
@@ -48,7 +48,7 @@ public class NetflixService {
 
 //    private final MovieRepository movieRepository;
 
-    private final OTTRepository ottRepository;
+    private final OTTContentsRepository ottRepository;
 
     private final RankingInfoRepository rankingInfoRepository;
 
@@ -72,7 +72,7 @@ public class NetflixService {
             String category = mostWatchedElement.findElement(By.cssSelector(".row-header-title")).getText();
             log.info(category);
 
-            List<OTT> mostWatchedMovies = new ArrayList<>();
+            List<OTTContents> mostWatchedMovies = new ArrayList<>();
 
             // Top10 제목 크롤링
             int count = 1;  // Top10 크롤링을 위한 10개 카운팅
@@ -87,7 +87,7 @@ public class NetflixService {
 
                 WebElement element = mostWatchedElement.findElement(By.cssSelector("div.slider-item.slider-item-" + i++));
                 String title = element.findElement(By.cssSelector("p.fallback-text")).getText();
-                OTT movie = ottRepository.findOTTByTitle(title);
+                OTTContents movie = ottRepository.findOTTByTitle(title);
 
                 // 중복 추가 방지
                 if (title.isEmpty() || mostWatchedMovies.contains(movie)) {
