@@ -55,7 +55,7 @@ public class OAuthSecurityConfig {
                 .requestMatchers("/api/**").permitAll()
                 .anyRequest().permitAll();
 
-        // localhost:3000에서 오는 사용자 인증 처리 요청 처리 부분 우선 주석 처리
+        // localhost:3000에서 오는 사용자 인증 처리 요청 처리 부분
         http.oauth2Login()
                 .loginPage("/oauthLogin")
                 .authorizationEndpoint()

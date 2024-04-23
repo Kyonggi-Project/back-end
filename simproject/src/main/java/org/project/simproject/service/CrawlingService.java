@@ -91,9 +91,9 @@ public class CrawlingService {
             // 작품 목록 하이퍼링크 저장
             List<WebElement> movieItems = driver.findElements(By.cssSelector("div.MovieItem"));
 
-            List<WebElement> anchorTags = new ArrayList<>();
-            for(WebElement movieItem : movieItems){
-                anchorTags.add(movieItem.findElement(By.tagName("a")));
+                List<WebElement> anchorTags = new ArrayList<>();
+                for(WebElement movieItem : movieItems){
+                    anchorTags.add(movieItem.findElement(By.tagName("a")));
             }
 
             List<String> hrefs = new ArrayList<>();
