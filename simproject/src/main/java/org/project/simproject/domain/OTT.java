@@ -31,7 +31,9 @@ public class OTT {
     private float rating;
 
     public void addOTTList(String ott){
-        this.ottList.add(ott);
+        if(!this.ottList.contains(ott)){
+            this.ottList.add(ott);
+        }
     }
 
     public void modifyScore(int reviewCount, double score){
