@@ -5,6 +5,8 @@ import com.google.api.gax.core.FixedCredentialsProvider;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.language.v1.*;
 import org.project.simproject.dto.response.SentimentResponseDTO;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 
 import java.io.FileInputStream;
@@ -12,11 +14,12 @@ import java.io.IOException;
 
 @Service
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+@PropertySource("classpath:application-sentiment.properties")
 public class SentimentAnalysisService {
+    @Value("${GOOGLE.SENTIMENT.KEY_PATH}")
+    private String keyPath;
 
     public SentimentResponseDTO analyzeSentiment(String myString) throws IOException {
-        String keyPath = "/Users/dudwnszero/Downloads/springboot-developer-410908-9c0ade90320a.json"; // JSON 인증 키 파일 경로
-
         GoogleCredentials credentials = GoogleCredentials.fromStream(new FileInputStream(keyPath));
 
         try (LanguageServiceClient language = LanguageServiceClient.create(LanguageServiceSettings.newBuilder()
