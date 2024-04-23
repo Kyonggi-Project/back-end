@@ -32,7 +32,7 @@ public class OTTReviewService {
     }
 
     public List<OTTReviewResponse> findByOTTId(String ottId){
-        return ottReviewRepository.findOTTReviewByOttIdOrderByScoreDesc(ottId)
+        return ottReviewRepository.findOTTReviewByOttIdOrderByLikesCountDesc(ottId)
                 .stream()
                 .map(OTTReviewResponse::new)
                 .toList();
