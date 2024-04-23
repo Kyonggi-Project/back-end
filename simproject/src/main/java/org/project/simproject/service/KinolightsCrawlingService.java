@@ -38,7 +38,7 @@ public class KinolightsCrawlingService {
 
     String[] OTT_ARRAY = new String[7];
 
-    private final OTTContentsRepository ottRepository;
+    private final OTTContentsRepository ottContentsRepository;
 
     @Transactional
     public void crawlingMovies() throws InterruptedException {
@@ -85,27 +85,19 @@ public class KinolightsCrawlingService {
                     continue;
                 }
 
-                if (ottRepository.existsOTTByTitle(title)) {
+                if (ottContentsRepository.existsOTTByTitle(title)) {
                     log.info("[" + ott + "] " + count++ + ": [" + title + "] (in DB)");
-                    OTTContents updateMovie = ottRepository.findOTTByTitle(title);
-                    if (updateMovie.getOttList().contains(ott)) {
-                        continue;
-                    } else {
-                        updateMovie.addOTTList(ott);
-                        ottRepository.save(updateMovie);
-                        continue;
-                    }
+                    OTTContents updateMovie = ottContentsRepository.findOTTByTitle(title);
+                    updateMovie.addOTTList(ott);
+                    ottContentsRepository.save(updateMovie);
+                    continue;
                 }
-/*                    OTT updateMovie = movieRepository.findByTitle(title);
-                    updateMovie.addOtt(ott);
-                    movieRepository.save(updateMovie);
-                    continue;*/
 
                 OTTContents movie = crawlingInfo(count++, title, ott);
                 movie.setScore(0);
                 movie.setReviewCount(0);
                 movie.setRating(0);
-                ottRepository.save(movie);
+                ottContentsRepository.save(movie);
             }
         }
 
@@ -146,47 +138,31 @@ public class KinolightsCrawlingService {
                     }
 
                     String title = getTitle();
-                    
+
                     // 이미 오늘의 신작 크롤링 시, 크롤링된 작품일 경우 OTT만 추가
                     if (newMovieTitleList.contains(title)) {
-                        OTTContents updateMovie = ottRepository.findOTTByTitle(title);
-                        if (ottRepository.existsOTTByTitle(title)) {
-                            OTTContents updatedMovie = ottRepository.findOTTByTitle(title);
-                            if (updateMovie.getOttList().contains(ott)) {
-                                continue;
-                            } else {
-                                updatedMovie.addOTTList(ott);
-                                ottRepository.save(updateMovie);
-                                continue;
-                            }
-                        }
-                        ottRepository.save(updateMovie);
+                        OTTContents updateMovie = ottContentsRepository.findOTTByTitle(title);
+                        updateMovie.addOTTList(ott);
+                        ottContentsRepository.save(updateMovie);
                         continue;
                     }
-                    
-/*                    if (newMovieTitleList.contains(title)) {
-                        OTT updateMovie = ottRepository.findOTTByTitle(title);
-                        updateMovie.addOTTList(ott);
-                        ottRepository.save(updateMovie);
-                        continue;
-                    }*/
 
                     OTTContents movie = crawlingInfo(count++, title, ott);
                     
                     /*DB에 해당 Movie가 저장되어 있다면,
                     DB에 저장되어 있는 Score, ReviewCount, Rating을 이용해 새로 저장*/
-                    if (ottRepository.existsOTTByTitle(title)) {
-                        OTTContents updateMovie = ottRepository.findOTTByTitle(title);
+                    if (ottContentsRepository.existsOTTByTitle(title)) {
+                        OTTContents updateMovie = ottContentsRepository.findOTTByTitle(title);
                         movie.setScore(updateMovie.getScore());
                         movie.setReviewCount(updateMovie.getReviewCount());
                         movie.setRating(updateMovie.getRating());
-                        ottRepository.delete(updateMovie);    // 새로 저장하게 되므로, 이전 기록은 삭제
+                        ottContentsRepository.delete(updateMovie);    // 새로 저장하게 되므로, 이전 기록은 삭제
                     } else {    // 만약 DB에 존재하지 않는다면, 모두 0으로 초기화
                         movie.setScore(0);
                         movie.setReviewCount(0);
                         movie.setRating(0);
                     }
-                    ottRepository.save(movie);
+                    ottContentsRepository.save(movie);
                     newMovieTitleList.add(title);
                 }
             }
