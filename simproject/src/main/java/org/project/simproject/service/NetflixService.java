@@ -46,9 +46,7 @@ public class NetflixService {
     @Value("${netflix.pwd}")
     private String NETFLIX_PWD;
 
-//    private final MovieRepository movieRepository;
-
-    private final OTTContentsRepository ottRepository;
+    private final OTTContentsRepository ottContentsRepository;
 
     private final RankingInfoRepository rankingInfoRepository;
 
@@ -87,7 +85,7 @@ public class NetflixService {
 
                 WebElement element = mostWatchedElement.findElement(By.cssSelector("div.slider-item.slider-item-" + i++));
                 String title = element.findElement(By.cssSelector("p.fallback-text")).getText();
-                OTTContents movie = ottRepository.findOTTByTitle(title);
+                OTTContents movie = ottContentsRepository.findOTTByTitle(title);
 
                 // 중복 추가 방지
                 if (title.isEmpty() || mostWatchedMovies.contains(movie)) {
@@ -108,6 +106,12 @@ public class NetflixService {
                     .rankingList(mostWatchedMovies)
                     .build();
 //                rankingInfo.setDate(crawlingDate);
+            
+            // 이전 순위 정보 삭제
+            if (rankingInfoRepository.existsRankingInfoByOtt("Netflix")) {
+                RankingInfo oldRankingInfo = rankingInfoRepository.findRankingInfoByOttAndCategory("Netflix", category);
+                rankingInfoRepository.delete(oldRankingInfo);
+            }
 
             rankingInfoRepository.save(rankingInfo);
         }
@@ -149,8 +153,6 @@ public class NetflixService {
 
     public void scroll() throws InterruptedException {
         JS_EXECUTOR.executeScript("window.scrollTo(0, document.body.scrollHeight)");
-
-        WebDriverWait scrollWait = new WebDriverWait(WEB_DRIVER, Duration.ofSeconds(1)); // 최대 30초까지 대기
 
         for (int i = 0; i < 10; i++) {
             JS_EXECUTOR.executeScript("window.scrollTo(0, document.body.scrollHeight)");
