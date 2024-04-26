@@ -1,5 +1,6 @@
 package org.project.simproject.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
@@ -50,6 +51,7 @@ public class NetflixService {
 
     private final RankingInfoRepository rankingInfoRepository;
 
+    @Transactional
     public void crawlingMostWatchedNetflix() throws InterruptedException {
         init();
 
@@ -108,7 +110,7 @@ public class NetflixService {
 //                rankingInfo.setDate(crawlingDate);
             
             // 이전 순위 정보 삭제
-            if (rankingInfoRepository.existsRankingInfoByOtt("Netflix")) {
+            if (rankingInfoRepository.existsRankingInfoByOttAndCategory("Netflix", category)) {
                 RankingInfo oldRankingInfo = rankingInfoRepository.findRankingInfoByOttAndCategory("Netflix", category);
                 rankingInfoRepository.delete(oldRankingInfo);
             }

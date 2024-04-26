@@ -8,5 +8,6 @@ import org.springframework.stereotype.Repository;
 public interface RankingInfoRepository extends MongoRepository<RankingInfo, String> {
     boolean existsRankingInfoByOtt(String ott);
     RankingInfo findRankingInfoByOtt(String ott);
+    boolean existsRankingInfoByOttAndCategory(String ott, String category);
     RankingInfo findRankingInfoByOttAndCategory(String ott, String category);
 }
