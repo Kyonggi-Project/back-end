@@ -73,6 +73,7 @@ public class NetflixService {
             log.info(category);
 
             List<OTTContents> mostWatchedMovies = new ArrayList<>();
+            List<String> mostWatchedTitles = new ArrayList<>();
 
             // Top10 제목 크롤링
             int count = 1;  // Top10 크롤링을 위한 10개 카운팅
@@ -90,11 +91,12 @@ public class NetflixService {
                 OTTContents movie = ottContentsRepository.findOTTByTitle(title);
 
                 // 중복 추가 방지
-                if (title.isEmpty() || mostWatchedMovies.contains(movie)) {
+                if (title.isEmpty() || mostWatchedTitles.contains(title)) {
                     continue;
                 }
 
                 mostWatchedMovies.add(movie);
+                mostWatchedTitles.add(title);
 
                 log.info(count + ": " + title);
 
@@ -133,7 +135,7 @@ public class NetflixService {
         WEB_DRIVER = new ChromeDriver(chromeOptions);
         JS_EXECUTOR = (JavascriptExecutor) WEB_DRIVER;
 
-        WAIT = new WebDriverWait(WEB_DRIVER, Duration.ofSeconds(3));
+        WAIT = new WebDriverWait(WEB_DRIVER, Duration.ofSeconds(10));
 
         log.info("Initialize");
     }
