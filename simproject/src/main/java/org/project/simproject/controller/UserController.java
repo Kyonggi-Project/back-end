@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.attribute.UserPrincipalNotFoundException;
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
@@ -46,15 +47,19 @@ public class UserController {
     //로그인 유저 마이페이지 보기
     @Operation(summary = "로그인 유저 정보", description = "유저 서비스에서 로그인 유저의 정보를 조회")
     @GetMapping("/profile/myPage")
-    public ResponseEntity<Map<String, Object>> getProfileByEmail(Principal principal) {
-        User user = userService.findByEmail(principal.getName());
-        WatchList watchList = watchListService.findByEmail(user.getEmail());
+    public ResponseEntity<Map<String, Object>> getProfileByEmail(Principal principal) throws UserPrincipalNotFoundException {
+        try{
+            User user = userService.findByEmail(principal.getName());
+            WatchList watchList = watchListService.findByEmail(user.getEmail());
 
-        Map<String, Object> data = new HashMap<>();
-        data.put("user", new UserResponse(user));
-        data.put("watchList", watchList);
+            Map<String, Object> data = new HashMap<>();
+            data.put("user", new UserResponse(user));
+            data.put("watchList", watchList);
 
-        return ResponseEntity.status(HttpStatus.OK).body(data);
+            return ResponseEntity.status(HttpStatus.OK).body(data);
+        } catch (Exception e){
+            throw new UserPrincipalNotFoundException("인증 실패");
+        }
     }
 
     @Operation(summary = "특정 닉네임의 유저 보기", description = "유저 서비스에서 특정 유저의 정보를 닉네임으로 조회")
@@ -87,20 +92,24 @@ public class UserController {
     //현재 유저 수정
     @Operation(summary = "유저 정보 수정", description = "유저 서비스에서 현재 유저의 정보를 수정")
     @PutMapping("/update")
-    public ResponseEntity<User> modifyUser(Principal principal, @RequestBody ModifyRequest modifyRequest) {
-        User modifyuser = userService.modify(principal.getName(), modifyRequest);
-        return new ResponseEntity<>(modifyuser,HttpStatus.OK);
+    public ResponseEntity<User> modifyUser(Principal principal, @RequestBody ModifyRequest modifyRequest) throws UserPrincipalNotFoundException {
+        try{
+            User modifyuser = userService.modify(principal.getName(), modifyRequest);
+            return new ResponseEntity<>(modifyuser,HttpStatus.OK);
+        } catch (Exception e){
+            throw new UserPrincipalNotFoundException("인증 실패");
+        }
     }
 
     //유저 삭제
     @Operation(summary = "유저 삭제", description = "유저 서비스에서 해당 유저를 삭제")
     @DeleteMapping("/delete")
-    public ResponseEntity<String> deleteUser(Principal principal) {
+    public ResponseEntity<String> deleteUser(Principal principal) throws UserPrincipalNotFoundException {
         try {
             userService.delete(principal.getName());
             return ResponseEntity.ok("The user was deleted.");
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("You can't delete a user.");
+            throw new UserPrincipalNotFoundException("인증 실패");
         }
     }
 }
