@@ -1,5 +1,6 @@
 package org.project.simproject.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
@@ -46,12 +47,11 @@ public class NetflixService {
     @Value("${netflix.pwd}")
     private String NETFLIX_PWD;
 
-//    private final MovieRepository movieRepository;
-
-    private final OTTContentsRepository ottRepository;
+    private final OTTContentsRepository ottContentsRepository;
 
     private final RankingInfoRepository rankingInfoRepository;
 
+    @Transactional
     public void crawlingMostWatchedNetflix() throws InterruptedException {
         init();
 
@@ -73,6 +73,7 @@ public class NetflixService {
             log.info(category);
 
             List<OTTContents> mostWatchedMovies = new ArrayList<>();
+            List<String> mostWatchedTitles = new ArrayList<>();
 
             // Top10 제목 크롤링
             int count = 1;  // Top10 크롤링을 위한 10개 카운팅
@@ -87,14 +88,15 @@ public class NetflixService {
 
                 WebElement element = mostWatchedElement.findElement(By.cssSelector("div.slider-item.slider-item-" + i++));
                 String title = element.findElement(By.cssSelector("p.fallback-text")).getText();
-                OTTContents movie = ottRepository.findOTTByTitle(title);
+                OTTContents movie = ottContentsRepository.findOTTByTitle(title);
 
                 // 중복 추가 방지
-                if (title.isEmpty() || mostWatchedMovies.contains(movie)) {
+                if (title.isEmpty() || mostWatchedTitles.contains(title)) {
                     continue;
                 }
 
                 mostWatchedMovies.add(movie);
+                mostWatchedTitles.add(title);
 
                 log.info(count + ": " + title);
 
@@ -108,6 +110,12 @@ public class NetflixService {
                     .rankingList(mostWatchedMovies)
                     .build();
 //                rankingInfo.setDate(crawlingDate);
+            
+            // 이전 순위 정보 삭제
+            if (rankingInfoRepository.existsRankingInfoByOttAndCategory("Netflix", category)) {
+                RankingInfo oldRankingInfo = rankingInfoRepository.findRankingInfoByOttAndCategory("Netflix", category);
+                rankingInfoRepository.delete(oldRankingInfo);
+            }
 
             rankingInfoRepository.save(rankingInfo);
         }
@@ -127,7 +135,7 @@ public class NetflixService {
         WEB_DRIVER = new ChromeDriver(chromeOptions);
         JS_EXECUTOR = (JavascriptExecutor) WEB_DRIVER;
 
-        WAIT = new WebDriverWait(WEB_DRIVER, Duration.ofSeconds(3));
+        WAIT = new WebDriverWait(WEB_DRIVER, Duration.ofSeconds(10));
 
         log.info("Initialize");
     }
@@ -149,8 +157,6 @@ public class NetflixService {
 
     public void scroll() throws InterruptedException {
         JS_EXECUTOR.executeScript("window.scrollTo(0, document.body.scrollHeight)");
-
-        WebDriverWait scrollWait = new WebDriverWait(WEB_DRIVER, Duration.ofSeconds(1)); // 최대 30초까지 대기
 
         for (int i = 0; i < 10; i++) {
             JS_EXECUTOR.executeScript("window.scrollTo(0, document.body.scrollHeight)");
