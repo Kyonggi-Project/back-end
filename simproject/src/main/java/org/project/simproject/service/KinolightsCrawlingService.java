@@ -148,7 +148,7 @@ public class KinolightsCrawlingService {
                     }
 
                     OTTContents movie = crawlingInfo(count++, title, ott);
-                    
+
                     /*DB에 해당 Movie가 저장되어 있다면,
                     DB에 저장되어 있는 Score, ReviewCount, Rating을 이용해 새로 저장*/
                     if (ottContentsRepository.existsOTTByTitle(title)) {
@@ -243,8 +243,14 @@ public class KinolightsCrawlingService {
     }
 
     public OTTContents crawlingInfo(int count, String title, String ott) {
-        String posterImgUrl = WEB_DRIVER.findElement(By.cssSelector("div.poster img.movie-poster")).getAttribute("src");
-        String backgroundImgUrl = WEB_DRIVER.findElement(By.cssSelector("div.movie-image-area img")).getAttribute("src");
+        String posterImgUrl;
+        while(true){
+            posterImgUrl = WEB_DRIVER.findElement(By.className("movie-poster")).getAttribute("data-src");
+            if(posterImgUrl != null) break;
+        }
+
+        String backgroundImgUrl = WEB_DRIVER.findElement(By.className("movie-poster")).getAttribute("data-src");
+        log.info(backgroundImgUrl);
 
         WebElement metadataYearElement = WEB_DRIVER.findElement(By.cssSelector("p.metadata"));
         int year = Integer.parseInt(metadataYearElement.findElement(By.cssSelector("span.metadata-item:last-child")).getText());
@@ -312,7 +318,6 @@ public class KinolightsCrawlingService {
             }
         }
 
-
         // 제작진 정보 저장
         HashMap<String, String> staffMap = new HashMap<>();
         if (!WEB_DRIVER.findElements(By.cssSelector("div.staff")).isEmpty()) {
@@ -337,7 +342,6 @@ public class KinolightsCrawlingService {
             }
         }
 
-
         // Movie 객체 생성 및 데이터 설정
         OTTContents movie = OTTContents.builder()
                 .title(title)
@@ -351,18 +355,6 @@ public class KinolightsCrawlingService {
                 .staffList(staffMap)
                 .build();
         movie.addOTTList(ott);
-
-/*        Movie movie = new Movie();
-        movie.setTitle(title);
-        movie.setYear(year);
-        movie.setSynopsis(synopsis);
-        movie.setPosterImg(posterImgUrl);
-        movie.setBackgroundImg(backgroundImgUrl);
-        movie.setGenreList(genreList);
-        movie.setMetadata(metadataMap);
-        movie.setActorList(actorCharacterMap);
-        movie.setStaffList(staffMap);
-        movie.addOtt(ott);*/
 
         log.info("[" + ott + "] " + count + ": [" + title + "] (" + year + ")");
 
