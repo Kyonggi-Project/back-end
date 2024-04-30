@@ -103,21 +103,22 @@ public class NetflixService {
                 count++;
             }
 
-            // RankingInfo 객체 생성
-            RankingInfo rankingInfo = RankingInfo.builder()
-                    .ott("Netflix")
-                    .category(category)
-                    .rankingList(mostWatchedMovies)
-                    .build();
-//                rankingInfo.setDate(crawlingDate);
-            
-            // 이전 순위 정보 삭제
+            // 순위정보 존재 시, update
             if (rankingInfoRepository.existsRankingInfoByOttAndCategory("Netflix", category)) {
                 RankingInfo oldRankingInfo = rankingInfoRepository.findRankingInfoByOttAndCategory("Netflix", category);
-                rankingInfoRepository.delete(oldRankingInfo);
+                oldRankingInfo.deleteRankingList();
+                oldRankingInfo.setRankingList(mostWatchedMovies);
+                rankingInfoRepository.save(oldRankingInfo);
+            } else {    // 존재하지 않을 시, 객체 생성 후 저장
+                // RankingInfo 객체 생성
+                RankingInfo rankingInfo = RankingInfo.builder()
+                        .ott("Netflix")
+                        .category(category)
+                        .rankingList(mostWatchedMovies)
+                        .build();
+//                rankingInfo.setDate(crawlingDate);
+                rankingInfoRepository.save(rankingInfo);
             }
-
-            rankingInfoRepository.save(rankingInfo);
         }
         WEB_DRIVER.quit();
     }

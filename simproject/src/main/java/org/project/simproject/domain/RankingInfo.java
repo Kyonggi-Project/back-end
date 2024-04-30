@@ -1,10 +1,7 @@
 package org.project.simproject.domain;
 
 import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.ArrayList;
@@ -12,6 +9,7 @@ import java.util.List;
 
 @Document(collection = "rankinginfo")
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class RankingInfo {
