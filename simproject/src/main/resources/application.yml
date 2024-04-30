@@ -40,3 +40,4 @@ spring:
         - oauth2
         - crawling
         - mongo
+        - sentiment
