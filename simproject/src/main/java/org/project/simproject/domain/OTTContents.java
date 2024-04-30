@@ -29,6 +29,7 @@ public class OTTContents {
     private double score;
     private int reviewCount;
     private float rating;
+    private int rankingScore;
 
     public void addOTTList(String ott){
         if(!this.ottList.contains(ott)){
@@ -57,6 +58,7 @@ public class OTTContents {
         this.score = score;
         this.reviewCount = reviewCount;
         this.rating = rating;
+        this.rankingScore = 0;
     }
 
 }
