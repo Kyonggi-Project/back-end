@@ -63,12 +63,8 @@ public class User implements UserDetails {
     }
 
     public void modify(ModifyRequest modifyRequest) {
-        if(modifyRequest.getPassword().equals("")) {
-            this.nickname = modifyRequest.getNickname();
-        }
-        else if(modifyRequest.getNickname().equals("")) {
-            this.password = modifyRequest.getPassword();
-        }
+        this.nickname = modifyRequest.getNickname();
+        this.password = modifyRequest.getPassword();
     }
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -26,10 +26,11 @@ public class WatchListService {
     }
 
     @Transactional
-    public void addBookmark(OTTContents ott, String email){
+    public void toggle(OTTContents ott, String email){
         WatchList watchList = watchListRepository.findWatchListByEmail(email);
 
-        watchList.addBookmark(ott);
+        if(watchList.getBookmark().contains(ott)) watchList.deleteBookmark(ott);
+        else watchList.addBookmark(ott);
         watchListRepository.save(watchList);
     }
 
