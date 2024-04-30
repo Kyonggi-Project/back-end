@@ -66,17 +66,17 @@ public class WavveCrawlingService {
 
         movie = movieRanking(Moive);
 
-        for (RankingInfo result : rankingInfoRepository.findAll()) {
-            System.out.println(result.getCategory());
-            List<OTTContents> ottContents = result.getRankingList();
-            System.out.println(result.getRankingList().size());
-            for(OTTContents ott : ottContents) {
-                if(ott == null) {
-                    continue;
-                }
-                System.out.println(ott.getTitle());
-            }
-        }
+//        for (RankingInfo result : rankingInfoRepository.findAll()) {
+//            System.out.println(result.getCategory());
+//            List<OTTContents> ottContents = result.getRankingList();
+//            System.out.println(result.getRankingList().size());
+//            for(OTTContents ott : ottContents) {
+//                if(ott == null) {
+//                    continue;
+//                }
+//                System.out.println(ott.getTitle());
+//            }
+//        }
         webDriver.quit();
     }
     @Transactional
@@ -133,7 +133,7 @@ public class WavveCrawlingService {
             WebElement result = top.findElement(By.tagName("img"));
             list.add(result.getAttribute("alt"));
         }
-        log.info(list);
+        log.info("list>>>"+list);
         return list;
     }
     public void popupclose() throws InterruptedException {

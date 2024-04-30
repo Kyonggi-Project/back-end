@@ -78,17 +78,17 @@ public class CoupangPlayService {
 
         RankingInfo Top20Movies = movieRanking(Movie);
 
-        for (RankingInfo result : rankingInfoRepository.findAll()) {
-            System.out.println(result.getCategory());
-            List<OTTContents> ottContents = result.getRankingList();
-            System.out.println(result.getRankingList().size());
-            for(OTTContents ott : ottContents) {
-                if(ott == null) {
-                    continue;
-                }
-                System.out.println(ott.getTitle());
-            }
-        }
+//        for (RankingInfo result : rankingInfoRepository.findAll()) {
+//            System.out.println(result.getCategory());
+//            List<OTTContents> ottContents = result.getRankingList();
+//            System.out.println(result.getRankingList().size());
+//            for(OTTContents ott : ottContents) {
+//                if(ott == null) {
+//                    continue;
+//                }
+//                System.out.println(ott.getTitle());
+//            }
+//        }
 
         WEB_DRIVER.quit();
     }
