@@ -7,8 +7,10 @@ import org.project.simproject.domain.User;
 import org.project.simproject.domain.WatchList;
 import org.project.simproject.dto.request.AddUserRequest;
 import org.project.simproject.dto.request.ModifyRequest;
+import org.project.simproject.dto.response.OTTReviewResponse;
 import org.project.simproject.dto.response.UserResponse;
 import org.project.simproject.service.FollowService;
+import org.project.simproject.service.OTTReviewService;
 import org.project.simproject.service.UserService;
 import org.project.simproject.service.WatchListService;
 import org.springframework.http.HttpStatus;
@@ -30,6 +32,7 @@ public class UserController {
     private final UserService userService;
     private final FollowService followService;
     private final WatchListService watchListService;
+    private final OTTReviewService ottReviewService;
 
     //유저 추가
     @Operation(summary = "유저 추가", description = "유저 서비스에서 유저를 추가")
@@ -51,10 +54,12 @@ public class UserController {
         try{
             User user = userService.findByEmail(principal.getName());
             WatchList watchList = watchListService.findByEmail(user.getEmail());
+            List<OTTReviewResponse> ottReviewList = ottReviewService.findByUserId(user);
 
             Map<String, Object> data = new HashMap<>();
             data.put("user", new UserResponse(user));
             data.put("watchList", watchList);
+            data.put("OTTReviewList", ottReviewList);
 
             return ResponseEntity.status(HttpStatus.OK).body(data);
         } catch (Exception e){

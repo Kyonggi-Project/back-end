@@ -49,7 +49,7 @@ public class UserService {
     public User modify(String email, ModifyRequest modifyRequest) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 아이디 : " + email));
-        user.modify(modifyRequest);
+        user.modify(modifyRequest, bCryptPasswordEncoder);
         return user;
     }
 
