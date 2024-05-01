@@ -106,7 +106,7 @@ public class KinolightsCrawlingService {
     }
 
     @Transactional
-    public void todayNewMovies() {
+    public void todayNewMovies() throws InterruptedException {
         init();
 
         List<String> newMovieTitleList = new ArrayList<>();
@@ -116,8 +116,8 @@ public class KinolightsCrawlingService {
             if (i == 3) continue;   // Tving 건너뛰기
 
             WEB_DRIVER.get(KINOLIGHTS_URL + "/new");
-//            Thread.sleep(5000);
-            WAIT.until(ExpectedConditions.elementToBeClickable(By.xpath("//*[@id=\"contents\"]/section[2]/div/div/div/div/div[" + i + "]/button")));
+            Thread.sleep(5000);
+//            WAIT.until(ExpectedConditions.elementToBeClickable(By.xpath("//*[@id=\"contents\"]/section[2]/div/div/div/div/div[" + i + "]/button")));
             WebElement buttonElement = WEB_DRIVER.findElement(By.xpath("//*[@id=\"contents\"]/section[2]/div/div/div/div/div[" + i + "]/button"));
             JS_EXECUTOR.executeScript("arguments[0].click();", buttonElement);
             String ott = OTT_ARRAY[i];
