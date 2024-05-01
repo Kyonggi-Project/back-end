@@ -4,7 +4,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.*;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -16,7 +15,10 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -47,6 +49,9 @@ public class KinolightsCrawlingService {
         for (int i = 2; i < 7; i++) {
             if (i == 3) continue;   // Tving 건너뛰기
 
+            /* OTT 버튼 클릭 시, 간헐적 에러 발생
+             * 에러 발생 시, catch 통해 재시도
+             * */
             try {
                 WEB_DRIVER.get(KINOLIGHTS_URL + "/discover/explore");
                 Thread.sleep(5000);
@@ -59,48 +64,32 @@ public class KinolightsCrawlingService {
                 WebElement buttonElement = WEB_DRIVER.findElement(By.xpath("//*[@id=\"contents\"]/section/div[2]/div/div/div/div[" + i + "]/button"));
                 JS_EXECUTOR.executeScript("arguments[0].click();", buttonElement);
             }
+
             String ott = OTT_ARRAY[i];
 
             log.info(ott + " Crawling Start");
 
             scroll();
 
-            // DB 중복검사
-            List<WebElement> movieList = WEB_DRIVER.findElements(By.cssSelector("div.MovieItem.grid"));
-            List<WebElement> crawlingList = new ArrayList<>();
-
-            for (WebElement movieElement : movieList) {
-                String title = movieElement.findElement(By.cssSelector("div.title")).getText();
-                if (!ottContentsRepository.existsOTTByTitle(title)) {
-                    crawlingList.add(movieElement);
-                } else {
-                    log.info(title + " is already crawled");
-                }
-            }
-            List<String> hrefList = collectHref(crawlingList);
-
+            // DB 중복검사 후, href 수집
             int count = 0;
+            List<WebElement> movieList = WEB_DRIVER.findElements(By.cssSelector("div.MovieItem.grid"));
+            List<WebElement> crawlingList = collectCrawlingList(movieList, ott);
+            List<String> hrefList = collectHref(crawlingList);
 
             for (String hrefLink : hrefList) {
                 WEB_DRIVER.get(hrefLink);
 
+                // 모달창 생성 시, 모달창 닫기
                 if (!WEB_DRIVER.findElements(By.cssSelector("div.modal-layer")).isEmpty()) {
                     closeModal();
                 }
 
-                String title = null;
+                String title;
                 try {
                     title = getTitle();
                 } catch (Exception e) {
                     log.error("Error in getTitle(): " + e.getMessage());
-                    continue;
-                }
-
-                if (ottContentsRepository.existsOTTByTitle(title)) {
-                    log.info("[" + ott + "] " + count++ + ": [" + title + "] (in DB)");
-                    OTTContents updateMovie = ottContentsRepository.findOTTByTitle(title);
-                    updateMovie.addOTTList(ott);
-                    ottContentsRepository.save(updateMovie);
                     continue;
                 }
 
@@ -228,6 +217,34 @@ public class KinolightsCrawlingService {
         log.info("Scroll Success");
     }
 
+    public List<WebElement> collectCrawlingList(List<WebElement> movieList, String ott) {
+        List<WebElement> crawlingList = new ArrayList<>();
+
+        for (WebElement movieElement : movieList) {
+            String title = movieElement.findElement(By.cssSelector("div.title")).getText();
+            String posterImgUrl;
+            while (true) {
+                posterImgUrl = movieElement.findElement(By.cssSelector("div.poster > img")).getAttribute("data-src");
+                if (posterImgUrl != null) break;
+            }
+
+            /*DB 중복 여부 확인
+             * 같은 title의 OTTContents가 여러 개인 경우 대비,
+             * posterImg 포함 체크
+             * */
+            if (ottContentsRepository.existsOTTContentsByTitleAndPosterImg(title, posterImgUrl)) {
+                OTTContents updateMovie = ottContentsRepository.findOTTContentsByTitleAndPosterImg(title, posterImgUrl);
+                updateMovie.addOTTList(ott);
+                ottContentsRepository.save(updateMovie);
+            } else {
+                crawlingList.add(movieElement);
+            }
+        }
+
+        log.info("[" + ott + "] CrawlingList collect Success");
+        return crawlingList;
+    }
+
     public List<String> collectHref(List<WebElement> elementList) {
 
 //        log.info("Get MovieList Success");
@@ -254,10 +271,14 @@ public class KinolightsCrawlingService {
     }
 
     public OTTContents crawlingInfo(int count, String title, String ott) {
+        List<String> subtitleList = new ArrayList<>();
+        String subtitle = title.replaceAll(" ", "");
+        subtitleList.add(subtitle);
+
         String posterImgUrl;
-        while(true){
+        while (true) {
             posterImgUrl = WEB_DRIVER.findElement(By.className("movie-poster")).getAttribute("data-src");
-            if(posterImgUrl != null) break;
+            if (posterImgUrl != null) break;
         }
 
         String backgroundImgUrl = WEB_DRIVER.findElement(By.cssSelector("div.backdrop img")).getAttribute("data-src");
@@ -352,9 +373,10 @@ public class KinolightsCrawlingService {
             }
         }
 
-        // Movie 객체 생성 및 데이터 설정
+        // OTTContents 객체 생성 및 데이터 설정
         OTTContents movie = OTTContents.builder()
                 .title(title)
+                .subtitleList(subtitleList)
                 .year(year)
                 .posterImg(posterImgUrl)
                 .backgroundImg(backgroundImgUrl)
