@@ -65,8 +65,19 @@ public class KinolightsCrawlingService {
 
             scroll();
 
+            // DB 중복검사
             List<WebElement> movieList = WEB_DRIVER.findElements(By.cssSelector("div.MovieItem.grid"));
-            List<String> hrefList = collectHref(movieList);
+            List<WebElement> crawlingList = new ArrayList<>();
+
+            for (WebElement movieElement : movieList) {
+                String title = movieElement.findElement(By.cssSelector("div.title")).getText();
+                if (!ottContentsRepository.existsOTTByTitle(title)) {
+                    crawlingList.add(movieElement);
+                } else {
+                    log.info(title + " is already crawled");
+                }
+            }
+            List<String> hrefList = collectHref(crawlingList);
 
             int count = 0;
 
@@ -249,8 +260,7 @@ public class KinolightsCrawlingService {
             if(posterImgUrl != null) break;
         }
 
-        String backgroundImgUrl = WEB_DRIVER.findElement(By.className("movie-poster")).getAttribute("data-src");
-        log.info(backgroundImgUrl);
+        String backgroundImgUrl = WEB_DRIVER.findElement(By.cssSelector("div.backdrop img")).getAttribute("data-src");
 
         WebElement metadataYearElement = WEB_DRIVER.findElement(By.cssSelector("p.metadata"));
         int year = Integer.parseInt(metadataYearElement.findElement(By.cssSelector("span.metadata-item:last-child")).getText());
