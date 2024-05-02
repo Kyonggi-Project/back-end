@@ -3,10 +3,12 @@ package org.project.simproject.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.openqa.selenium.*;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.project.simproject.domain.OTTContents;
@@ -72,18 +74,13 @@ public class NetflixService {
         List<WebElement> mostWatchedElements;
 
         // 시리즈 Top 10, 영화 Top 10 두 가지 Element 크롤링
-        try {
-            mostWatchedElements = WEB_DRIVER.findElements(By.cssSelector("div[data-list-context='mostWatched']"));
-        } catch (ElementNotInteractableException e) {       // 팝업창으로 인한 예외처리 발생 시, 다시 시도
-            Actions actions = new Actions(WEB_DRIVER);
-            actions.moveByOffset(0, 0).click().perform();
-            mostWatchedElements = WEB_DRIVER.findElements(By.cssSelector("div[data-list-context='mostWatched']"));
-        }
+        mostWatchedElements = WEB_DRIVER.findElements(By.cssSelector("div[data-list-context='mostWatched']"));
 
         int categoryCount = 0;
         for (WebElement mostWatchedElement : mostWatchedElements) {
+            JS_EXECUTOR.executeScript("arguments[0].scrollIntoView({ behavior: 'smooth', block: 'center' });", mostWatchedElement);
             String category = mostWatchedElement.findElement(By.cssSelector(".row-header-title")).getText();
-            log.info(category);
+            log.info("[" + category + "]");
 
             float rakingScoreRating = rankingScoreMatrix[categoryCount++];
 
@@ -91,9 +88,11 @@ public class NetflixService {
             List<String> mostWatchedTitles = new ArrayList<>(); // 중복검사용 제목 저장
 
             // Top10 제목 크롤링
-            int count = 1;  // Top10 크롤링을 위한 10개 카운팅 (순위와 같은 값)
+            int count = 0;  // Top10 크롤링을 위한 10개 카운팅 (순위와 같은 값)
             int i = 0;
-            while (count <= 10) {
+            while (count < 10) {
+                Thread.sleep(500);
+
                 // 다음 요소가 존재하지 않을 시, 리스트를 다음으로 넘김
                 if (mostWatchedElement.findElements(By.cssSelector("div.slider-item.slider-item-" + i)).isEmpty()) {
                     mostWatchedElement.findElement(By.cssSelector("span.handle.handleNext.active")).click();
@@ -109,7 +108,19 @@ public class NetflixService {
                     continue;
                 }
 
-                OTTContents movie = ottContentsRepository.findOTTByTitle(title);
+                OTTContents movie;
+                if (ottContentsRepository.findAllByTitle(title).size() == 1) {
+                    movie = ottContentsRepository.findOTTByTitle(title);
+                } else {
+                    List<OTTContents> ottContentsList = ottContentsRepository.findAllByTitle(title);
+                    movie = ottContentsList.get(0);
+                    for (OTTContents ottContents : ottContentsList) {
+                        if (ottContents.getOttList().contains("Netflix") && ottContents.getYear() > movie.getYear()) {
+                            movie = ottContents;
+                        }
+                    }
+
+                }
 
                 float rakingScore = pointMatrix[count] * rakingScoreRating;
 
@@ -120,7 +131,7 @@ public class NetflixService {
                 mostWatchedMovies.add(movie);
                 mostWatchedTitles.add(title);
 
-                log.info(count + ": " + title);
+                log.info(count + 1 + ": " + title);
 
                 count++;
             }
@@ -140,6 +151,8 @@ public class NetflixService {
                         .build();
                 rankingInfoRepository.save(rankingInfo);
             }
+
+            log.info("Crawling End: " + category);
         }
 
         WEB_DRIVER.quit();
@@ -186,6 +199,14 @@ public class NetflixService {
             Thread.sleep(1000);
         }
         log.info("Scroll Success");
+
+        Thread.sleep(1000);
+
+        // 모달창 제거용 클릭 이벤트 발생
+        WebElement anyElement = WEB_DRIVER.findElement(By.cssSelector("body")); // 화면의 아무 부분이나 선택
+        anyElement.click();
+
+        Thread.sleep(1000);
     }
 
 }
