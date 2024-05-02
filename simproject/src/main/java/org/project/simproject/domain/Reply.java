@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.project.simproject.dto.request.ModifyReplyRequest;
 
 import java.time.LocalDateTime;
 
@@ -31,6 +32,11 @@ public class Reply {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    public void modify(ModifyReplyRequest request){
+        this.content = request.getContent();
+        this.updatedAt = LocalDateTime.now();
+    }
 
     @Builder
     public Reply(String content, User userId, OTTReview ottReviewId){

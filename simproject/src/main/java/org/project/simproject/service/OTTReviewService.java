@@ -50,7 +50,7 @@ public class OTTReviewService {
         OTTReview ottReview = ottReviewRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found Review"));
 
-        authorizeArticleAuthor(ottReview, user);
+        authorizeOTTReviewAuthor(ottReview, user);
 
         if(ottReview.getScore() == request.getScore()) ottReview.modify(request);
         else {
@@ -69,13 +69,13 @@ public class OTTReviewService {
                 .orElseThrow(() -> new IllegalArgumentException("Not Found Review"));
         OTTContents ott = ottService.findById(ottReview.getOttId());
 
-        authorizeArticleAuthor(ottReview, user);
+        authorizeOTTReviewAuthor(ottReview, user);
         ottService.deleteScore(ott, ottReview.getScore());
         ottReviewRepository.delete(ottReview);
     }
 
     // 현재 사용자와 리뷰 작성자가 일치하는지 검사
-    private static void authorizeArticleAuthor(OTTReview ottReview, User user){
+    private static void authorizeOTTReviewAuthor(OTTReview ottReview, User user){
         if(!ottReview.getUserId().getNickname().equals(user.getNickname())){
             throw new IllegalArgumentException("Not Authorization User");
         }
