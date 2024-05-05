@@ -45,8 +45,11 @@ public class OTTService {
         double score = (lastScore * reviewCount) - userScore;
         reviewCount--;
 
-        ott.modifyScore(reviewCount,
-                new BigDecimal(score / reviewCount).setScale(2, RoundingMode.HALF_UP).doubleValue());
+        if(score == 0.0) ott.modifyScore(reviewCount, 0.0);
+        else{
+            ott.modifyScore(reviewCount,
+                    new BigDecimal(score / reviewCount).setScale(2, RoundingMode.HALF_UP).doubleValue());
+        }
 
         ottRepository.save(ott);
     }
