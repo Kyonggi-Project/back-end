@@ -28,6 +28,7 @@ public class OTTContents {
     private HashMap<String, String> actorList = new HashMap<>();
     private HashMap<String, String> staffList = new HashMap<>();
     private List<String> ottList = new ArrayList<>();
+    private List<String> tagList = new ArrayList<>();
     private double score;
     private int reviewCount;
     private float rating;
