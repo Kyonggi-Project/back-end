@@ -6,10 +6,7 @@ import org.project.simproject.dto.request.RefreshTokenRequest;
 import org.project.simproject.service.TokenService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,8 +15,9 @@ public class TokenController {
     private final TokenService tokenService;
 
     @PostMapping("/createToken")
-    public ResponseEntity<AccessTokenResponse> createNewAccessToken(@RequestBody RefreshTokenRequest request){
-        String newToken = tokenService.createNewAccessToken(request.getRefreshToken());
+    public ResponseEntity<AccessTokenResponse> createNewAccessToken(
+            @CookieValue(value = "refresh_token", defaultValue = "cookie") String cookie){
+        String newToken = tokenService.createNewAccessToken(cookie);
         return ResponseEntity.status(HttpStatus.OK).body(new AccessTokenResponse(newToken));
     }
 }

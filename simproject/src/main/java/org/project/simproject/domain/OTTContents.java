@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 @Document(collection = "ottdata")
 @Getter
@@ -43,9 +44,21 @@ public class OTTContents {
         this.score = score;
     }
 
+
     public void updateRakingScore(int rankingScore){
         this.rankingScore = rankingScore;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || (getClass() != o.getClass())) return false;
+        OTTContents ottContents = (OTTContents) o;
+        return Objects.equals(id, ottContents.id);
     }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
 
     @Builder
     public OTTContents(String title, List<String> subtitleList, int year, String posterImg, String backgroundImg, List<String> genreList, HashMap<String, String> metaData,
