@@ -46,9 +46,15 @@ public class OTTContentsService {
         List<OTTContents> contentsByGenreList = ottContentsRepository.findAllByGenreListContainsIgnoreCase(genre);
         contentsByGenreList.sort(new OTTContentsScoreComparator());
 
-        ottContentsList.addAll(contentsByGenreList);
+        int i = 0;
+        while (ottContentsList.size() <= 20) {
+            OTTContents ottContents = contentsByGenreList.get(i);
+            if (!ottContentsList.contains(ottContents)) {
+                ottContentsList.add(ottContents);
+            }
+        }
 
-        return ottContentsList.subList(0, 20);
+        return ottContentsList;
     }
 
     // RakingInfo의 OTTContents들을 RankingSocre 기준으로 정렬한 후, return
@@ -59,7 +65,7 @@ public class OTTContentsService {
             ottContentsList.addAll(rankingInfo.getRankingList());
         }
         ottContentsList.sort(new OTTContentsRankingScoreComparator());
-        return ottContentsList;
+        return ottContentsList.stream().distinct().toList();
     }
 
 }
