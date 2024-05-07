@@ -22,7 +22,7 @@ public class OTTContentsController {
 
     private final OTTContentsService ottContentsService;
 
-    @Operation(summary = "인기 TOP 10", description = "서비스 자체 인기 순위")
+    @Operation(summary = "인기 TOP 10", description = "서비스 자체 인기 순위 TOP 10")
     @GetMapping("/top10")
     public ResponseEntity<List<OTTContents>> getTop10Contents() {
         List<OTTContents> top10ContentsList = ottContentsService.getTop10Contents();

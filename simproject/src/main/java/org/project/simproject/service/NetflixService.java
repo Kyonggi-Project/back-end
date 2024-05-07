@@ -51,11 +51,17 @@ public class NetflixService {
 
     private final RankingInfoRepository rankingInfoRepository;
 
+    private final String SERIES_CATEGORY = "오늘 대한민국의 TOP 10 시리즈";
+
+    private final String MOVIE_CATEGORY = "오늘 대한민국의 TOP 10 영화";
+
+    private final int[] pointMatrix = {25, 18, 15, 12, 10, 8, 6, 4, 2, 1};
+
+    private final float[] rankingScoreMatrix = {10, 8};
+
     @Transactional
     public void crawlingMostWatchedNetflix() throws InterruptedException {
         init();
-
-//        LocalDate crawlingDate = LocalDate.now();
 
         WEB_DRIVER.get(NETFLIX_URL);
 
@@ -65,20 +71,28 @@ public class NetflixService {
 
         scroll();
 
-        // 오늘의 대한민국 TOP10과 영화 TOP10 두 가지 카테고리 크롤링
-        List<WebElement> mostWatchedElements = WEB_DRIVER.findElements(By.cssSelector("div[data-list-context='mostWatched']"));
+        List<WebElement> mostWatchedElements;
 
+        // 시리즈 Top 10, 영화 Top 10 두 가지 Element 크롤링
+        mostWatchedElements = WEB_DRIVER.findElements(By.cssSelector("div[data-list-context='mostWatched']"));
+
+        int categoryCount = 0;
         for (WebElement mostWatchedElement : mostWatchedElements) {
+            JS_EXECUTOR.executeScript("arguments[0].scrollIntoView({ behavior: 'smooth', block: 'center' });", mostWatchedElement);
             String category = mostWatchedElement.findElement(By.cssSelector(".row-header-title")).getText();
-            log.info(category);
+            log.info("[" + category + "]");
+
+            float rakingScoreRating = rankingScoreMatrix[categoryCount++];
 
             List<OTTContents> mostWatchedMovies = new ArrayList<>();
-            List<String> mostWatchedTitles = new ArrayList<>();
+            List<String> mostWatchedTitles = new ArrayList<>(); // 중복검사용 제목 저장
 
             // Top10 제목 크롤링
-            int count = 1;  // Top10 크롤링을 위한 10개 카운팅
+            int count = 0;  // Top10 크롤링을 위한 10개 카운팅 (순위와 같은 값)
             int i = 0;
-            while (count <= 10) {
+            while (count < 10) {
+                Thread.sleep(500);
+
                 // 다음 요소가 존재하지 않을 시, 리스트를 다음으로 넘김
                 if (mostWatchedElement.findElements(By.cssSelector("div.slider-item.slider-item-" + i)).isEmpty()) {
                     mostWatchedElement.findElement(By.cssSelector("span.handle.handleNext.active")).click();
@@ -88,37 +102,59 @@ public class NetflixService {
 
                 WebElement element = mostWatchedElement.findElement(By.cssSelector("div.slider-item.slider-item-" + i++));
                 String title = element.findElement(By.cssSelector("p.fallback-text")).getText();
-                OTTContents movie = ottContentsRepository.findOTTByTitle(title);
 
                 // 중복 추가 방지
                 if (title.isEmpty() || mostWatchedTitles.contains(title)) {
                     continue;
                 }
 
+                OTTContents movie;
+                if (ottContentsRepository.findAllByTitle(title).size() == 1) {
+                    movie = ottContentsRepository.findOTTByTitle(title);
+                } else {
+                    List<OTTContents> ottContentsList = ottContentsRepository.findAllByTitle(title);
+                    movie = ottContentsList.get(0);
+                    for (OTTContents ottContents : ottContentsList) {
+                        if (ottContents.getOttList().contains("Netflix") && ottContents.getYear() > movie.getYear()) {
+                            movie = ottContents;
+                        }
+                    }
+
+                }
+
+                float rakingScore = pointMatrix[count] * rakingScoreRating;
+
+                movie.updateRakingScore((int) rakingScore);
+
+                ottContentsRepository.save(movie);
+
                 mostWatchedMovies.add(movie);
                 mostWatchedTitles.add(title);
 
-                log.info(count + ": " + title);
+                log.info(count + 1 + ": " + title);
 
                 count++;
             }
 
-            // RankingInfo 객체 생성
-            RankingInfo rankingInfo = RankingInfo.builder()
-                    .ott("Netflix")
-                    .category(category)
-                    .rankingList(mostWatchedMovies)
-                    .build();
-//                rankingInfo.setDate(crawlingDate);
-            
-            // 이전 순위 정보 삭제
+            // 순위 정보 존재 시, RakingList만 업데이트
             if (rankingInfoRepository.existsRankingInfoByOttAndCategory("Netflix", category)) {
-                RankingInfo oldRankingInfo = rankingInfoRepository.findRankingInfoByOttAndCategory("Netflix", category);
-                rankingInfoRepository.delete(oldRankingInfo);
+                RankingInfo existRankingInfo = rankingInfoRepository.findRankingInfoByOttAndCategory("Netflix", category);
+                existRankingInfo.deleteRankingList();
+                existRankingInfo.setRankingList(mostWatchedMovies);
+                rankingInfoRepository.save(existRankingInfo);
+            } else {
+                // RankingInfo 객체 생성
+                RankingInfo rankingInfo = RankingInfo.builder()
+                        .ott("Netflix")
+                        .category(category)
+                        .rankingList(mostWatchedMovies)
+                        .build();
+                rankingInfoRepository.save(rankingInfo);
             }
 
-            rankingInfoRepository.save(rankingInfo);
+            log.info("Crawling End: " + category);
         }
+
         WEB_DRIVER.quit();
     }
 
@@ -163,6 +199,14 @@ public class NetflixService {
             Thread.sleep(1000);
         }
         log.info("Scroll Success");
+
+        Thread.sleep(1000);
+
+        // 모달창 제거용 클릭 이벤트 발생
+        WebElement anyElement = WEB_DRIVER.findElement(By.cssSelector("body")); // 화면의 아무 부분이나 선택
+        anyElement.click();
+
+        Thread.sleep(1000);
     }
 
 }

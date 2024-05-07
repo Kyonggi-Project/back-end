@@ -18,6 +18,7 @@ public class OTTContents {
     @Id
     private String id;
     private String title;
+    private List<String> subtitleList = new ArrayList<>();
     private int year;
     private String posterImg;
     private String backgroundImg;
@@ -43,6 +44,10 @@ public class OTTContents {
         this.score = score;
     }
 
+
+    public void updateRakingScore(int rankingScore){
+        this.rankingScore = rankingScore;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -54,13 +59,13 @@ public class OTTContents {
     @Override
     public int hashCode() {
         return Objects.hash(id);
-    }
 
     @Builder
-    public OTTContents(String title, int year, String posterImg, String backgroundImg, List<String> genreList, HashMap<String, String> metaData,
+    public OTTContents(String title, List<String> subtitleList, int year, String posterImg, String backgroundImg, List<String> genreList, HashMap<String, String> metaData,
                        String synopsis, HashMap<String, String> actorList, HashMap<String, String> staffList, double score, int reviewCount,
                        float rating){
         this.title = title;
+        this.subtitleList = subtitleList;
         this.year = year;
         this.posterImg = posterImg;
         this.backgroundImg = backgroundImg;
