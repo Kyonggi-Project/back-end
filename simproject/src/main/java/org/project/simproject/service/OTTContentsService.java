@@ -21,6 +21,10 @@ public class OTTContentsService {
     private final OTTContentsRepository ottContentsRepository;
     private final RankingInfoRepository rankingInfoRepository;
 
+    public OTTContents findById(String id) {
+        return ottContentsRepository.findById(id).orElse(null);
+    }
+
     // 인기순위 TOP 10
     public List<OTTContents> getTop10Contents() {
         return getAllContentsByRankingInfo().subList(0, 10);

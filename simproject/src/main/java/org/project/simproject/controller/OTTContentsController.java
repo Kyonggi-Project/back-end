@@ -7,10 +7,7 @@ import org.project.simproject.domain.OTTContents;
 import org.project.simproject.service.OTTContentsService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -21,6 +18,14 @@ import java.util.List;
 public class OTTContentsController {
 
     private final OTTContentsService ottContentsService;
+
+    @Operation(summary = "작품 상세페이지", description = "작품 상세페이지용 OTT Contents")
+    @GetMapping("/{id}")
+    public ResponseEntity<OTTContents> getOTTContents(@PathVariable("id") String id) {
+        OTTContents ottContents = ottContentsService.findById(id);
+
+        return ResponseEntity.status(HttpStatus.OK).body(ottContents);
+    }
 
     @Operation(summary = "인기 TOP 10", description = "서비스 자체 인기 순위 TOP 10")
     @GetMapping("/top10")
