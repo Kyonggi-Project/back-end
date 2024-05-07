@@ -45,6 +45,7 @@ public class OTTContentsService {
 
         List<OTTContents> contentsByGenreList = ottContentsRepository.findAllByGenreListContainsIgnoreCase(genre);
         contentsByGenreList.sort(new OTTContentsScoreComparator());
+        log.info("Sorting contents by genre");
 
         int i = 0;
         while (ottContentsList.size() <= 20) {
@@ -52,6 +53,7 @@ public class OTTContentsService {
             if (!ottContentsList.contains(ottContents)) {
                 ottContentsList.add(ottContents);
             }
+            i++;
         }
 
         return ottContentsList;
@@ -65,6 +67,7 @@ public class OTTContentsService {
             ottContentsList.addAll(rankingInfo.getRankingList());
         }
         ottContentsList.sort(new OTTContentsRankingScoreComparator());
+        log.info("Get All Contents By Ranking Info");
         return ottContentsList.stream().distinct().toList();
     }
 
