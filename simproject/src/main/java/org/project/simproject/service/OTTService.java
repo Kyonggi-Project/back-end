@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.project.simproject.domain.OTTContents;
 import org.project.simproject.repository.mongoRepo.OTTContentsRepository;
+import org.project.simproject.util.OTTContentsCustomRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -13,6 +14,8 @@ import java.math.RoundingMode;
 @RequiredArgsConstructor
 public class OTTService {
     private final OTTContentsRepository ottRepository;
+
+    private final OTTContentsCustomRepository ottContentsCustomRepository;
 
     public OTTContents findById(String id){
         return ottRepository.findById(id)
@@ -65,5 +68,9 @@ public class OTTService {
                 new BigDecimal(score / reviewCount).setScale(2, RoundingMode.HALF_UP).doubleValue());
 
         ottRepository.save(ott);
+    }
+
+    public void initializeRankingScore() {
+        ottContentsCustomRepository.initializeRankingScore();
     }
 }
