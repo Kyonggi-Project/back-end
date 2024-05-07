@@ -34,6 +34,10 @@ public class DisneyRankingCrawlingService {
 
     private JavascriptExecutor jse;
 
+    private int[] scoreMatrix = {25, 18, 15, 12, 10, 8, 6, 4, 2, 1};
+
+    private int rate = 4;
+
     private final RankingInfoRepository rankingInfoRepository;
 
     private final OTTContentsRepository ottRepository;
@@ -86,6 +90,7 @@ public class DisneyRankingCrawlingService {
         for(WebElement rank : ranking){
             if(ottRepository.existsOTTByTitle(rank.getText())){
                 OTTContents movie = ottRepository.findOTTByTitle(rank.getText());
+                movie.setRankingScore(scoreMatrix[count] * rate);
                 rankingList.add(movie);
                 count++;
                 if(count == 10) break;
@@ -112,6 +117,7 @@ public class DisneyRankingCrawlingService {
         for(WebElement rank : ranking){
             if(ottRepository.existsOTTByTitle(rank.getText())){
                 OTTContents movie = ottRepository.findOTTByTitle(rank.getText());
+                movie.setRankingScore(scoreMatrix[count] * rate);
                 rankingInfo.addRankingList(movie);
                 count++;
                 if(count == 10) break;
