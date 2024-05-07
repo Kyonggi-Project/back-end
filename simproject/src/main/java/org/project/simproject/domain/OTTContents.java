@@ -45,8 +45,9 @@ public class OTTContents {
     }
 
 
-    public void updateRakingScore(int rankingScore){
-        this.rankingScore = rankingScore;
+    public void updateRakingScore(int rankingScore) {
+        this.rankingScore += rankingScore;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -58,7 +59,8 @@ public class OTTContents {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+            return Objects.hash(id);
+    }
 
     @Builder
     public OTTContents(String title, List<String> subtitleList, int year, String posterImg, String backgroundImg, List<String> genreList, HashMap<String, String> metaData,
