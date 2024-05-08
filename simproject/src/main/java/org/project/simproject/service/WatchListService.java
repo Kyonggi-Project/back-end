@@ -48,4 +48,11 @@ public class WatchListService {
 
         watchListRepository.delete(watchList);
     }
+
+    public boolean isBookmarked(OTTContents ottContents, String email){
+        WatchList watchList = watchListRepository.findWatchListByEmail(email);
+
+        if(watchList.getBookmark().contains(ottContents)) return true;
+        else return false;
+    }
 }
