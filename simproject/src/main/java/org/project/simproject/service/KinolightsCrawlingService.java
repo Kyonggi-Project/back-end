@@ -1,13 +1,10 @@
 package org.project.simproject.service;
 
 import jakarta.transaction.Transactional;
-import lombok.Builder;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.openqa.selenium.*;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -40,6 +37,8 @@ public class KinolightsCrawlingService {
     private String KINOLIGHTS_URL;
 
     String[] OTT_ARRAY = new String[7];
+
+    List<String> hrefListInDB = new ArrayList<>();
 
     private final OTTContentsRepository ottContentsRepository;
 
@@ -75,11 +74,7 @@ public class KinolightsCrawlingService {
             // DB 중복검사 후, href 수집
             int count = 0;
             List<WebElement> movieList = WEB_DRIVER.findElements(By.cssSelector("div.MovieItem.grid"));
-//            List<WebElement> crawlingList = collectCrawlingList(movieList, ott);
-            CrawlingInfo crawlingInfo = collectCrawlingList(movieList, ott);
-            List<WebElement> crawlingList = crawlingInfo.getCralwingElementList();
-            List<String> crawlingPosterList = crawlingInfo.getPosterImgList();
-            List<String> hrefList = collectHref(crawlingList);
+            List<String> hrefList = collectHref(movieList, ott);
 
             for (String hrefLink : hrefList) {
                 WEB_DRIVER.get(hrefLink);
@@ -93,11 +88,11 @@ public class KinolightsCrawlingService {
                 try {
                     title = getTitle();
                 } catch (Exception e) {
-                    log.error("Error in getTitle(): " + e.getMessage());
-                    continue;
+                    title = getTitle();
                 }
 
-                OTTContents movie = crawlingInfo(count++, title, crawlingPosterList, ott);
+                OTTContents movie = crawlingInfo(count++, title, ott);
+                movie.setHref(hrefLink);
                 movie.setScore(0);
                 movie.setReviewCount(0);
                 movie.setRating(0);
@@ -198,6 +193,12 @@ public class KinolightsCrawlingService {
         OTT_ARRAY[5] = "Wavve";
         OTT_ARRAY[6] = "Disney Plus";
 
+        hrefListInDB.clear();
+        List<OTTContents> AllOTTContents = ottContentsRepository.findAll();
+        for (OTTContents ottContents : AllOTTContents) {
+            hrefListInDB.add(ottContents.getHref());
+        }
+
         log.info("Initialize Success");
     }
 
@@ -223,51 +224,20 @@ public class KinolightsCrawlingService {
         log.info("Scroll Success");
     }
 
-    public CrawlingInfo collectCrawlingList(List<WebElement> movieList, String ott) {
-        List<WebElement> crawlingElementList = new ArrayList<>();
-        List<String> crawlingPosterList = new ArrayList<>();
-
-        for (WebElement movieElement : movieList) {
-            String title = movieElement.findElement(By.cssSelector("div.title")).getText();
-            String posterImgUrl;
-            while (true) {
-                posterImgUrl = movieElement.findElement(By.cssSelector("div.poster > img")).getAttribute("data-src");
-                if (posterImgUrl != null) break;
-            }
-
-            /*DB 중복 여부 확인
-             * 같은 title의 OTTContents가 여러 개인 경우 대비,
-             * posterImg 포함 체크
-             * */
-            if (ottContentsRepository.existsOTTContentsByTitleAndPosterImg(title, posterImgUrl)) {
-                OTTContents updateMovie = ottContentsRepository.findOTTContentsByTitleAndPosterImg(title, posterImgUrl);
-                updateMovie.addOTTList(ott);
-                ottContentsRepository.save(updateMovie);
-            } else {
-                crawlingElementList.add(movieElement);
-                crawlingPosterList.add(posterImgUrl);
-            }
-        }
-
-        CrawlingInfo crawlingInfo = CrawlingInfo.builder()
-                .cralwingElementList(crawlingElementList)
-                .posterImgList(crawlingPosterList)
-                .build();
-
-        log.info("[" + ott + "] CrawlingList collect Success");
-        return crawlingInfo;
-    }
-
-    public List<String> collectHref(List<WebElement> elementList) {
-
-//        log.info("Get MovieList Success");
-//        log.info("Start get Info");
-
+    public List<String> collectHref(List<WebElement> elementList, String ott) {
         List<String> hrefList = new ArrayList<>();
 
         for (WebElement element : elementList) {
-            hrefList.add(element.findElement(By.tagName("a")).getAttribute("href"));
+            String href = element.findElement(By.tagName("a")).getAttribute("href");
+            if (!hrefListInDB.contains(href)) {
+                hrefList.add(href);
+            } else {
+                OTTContents ottContents = ottContentsRepository.findOTTContentsByHref(href);
+                ottContents.addOTTList(ott);
+                ottContentsRepository.save(ottContents);
+            }
         }
+        log.info("Collect Href Successs");
 
         return hrefList;
     }
@@ -283,25 +253,22 @@ public class KinolightsCrawlingService {
         return titleElement.getText();
     }
 
-    public OTTContents crawlingInfo(int count, String title, List<String> crawlingPosterList, String ott) {
+    public OTTContents crawlingInfo(int count, String title, String ott) {
         List<String> subtitleList = new ArrayList<>();
         String subtitle = title.replaceAll(" ", "");
         subtitleList.add(subtitle);
 
-        String posterImgUrl = crawlingPosterList.get(count);
-/*        String posterImgUrl;
+        String posterImgUrl;
         while (true) {
             posterImgUrl = WEB_DRIVER.findElement(By.className("movie-poster")).getAttribute("data-src");
             if (posterImgUrl != null) break;
-        }*/
-
-//        String backgroundImgUrl = WEB_DRIVER.findElement(By.cssSelector("div.backdrop img")).getAttribute("data-src");
-
-        String backgroundImgUrl;
-        while (true) {
-            backgroundImgUrl = WEB_DRIVER.findElement(By.cssSelector("div.backdrop img")).getAttribute("data-src");
-            if (backgroundImgUrl != null) break;
         }
+        posterImgUrl = posterImgUrl.replace("/m/", "/original/");
+        posterImgUrl = posterImgUrl.replace(".webp", ".jpeg");
+
+        String backgroundImgUrl = WEB_DRIVER.findElement(By.cssSelector("div.backdrop img")).getAttribute("data-src");
+        backgroundImgUrl = backgroundImgUrl.replace("/m/", "/original/");
+        backgroundImgUrl = backgroundImgUrl.replace(".webp", ".jpeg");
 
         WebElement metadataYearElement = WEB_DRIVER.findElement(By.cssSelector("p.metadata"));
         int year = Integer.parseInt(metadataYearElement.findElement(By.cssSelector("span.metadata-item:last-child")).getText());
@@ -342,7 +309,7 @@ public class KinolightsCrawlingService {
         }
 
         // 배우 정보 저장
-        HashMap<String, String> actorCharacterMap = new HashMap<>();
+        LinkedHashMap<String, String> actorCharacterMap = new LinkedHashMap<>();
         if (!WEB_DRIVER.findElements(By.cssSelector("div.person.list__avatar")).isEmpty()) {
 //            log.info("Start Crawling Actors");
             WebElement actorList = WEB_DRIVER.findElement(By.cssSelector("div.person__actor"));
@@ -370,7 +337,7 @@ public class KinolightsCrawlingService {
         }
 
         // 제작진 정보 저장
-        HashMap<String, String> staffMap = new HashMap<>();
+        LinkedHashMap<String, String> staffMap = new LinkedHashMap<>();
         if (!WEB_DRIVER.findElements(By.cssSelector("div.staff")).isEmpty()) {
 //            log.info("Start Crawling Staffs");
             WebElement staffList = WEB_DRIVER.findElement(By.cssSelector("div.person__staff"));
@@ -408,21 +375,8 @@ public class KinolightsCrawlingService {
                 .build();
         movie.addOTTList(ott);
 
-        log.info("[" + ott + "] " + count + ": [" + title + "] (" + year + ")" + posterImgUrl);
+        log.info("[" + ott + "] " + count + ": [" + title + "] (" + year + ")");
 
         return movie;
-    }
-}
-
-@Getter
-@Setter
-class CrawlingInfo {
-    List<WebElement> cralwingElementList = new ArrayList<>();
-    List<String> posterImgList = new ArrayList<>();
-
-    @Builder
-    public CrawlingInfo(List<WebElement> cralwingElementList, List<String> posterImgList) {
-        this.cralwingElementList = cralwingElementList;
-        this.posterImgList = posterImgList;
     }
 }

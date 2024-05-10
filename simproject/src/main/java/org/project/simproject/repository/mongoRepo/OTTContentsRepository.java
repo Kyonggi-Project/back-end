@@ -10,9 +10,8 @@ import java.util.List;
 public interface OTTContentsRepository extends MongoRepository<OTTContents, String> {
     OTTContents findOTTByTitle(String title);
     List<OTTContents> findAllByGenreListContainsIgnoreCase(String genre);
-    OTTContents findOTTContentsByTitleAndPosterImg(String title, String posterImg);
     List<OTTContents> findAllByTitle(String title);
     List<OTTContents> findAllByTitleContainsIgnoreCaseAndSubtitleListContainsIgnoreCase(String title, String subtitle);
+    OTTContents findOTTContentsByHref(String href);
     boolean existsOTTByTitle(String title);
-    boolean existsOTTContentsByTitleAndPosterImg(String title, String posterImg);
 }

@@ -4,10 +4,7 @@ import jakarta.persistence.Id;
 import lombok.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Document(collection = "ottdata")
 @Getter
@@ -17,6 +14,7 @@ import java.util.Objects;
 public class OTTContents {
     @Id
     private String id;
+    private String href;
     private String title;
     private List<String> subtitleList = new ArrayList<>();
     private int year;
@@ -25,8 +23,8 @@ public class OTTContents {
     private List<String> genreList = new ArrayList<>();
     private HashMap<String, String> metaData = new HashMap<>();
     private String synopsis;
-    private HashMap<String, String> actorList = new HashMap<>();
-    private HashMap<String, String> staffList = new HashMap<>();
+    private LinkedHashMap<String, String> actorList = new LinkedHashMap<>();
+    private LinkedHashMap<String, String> staffList = new LinkedHashMap<>();
     private List<String> ottList = new ArrayList<>();
     private List<String> tagList = new ArrayList<>();
     private double score;
@@ -65,7 +63,7 @@ public class OTTContents {
 
     @Builder
     public OTTContents(String title, List<String> subtitleList, int year, String posterImg, String backgroundImg, List<String> genreList, HashMap<String, String> metaData,
-                       String synopsis, HashMap<String, String> actorList, HashMap<String, String> staffList, double score, int reviewCount,
+                       String synopsis, LinkedHashMap<String, String> actorList, LinkedHashMap<String, String> staffList, double score, int reviewCount,
                        float rating){
         this.title = title;
         this.subtitleList = subtitleList;
