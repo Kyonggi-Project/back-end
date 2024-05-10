@@ -14,4 +14,5 @@ public interface OTTContentsRepository extends MongoRepository<OTTContents, Stri
     List<OTTContents> findAllByTitleContainsIgnoreCaseAndSubtitleListContainsIgnoreCase(String title, String subtitle);
     OTTContents findOTTContentsByHref(String href);
     boolean existsOTTByTitle(String title);
+    boolean existsOTTContentsByHref(String href);
 }

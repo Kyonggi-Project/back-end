@@ -62,9 +62,10 @@ public class OTTContents {
     }
 
     @Builder
-    public OTTContents(String title, List<String> subtitleList, int year, String posterImg, String backgroundImg, List<String> genreList, HashMap<String, String> metaData,
+    public OTTContents(String href, String title, List<String> subtitleList, int year, String posterImg, String backgroundImg, List<String> genreList, HashMap<String, String> metaData,
                        String synopsis, LinkedHashMap<String, String> actorList, LinkedHashMap<String, String> staffList, double score, int reviewCount,
                        float rating){
+        this.href = href;
         this.title = title;
         this.subtitleList = subtitleList;
         this.year = year;

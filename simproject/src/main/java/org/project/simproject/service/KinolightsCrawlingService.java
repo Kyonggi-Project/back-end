@@ -84,18 +84,13 @@ public class KinolightsCrawlingService {
                     closeModal();
                 }
 
-                String title;
-                try {
-                    title = getTitle();
-                } catch (Exception e) {
-                    title = getTitle();
-                }
+                String title = getTitle();
 
-                OTTContents movie = crawlingInfo(count++, title, ott);
-                movie.setHref(hrefLink);
+                OTTContents movie = crawlingInfo(count++, title, hrefLink, ott);
                 movie.setScore(0);
                 movie.setReviewCount(0);
                 movie.setRating(0);
+                movie.setRankingScore(0);
                 ottContentsRepository.save(movie);
             }
         }
@@ -104,7 +99,7 @@ public class KinolightsCrawlingService {
         WEB_DRIVER.quit();
     }
 
-/*    @Transactional
+    @Transactional
     public void todayNewMovies() throws InterruptedException {
         init();
 
@@ -128,7 +123,14 @@ public class KinolightsCrawlingService {
                 log.info("오늘의 " + ott + " 신작 크롤링 시작");
                 WebElement ottNewMovieWrap = newMovieSection.findElement(By.cssSelector("div.contents-wrap"));
                 List<WebElement> ottNewMovies = ottNewMovieWrap.findElements(By.cssSelector("div.MovieItem.xs.eg-flick-panel"));
-                List<String> hrefList = collectHref(ottNewMovies);
+//                List<String> hrefList = collectHref(ottNewMovies, ott);
+
+                List<String> hrefList = new ArrayList<>();
+                for (WebElement element : ottNewMovies) {
+                    String href = element.findElement(By.tagName("a")).getAttribute("href");
+                    hrefList.add(href);
+                }
+
                 for (String hrefLink : hrefList) {
                     WEB_DRIVER.get(hrefLink);
 
@@ -146,20 +148,22 @@ public class KinolightsCrawlingService {
                         continue;
                     }
 
-                    OTTContents movie = crawlingInfo(count++, title, ott);
+                    OTTContents movie = crawlingInfo(count++, title, hrefLink, ott);
 
-                    *//*DB에 해당 Movie가 저장되어 있다면,
-                    DB에 저장되어 있는 Score, ReviewCount, Rating을 이용해 새로 저장*//*
-                    if (ottContentsRepository.existsOTTByTitle(title)) {
-                        OTTContents updateMovie = ottContentsRepository.findOTTByTitle(title);
+                    /*DB에 해당 Movie가 저장되어 있다면,
+                    DB에 저장되어 있는 Score, ReviewCount, Rating을 이용해 새로 저장*/
+                    if (hrefListInDB.contains(hrefLink)) {
+                        OTTContents updateMovie = ottContentsRepository.findOTTContentsByHref(hrefLink);
                         movie.setScore(updateMovie.getScore());
                         movie.setReviewCount(updateMovie.getReviewCount());
                         movie.setRating(updateMovie.getRating());
+                        movie.setRankingScore(updateMovie.getRankingScore());
                         ottContentsRepository.delete(updateMovie);    // 새로 저장하게 되므로, 이전 기록은 삭제
                     } else {    // 만약 DB에 존재하지 않는다면, 모두 0으로 초기화
                         movie.setScore(0);
                         movie.setReviewCount(0);
                         movie.setRating(0);
+                        movie.setRankingScore(0);
                     }
                     ottContentsRepository.save(movie);
                     newMovieTitleList.add(title);
@@ -169,7 +173,77 @@ public class KinolightsCrawlingService {
 
         log.info("Crawling New Movies Success");
         WEB_DRIVER.quit();
-    }*/
+    }
+
+    public void updateAllOTTContents() throws InterruptedException {
+        init();
+
+        for (int i = 2; i < 7; i++) {
+            if (i == 3) continue;   // Tving 건너뛰기
+
+            /* OTT 버튼 클릭 시, 간헐적 에러 발생
+             * 에러 발생 시, catch 통해 재시도
+             * */
+            try {
+                WEB_DRIVER.get(KINOLIGHTS_URL + "/discover/explore");
+                Thread.sleep(5000);
+                WebElement buttonElement = WEB_DRIVER.findElement(By.xpath("//*[@id=\"contents\"]/section/div[2]/div/div/div/div[" + i + "]/button"));
+                JS_EXECUTOR.executeScript("arguments[0].click();", buttonElement);
+            } catch (NoSuchElementException e) {
+                // 버튼 클릭 실패 시, 재시도
+                WEB_DRIVER.get(KINOLIGHTS_URL + "/discover/explore");
+                Thread.sleep(5000);
+                WebElement buttonElement = WEB_DRIVER.findElement(By.xpath("//*[@id=\"contents\"]/section/div[2]/div/div/div/div[" + i + "]/button"));
+                JS_EXECUTOR.executeScript("arguments[0].click();", buttonElement);
+            }
+
+            String ott = OTT_ARRAY[i];
+
+            log.info(ott + " Crawling Start");
+
+            scroll();
+
+            // DB 중복검사 후, href 수집
+            int count = 0;
+            List<WebElement> movieList = WEB_DRIVER.findElements(By.cssSelector("div.MovieItem.grid"));
+            List<String> hrefList = new ArrayList<>();
+            for (WebElement element : movieList) {
+                String href = element.findElement(By.tagName("a")).getAttribute("href");
+                hrefList.add(href);
+            }
+
+            for (String hrefLink : hrefList) {
+                WEB_DRIVER.get(hrefLink);
+
+                // 모달창 생성 시, 모달창 닫기
+                if (!WEB_DRIVER.findElements(By.cssSelector("div.modal-layer")).isEmpty()) {
+                    closeModal();
+                }
+
+                String title = getTitle();
+
+                OTTContents movie = crawlingInfo(count++, title, hrefLink, ott);
+
+                if (ottContentsRepository.existsOTTContentsByHref(hrefLink)) {
+                    OTTContents updateMovie = ottContentsRepository.findOTTContentsByHref(hrefLink);
+                    movie.setScore(updateMovie.getScore());
+                    movie.setReviewCount(updateMovie.getReviewCount());
+                    movie.setRating(updateMovie.getRating());
+                    movie.setRankingScore(updateMovie.getRankingScore());
+                    ottContentsRepository.delete(updateMovie);
+                } else {
+                    movie.setScore(0);
+                    movie.setReviewCount(0);
+                    movie.setRating(0);
+                    movie.setRankingScore(0);
+                }
+                ottContentsRepository.save(movie);
+            }
+        }
+
+        // 웹 드라이버 종료
+        WEB_DRIVER.quit();
+    }
 
     public void init() {
         System.setProperty("webdriver.chrome.driver", WEB_DRIVER_PATH);
@@ -249,11 +323,18 @@ public class KinolightsCrawlingService {
     }
 
     public String getTitle() {
-        WebElement titleElement = WAIT.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("div.movie-title-wrap h2.title-kr")));
-        return titleElement.getText();
+        String title;
+        try {
+            WebElement titleElement = WAIT.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("div.movie-title-wrap h2.title-kr")));
+            title = titleElement.getText();
+        } catch (Exception e) {
+            WebElement titleElement = WAIT.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("div.movie-title-wrap h2.title-kr")));
+            title = titleElement.getText();
+        }
+        return title;
     }
 
-    public OTTContents crawlingInfo(int count, String title, String ott) {
+    public OTTContents crawlingInfo(int count, String title, String href, String ott) {
         List<String> subtitleList = new ArrayList<>();
         String subtitle = title.replaceAll(" ", "");
         subtitleList.add(subtitle);
@@ -362,6 +443,7 @@ public class KinolightsCrawlingService {
 
         // OTTContents 객체 생성 및 데이터 설정
         OTTContents movie = OTTContents.builder()
+                .href(href)
                 .title(title)
                 .subtitleList(subtitleList)
                 .year(year)
