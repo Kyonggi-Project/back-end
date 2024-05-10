@@ -8,14 +8,20 @@ import org.project.simproject.domain.User;
 @NoArgsConstructor
 public class UserResponse {
     private String nickname;
-    private int articlesCount;
     private int followers;
     private int following;
+    private boolean isFollowed;
 
     public UserResponse(User user){
         this.nickname = user.getNickname();
-        this.articlesCount = user.getArticlesCount();
         this.followers = user.getFollowers().size();
         this.following = user.getFollowing().size();
+    }
+
+    public UserResponse(User user, boolean isFollowed){
+        this.nickname = user.getNickname();
+        this.followers = user.getFollowers().size();
+        this.following = user.getFollowing().size();
+        this.isFollowed = isFollowed;
     }
 }
