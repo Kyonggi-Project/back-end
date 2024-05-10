@@ -31,6 +31,14 @@ public class OTTReviewService {
                 .orElseThrow(() -> new IllegalArgumentException("Not Found Review"));
     }
 
+    public OTTReviewResponse findByIdForDTO(Long id){
+        OTTReview ottReview = ottReviewRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Not Found Review"));
+        OTTContents ottContents = ottService.findById(ottReview.getOttId());
+
+        return new OTTReviewResponse(ottReview, ottContents);
+    }
+
     public List<OTTReviewResponse> findByOTTId(String ottId){
         return ottReviewRepository.findOTTReviewByOttIdOrderByLikesCountDesc(ottId)
                 .stream()

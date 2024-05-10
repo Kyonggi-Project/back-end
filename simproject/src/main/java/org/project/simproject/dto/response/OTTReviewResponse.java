@@ -3,6 +3,7 @@ package org.project.simproject.dto.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.project.simproject.domain.OTTContents;
 import org.project.simproject.domain.OTTReview;
 
 import java.time.LocalDateTime;
@@ -26,6 +27,10 @@ public class OTTReviewResponse {
 
     private double score;
 
+    private String contentsTitle;
+
+    private String backgroundImg;
+
     public OTTReviewResponse(OTTReview ottReview){
         this.id = ottReview.getId();
         this.content = ottReview.getContent();
@@ -34,5 +39,17 @@ public class OTTReviewResponse {
         this.updateAt = ottReview.getUpdatedAt();
         this.likesCount = ottReview.getLikesCount();
         this.score = ottReview.getScore();
+    }
+
+    public OTTReviewResponse(OTTReview ottReview, OTTContents ottContents){
+        this.id = ottReview.getId();
+        this.content = ottReview.getContent();
+        this.author = ottReview.getUserId().getNickname();
+        this.creatAt = ottReview.getCreatedAt();
+        this.updateAt = ottReview.getUpdatedAt();
+        this.likesCount = ottReview.getLikesCount();
+        this.score = ottReview.getScore();
+        this.contentsTitle = ottContents.getTitle();
+        this.backgroundImg = ottContents.getBackgroundImg();
     }
 }

@@ -5,14 +5,14 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.project.simproject.domain.OTTContents;
 import org.project.simproject.domain.User;
+import org.project.simproject.domain.WatchList;
 import org.project.simproject.service.OTTService;
 import org.project.simproject.service.UserService;
 import org.project.simproject.service.WatchListService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -55,5 +55,13 @@ public class WatchListController {
             return ResponseEntity.internalServerError()
                     .body("WatchList delete failed.");
         }
+    }
+
+    @Operation(summary = "WatchList 목록 보기", description = "WatchList Repository 불러오기 기능")
+    @GetMapping("/view")
+    public ResponseEntity<WatchList> getWatchList(@RequestParam String email){
+        WatchList watchList = watchListService.findByEmail(email);
+
+        return ResponseEntity.status(HttpStatus.OK).body(watchList);
     }
 }
