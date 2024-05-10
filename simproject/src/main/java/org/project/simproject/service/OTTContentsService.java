@@ -75,4 +75,7 @@ public class OTTContentsService {
         return ottContentsList.stream().distinct().toList();
     }
 
+    public List<OTTContents> getOTTContentsByTitle(String search) {
+        return ottContentsRepository.findAllByTitleContainsIgnoreCaseAndSubtitleListContainsIgnoreCase(search, search);
+    }
 }

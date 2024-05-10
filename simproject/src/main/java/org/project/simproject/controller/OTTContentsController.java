@@ -43,4 +43,12 @@ public class OTTContentsController {
         return ResponseEntity.status(HttpStatus.OK).body(contentsByGenreList);
     }
 
+    @Operation(summary = "작품 검색", description = "제목을 이용해 작품 검색")
+    @GetMapping("/search")
+    public ResponseEntity<List<OTTContents>> getOTTContentsByTitle(@RequestParam String search) {
+        List<OTTContents> contentsByGenreList = ottContentsService.getOTTContentsByTitle(search);
+
+        return ResponseEntity.status(HttpStatus.OK).body(contentsByGenreList);
+    }
+
 }
