@@ -19,6 +19,8 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Service
@@ -44,20 +46,28 @@ public class WavveCrawlingService {
 
     @Value("${wavve.url}")
     private String url;
-
     private RankingInfo series;
-
     private RankingInfo movie;
-
-    private String Popular = "'오늘의 TOP 20'";
-    private String Moive = "'오늘의 영화 TOP 20'";
-
+    private final int[] score = {25,18,15,12,10,8,6,4,2,1};
     public void crawlingMostWatchedWavve() throws InterruptedException {
+        try {
+            run();
+        } catch (Exception e) {
+            webDriver.quit();
+            run();
+        }
+    }
+    public void run() throws InterruptedException {
+        final String Popular = "'오늘의 TOP 20'";
+        final String Moive = "'오늘의 영화 TOP 20'";
         login(url);
+
+        Thread.sleep(1000);
 
         scroll();
 
-        webDriver.manage().timeouts().implicitlyWait(2, TimeUnit.SECONDS);
+        webDriver.manage().timeouts().implicitlyWait(7, TimeUnit.SECONDS);
+        Thread.sleep(1000);
 
         series = seriesRanking(Popular);
 
@@ -65,17 +75,6 @@ public class WavveCrawlingService {
 
         movie = movieRanking(Moive);
 
-//        for (RankingInfo result : rankingInfoRepository.findAll()) {
-//            System.out.println(result.getCategory());
-//            List<OTTContents> ottContents = result.getRankingList();
-//            System.out.println(result.getRankingList().size());
-//            for(OTTContents ott : ottContents) {
-//                if(ott == null) {
-//                    continue;
-//                }
-//                System.out.println(ott.getTitle());
-//            }
-//        }
         webDriver.quit();
     }
     @Transactional
@@ -86,6 +85,17 @@ public class WavveCrawlingService {
             RankingInfo Info = rankingInfoRepository.findRankingInfoByOttAndCategory(seriesRankingInfo.getOtt(), seriesRankingInfo.getCategory());      // 해당 RankingInfo 객체 찾기
             rankingInfoRepository.delete(Info);
         }
+
+        for(int i = 0; i < score.length; i++) {
+            OTTContents ottContents = seriesRankingInfo.getRankingList().get(i);
+            if (ottContents == null) {
+                continue;
+            } else {
+                int rank = score[i] * 5;
+                ottContents.updateRakingScore(rank);
+            }
+        }
+
         return rankingInfoRepository.save(seriesRankingInfo);
     }
     @Transactional
@@ -95,6 +105,24 @@ public class WavveCrawlingService {
         if (rankingInfoRepository.existsRankingInfoByOttAndCategory(movieRankingInfo.getOtt(), movieRankingInfo.getCategory())) { // 유무 검사
             RankingInfo Info = rankingInfoRepository.findRankingInfoByOttAndCategory(movieRankingInfo.getOtt(), movieRankingInfo.getCategory());      // 해당 RankingInfo 객체 찾기
             rankingInfoRepository.delete(Info);
+        }
+
+        for(int i = 0; i < score.length; i++) {
+            OTTContents ottContents = movieRankingInfo.getRankingList().get(i);
+            List<OTTContents> seriesRankingTop10 = series.getRankingList().subList(0,10);
+            if (ottContents == null) {
+                continue;
+            } else {
+                if (!seriesRankingTop10.contains(ottContents)) {
+                    movieRankingInfo.getRankingList().get(i).updateRakingScore((int) (score[i] * 0.7 * 5));
+                }
+                else {
+                    int seriesRank = seriesRankingTop10.indexOf(ottContents);
+                    int rank = (int) (score[i] * 0.7 * 5);
+                    int max_value = (rank > score[seriesRank] * 5) ? rank : score[seriesRank] * 5;
+                    movieRankingInfo.getRankingList().get(i).updateRakingScore(max_value);
+                }
+            }
         }
         return rankingInfoRepository.save(movieRankingInfo);
     }
@@ -109,13 +137,54 @@ public class WavveCrawlingService {
         List<OTTContents> ottContents = new ArrayList<>();
         for(String ottTitle:list) {
             if(ottRepository.existsOTTByTitle(ottTitle)) {
-                ottContents.add(ottRepository.findOTTByTitle(ottTitle));
+                List<OTTContents> ott = ottRepository.findAllOTTContentsByTitle(ottTitle);
+                if (ott.size() == 1) {
+                    OTTContents oneOTT = ott.get(0);
+                    ottContents.add(oneOTT);
+                }
+                else {
+                    for (OTTContents contents : ott) {
+                        if (contents.getOttList().contains("Wavve")) {
+                            ottContents.add(contents);
+                        }
+                    }
+                }
+            } else if (ottRepository.findOTTContentsBySubtitleListContaining(ottTitle.replace(" ","")) != null) {
+                OTTContents ott = ottRepository.findOTTContentsBySubtitleListContaining(ottTitle.replace(" ",""));
+                ottContents.add(ott);
+            } else if (ottRepository.findOTTContentsBySubtitleListContaining(ottTitle) != null) {
+                OTTContents ott = ottRepository.findOTTContentsBySubtitleListContaining(ottTitle.replace(" ",""));
+                ottContents.add(ott);
+            } else if (ottRepository.findOTTContentsBySubtitleListContaining(ottTitle.replace(" ","").replace("-",":")) != null) {
+                OTTContents ott = ottRepository.findOTTContentsBySubtitleListContaining(ottTitle.replace(" ","").replace("-",":"));
+                ottContents.add(ott);
+            } else if (ottRepository.findOTTContentsByTitleContaining(getPrefixBeforeName(ottTitle)) != null) {
+                log.info("Section getPrefix : "+ottTitle);
+                OTTContents ott = ottRepository.findOTTContentsByTitleContaining(getPrefixBeforeName(ottTitle));
+                String OTTReplace = ottTitle.replace(" ","");
+                Pattern pattern = Pattern.compile("^(!+)(.*?)(!+)$");
+                Matcher matcher = pattern.matcher(OTTReplace);
+                String filteringStr = "";
+                if(matcher.find()) {
+                    filteringStr = matcher.group(1);
+                }
+                if(OTTReplace.contains(""+ott.getYear())) {
+                    ottContents.add(ott);
+                } else if(ott.getSubtitleList().contains(filteringStr)) {
+                    ottContents.add(ott);
+                }  else {
+                    log.info("Null Title : " + ottTitle);
+                    ottContents.add(null);
+                }
+            } else {
+                log.info("Null Title : " + ottTitle);
+                ottContents.add(null);
             }
         }
-        log.info("OTTContents>>>>>"+ottContents);
         RankingInfo RankingInfo = new RankingInfo("Wavve",top20Container.getText(),ottContents);
         return RankingInfo;
     }
+
     public List<String> getList(String CrawlingStr) throws InterruptedException {
         List<String> list = new ArrayList<>();
         WebElement top20Container = webDriver.findElement(By.xpath("//*[contains(text(),"+CrawlingStr+")]"));
@@ -123,7 +192,7 @@ public class WavveCrawlingService {
         jse.executeScript("arguments[0].scrollIntoView(true);",top20Container);
         webDriver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         WebElement top20Contain = top20Container.findElement(By.xpath("//*[contains(text(),"+CrawlingStr+")]/../../../div[2]/div[1]/div[1]"));
-        List<WebElement> top20s = new ArrayList<WebElement>();
+        List<WebElement> top20s = new ArrayList<>();
         for(int j = 1; j <= 20; j++) {
             top20s.add(top20Contain.findElement(By.cssSelector("div:nth-child("+j+") > div:nth-child(1) > a > div:nth-child(2) > div:nth-child(1) > picture")));
             webDriver.manage().timeouts().implicitlyWait(1, TimeUnit.SECONDS);
@@ -146,7 +215,7 @@ public class WavveCrawlingService {
         log.info("wavve 로그인");
         webDriver.get(url);
         log.info("페이지 접속후 1초 로딩");
-        webDriver.manage().timeouts().implicitlyWait(3, TimeUnit.SECONDS);
+        webDriver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         webDriver.findElement(By.xpath("//*[@id=\"app\"]/div[1]/main/div/div[1]/form/fieldset/ul[1]/li[1]/label/input")).sendKeys(LOGINID);
         webDriver.findElement(By.xpath("//*[@id=\"app\"]/div[1]/main/div/div[1]/form/fieldset/ul[1]/li[2]/label/input")).sendKeys(LOINGPWD);
 
@@ -158,11 +227,6 @@ public class WavveCrawlingService {
         webDriver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
     }
     public void init() {
-        log.info("WEB_DRIVER_PATH: {}", WEB_DRIVER_PATH);
-        log.info("LOGINID: {}", LOGINID);
-        log.info("LOINGPWD: {}", LOINGPWD);
-        log.info("URL : {}", url);
-
         log.info("OTT 크롤링");
         System.setProperty("webdriver.chrome.driver", WEB_DRIVER_PATH);
 
@@ -170,7 +234,7 @@ public class WavveCrawlingService {
 
         chromeOptions.addArguments("--remote-allow-origins=*");     // 웹 브라우저 Origin 허용
         chromeOptions.addArguments("--disable-popup-blocking");     // 팝업창 안띄우게 설정
-//        chromeOptions.addArguments("headless");                     // 브라우저 안띄우게 설정
+        chromeOptions.addArguments("headless");                     // 브라우저 안띄우게 설정
         chromeOptions.addArguments("--disable-gpu");                // gpu 비활성화(headless 적용하기 위해 필요)
 
         webDriver = new ChromeDriver(chromeOptions);
@@ -189,6 +253,15 @@ public class WavveCrawlingService {
                 Thread.sleep(1000);
             }
             else break;
+        }
+    }
+    public static String getPrefixBeforeName (String input) {
+        // "데드맨" 문자열 찾기
+        int index = input.indexOf("(");
+        if (index != -1) { // "데드맨" 문자열이 발견되면
+            return input.substring(0, index).trim(); // 발견된 문자열 앞까지 잘라서 반환
+        } else { // "데드맨" 문자열이 없으면
+            return input.trim(); // 원본 문자열 그대로 반환
         }
     }
 }
