@@ -1,5 +1,6 @@
 package org.project.simproject.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
@@ -7,6 +8,8 @@ import org.hibernate.annotations.OnDeleteAction;
 import org.project.simproject.dto.request.ModifyOTTReviewRequest;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -34,6 +37,10 @@ public class OTTReview {
     private LocalDateTime updatedAt;
 
     private int likesCount;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "ottReviewId")
+    private List<Reply> replies = new ArrayList<>();
 
     private double score;
 

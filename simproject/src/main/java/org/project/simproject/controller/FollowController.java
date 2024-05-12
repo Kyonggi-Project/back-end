@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/follow")
@@ -16,9 +18,9 @@ public class FollowController {
     private final FollowService followService;
 
     @Operation(summary = "팔로우 추가 및 삭제", description = "팔로우 추가/삭제는 Service단에서 실행")
-    @PostMapping("/following/{followeeEmail}")
-    public ResponseEntity<Void> toggleFollow(@RequestParam Long id, @PathVariable String followeeEmail){
-        followService.toggle(id, followeeEmail);
+    @PostMapping("/following/{nickname}")
+    public ResponseEntity<Void> toggleFollow(Principal principal, @PathVariable String nickname){
+        followService.toggle(principal.getName(), nickname);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
