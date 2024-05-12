@@ -26,7 +26,7 @@ public class OTTReviewService {
     @Transactional
     public OTTReview save(User user, OTTContents ott, AddOTTReviewRequest request){
         ottService.addScore(ott, request.getScore());
-        return ottReviewRepository.save(request.toEntity(user, ott.getId()));
+        return ottReviewRepository.save(request.toEntity(user, ott.getId(), ott.getTitle()));
     }
 
     public OTTReview findById(Long id){

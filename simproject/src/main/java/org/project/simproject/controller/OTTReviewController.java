@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -31,10 +32,10 @@ public class OTTReviewController {
 
     @Operation(summary = "리뷰 추가하기", description = "특정 OTT 컨텐츠에 대한 리뷰 데이터 추가")
     @PostMapping("/add/{ottId}")
-    public ResponseEntity<OTTReview> save(@PathVariable String ottId, @RequestParam Long userId,
-                                          @RequestBody AddOTTReviewRequest request){
+    public ResponseEntity<OTTReview> save(@PathVariable String ottId,
+                                          @RequestBody AddOTTReviewRequest request, Principal principal){
         OTTContents ott = ottService.findById(ottId);
-        User user = userService.findById(userId);
+        User user = userService.findByEmail(principal.getName());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(ottReviewService.save(user, ott, request));
     }

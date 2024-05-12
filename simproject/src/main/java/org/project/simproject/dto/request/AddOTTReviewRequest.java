@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 import org.project.simproject.domain.OTTReview;
 import org.project.simproject.domain.User;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -15,12 +18,17 @@ public class AddOTTReviewRequest {
 
     private double score;
 
-    public OTTReview toEntity(User userId, String ottId){
+    private List<String> tags = new ArrayList<>();
+
+    private List<String> inputTags = new ArrayList<>();
+
+    public OTTReview toEntity(User userId, String ottId, String contentsTitle){
         return OTTReview.builder()
                 .content(content)
                 .score(score)
                 .userId(userId)
                 .ottId(ottId)
+                .contentsTitle(contentsTitle)
                 .build();
     }
 }

@@ -44,6 +44,7 @@ public class OTTReviewResponse {
         this.likesCount = ottReview.getLikesCount();
         this.repliesCount = ottReview.getReplies().size();
         this.score = ottReview.getScore();
+        this.contentsTitle = ottReview.getContentsTitle();
     }
 
     public OTTReviewResponse(OTTReview ottReview, OTTContents ottContents, boolean isLiked){
