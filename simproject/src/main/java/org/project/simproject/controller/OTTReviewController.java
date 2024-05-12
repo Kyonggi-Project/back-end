@@ -48,8 +48,8 @@ public class OTTReviewController {
 
     @Operation(summary = "특정 리뷰 보기", description = "특정 OTT 컨텐츠에 대한 특정 리뷰 데이터 보기")
     @GetMapping("/reviews/{id}")
-    public ResponseEntity<OTTReviewResponse> getOTTReview(@PathVariable Long id, @RequestParam String email){
-        User user = userService.findByEmail(email);
+    public ResponseEntity<OTTReviewResponse> getOTTReview(@PathVariable Long id, Principal principal){
+        User user = userService.findByEmail(principal.getName());
 
         return ResponseEntity.status(HttpStatus.OK).body(ottReviewService.findByIdForDTO(id, user));
     }
