@@ -31,6 +31,8 @@ public class OTTReviewResponse {
 
     private String backgroundImg;
 
+    private boolean isLiked;
+
     public OTTReviewResponse(OTTReview ottReview){
         this.id = ottReview.getId();
         this.content = ottReview.getContent();
@@ -41,7 +43,7 @@ public class OTTReviewResponse {
         this.score = ottReview.getScore();
     }
 
-    public OTTReviewResponse(OTTReview ottReview, OTTContents ottContents){
+    public OTTReviewResponse(OTTReview ottReview, OTTContents ottContents, boolean isLiked){
         this.id = ottReview.getId();
         this.content = ottReview.getContent();
         this.author = ottReview.getUserId().getNickname();
@@ -51,5 +53,6 @@ public class OTTReviewResponse {
         this.score = ottReview.getScore();
         this.contentsTitle = ottContents.getTitle();
         this.backgroundImg = ottContents.getBackgroundImg();
+        this.isLiked = isLiked;
     }
 }

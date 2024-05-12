@@ -8,6 +8,7 @@ import org.project.simproject.domain.User;
 import org.project.simproject.dto.request.AddOTTReviewRequest;
 import org.project.simproject.dto.request.ModifyOTTReviewRequest;
 import org.project.simproject.dto.response.OTTReviewResponse;
+import org.project.simproject.repository.entityRepo.OTTReviewLikeRepository;
 import org.project.simproject.repository.entityRepo.OTTReviewRepository;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +21,8 @@ public class OTTReviewService {
 
     private final OTTService ottService;
 
+    private final OTTReviewLikeRepository ottReviewLikeRepository;
+
     @Transactional
     public OTTReview save(User user, OTTContents ott, AddOTTReviewRequest request){
         ottService.addScore(ott, request.getScore());
@@ -31,12 +34,13 @@ public class OTTReviewService {
                 .orElseThrow(() -> new IllegalArgumentException("Not Found Review"));
     }
 
-    public OTTReviewResponse findByIdForDTO(Long id){
+    public OTTReviewResponse findByIdForDTO(Long id, User user){
         OTTReview ottReview = ottReviewRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found Review"));
         OTTContents ottContents = ottService.findById(ottReview.getOttId());
+        boolean isLiked = ottReviewLikeRepository.existsOTTReviewLikeByOttReviewIdAndUserId(ottReview, user);
 
-        return new OTTReviewResponse(ottReview, ottContents);
+        return new OTTReviewResponse(ottReview, ottContents, isLiked);
     }
 
     public List<OTTReviewResponse> findByOTTId(String ottId){
