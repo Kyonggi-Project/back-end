@@ -14,6 +14,8 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/watchList")
@@ -27,8 +29,8 @@ public class WatchListController {
 
     @Operation(summary = "WatchList toggle system", description = "WatchList 추가/삭제 토글 기능 실행")
     @PostMapping("/toggle")
-    public ResponseEntity<String> toggleWatchList(@RequestParam String ottContentsId, @RequestParam Long userId){
-        User user = userService.findById(userId);
+    public ResponseEntity<String> toggleWatchList(@RequestParam String ottContentsId, Principal principal){
+        User user = userService.findByEmail(principal.getName());
 
         try {
             OTTContents ottContents = ottService.findById(ottContentsId);
