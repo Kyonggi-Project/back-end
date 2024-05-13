@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface InputTagRepository extends JpaRepository<InputTag, Long> {
-
+    boolean existsInputTagByName(String name);
 }

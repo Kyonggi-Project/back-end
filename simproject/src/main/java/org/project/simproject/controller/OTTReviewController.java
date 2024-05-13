@@ -9,6 +9,7 @@ import org.project.simproject.domain.User;
 import org.project.simproject.dto.request.AddOTTReviewRequest;
 import org.project.simproject.dto.request.ModifyOTTReviewRequest;
 import org.project.simproject.dto.response.OTTReviewResponse;
+import org.project.simproject.service.InputTagService;
 import org.project.simproject.service.OTTReviewService;
 import org.project.simproject.service.OTTService;
 import org.project.simproject.service.UserService;
@@ -31,6 +32,8 @@ public class OTTReviewController {
 
     private final UserService userService;
 
+    private final InputTagService inputTagService;
+
     @Operation(summary = "리뷰 추가하기", description = "특정 OTT 컨텐츠에 대한 리뷰 데이터 추가")
     @PostMapping("/add/{ottId}")
     public ResponseEntity<OTTReview> save(@PathVariable String ottId,
@@ -38,6 +41,8 @@ public class OTTReviewController {
         try{
             OTTContents ott = ottService.findById(ottId);
             User user = userService.findByEmail(principal.getName());
+
+            inputTagService.save(request.getInputTags());
 
             return ResponseEntity.status(HttpStatus.CREATED).body(ottReviewService.save(user, ott, request));
         } catch (Exception e){
