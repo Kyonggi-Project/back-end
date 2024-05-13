@@ -62,7 +62,6 @@ public class OTTReviewService {
         OTTReview ottReview = ottReviewRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found Review"));
 
-        authorizeOTTReviewAuthor(ottReview, user);
 
         if(ottReview.getScore() == request.getScore()) ottReview.modify(request);
         else {
@@ -81,7 +80,6 @@ public class OTTReviewService {
                 .orElseThrow(() -> new IllegalArgumentException("Not Found Review"));
         OTTContents ott = ottService.findById(ottReview.getOttId());
 
-        authorizeOTTReviewAuthor(ottReview, user);
         ottService.deleteScore(ott, ottReview.getScore());
         ottReviewRepository.delete(ottReview);
     }

@@ -38,7 +38,6 @@ public class ReplyService {
     @Transactional
     public Reply modify(ModifyReplyRequest request, Long replyId, User user){
         Reply reply = findById(replyId);
-        authorizeReplyAuthor(reply, user);
 
         reply.modify(request);
 
@@ -48,7 +47,6 @@ public class ReplyService {
     @Transactional
     public void delete(Long replyId, User user){
         Reply reply = findById(replyId);
-        authorizeReplyAuthor(reply, user);
 
         replyRepository.delete(reply);
     }
