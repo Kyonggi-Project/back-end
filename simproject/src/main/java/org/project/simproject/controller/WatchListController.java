@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.attribute.UserPrincipalNotFoundException;
 import java.security.Principal;
 
 @RestController
@@ -29,8 +30,14 @@ public class WatchListController {
 
     @Operation(summary = "WatchList toggle system", description = "WatchList 추가/삭제 토글 기능 실행")
     @PostMapping("/toggle")
-    public ResponseEntity<String> toggleWatchList(@RequestParam String ottContentsId, Principal principal){
-        User user = userService.findByEmail(principal.getName());
+    public ResponseEntity<String> toggleWatchList(@RequestParam String ottContentsId, Principal principal) throws UserPrincipalNotFoundException {
+        User user;
+
+        try {
+            user = userService.findByEmail(principal.getName());
+        } catch (Exception e){
+            throw new UserPrincipalNotFoundException("인증 실패");
+        }
 
         try {
             OTTContents ottContents = ottService.findById(ottContentsId);
@@ -45,8 +52,14 @@ public class WatchListController {
 
     @Operation(summary = "WatchList delete system", description = "WatchList 삭제 기능 실행(WatchList 페이지에서 직접 삭제)")
     @PostMapping("/delete")
-    public ResponseEntity<String> deleteWatchList(@RequestParam String ottContentsId, @RequestParam Long userId){
-        User user = userService.findById(userId);
+    public ResponseEntity<String> deleteWatchList(@RequestParam String ottContentsId, Principal principal) throws UserPrincipalNotFoundException {
+        User user;
+
+        try {
+            user = userService.findByEmail(principal.getName());
+        } catch (Exception e){
+            throw new UserPrincipalNotFoundException("인증 실패");
+        }
 
         try {
             OTTContents ottContents = ottService.findById(ottContentsId);
@@ -61,9 +74,13 @@ public class WatchListController {
 
     @Operation(summary = "WatchList 목록 보기", description = "WatchList Repository 불러오기 기능")
     @GetMapping("/view")
-    public ResponseEntity<WatchList> getWatchList(@RequestParam String email){
-        WatchList watchList = watchListService.findByEmail(email);
+    public ResponseEntity<WatchList> getWatchList(Principal principal) throws UserPrincipalNotFoundException {
+        try {
+            WatchList watchList = watchListService.findByEmail(principal.getName());
 
-        return ResponseEntity.status(HttpStatus.OK).body(watchList);
+            return ResponseEntity.status(HttpStatus.OK).body(watchList);
+        } catch (Exception e){
+            throw new UserPrincipalNotFoundException("인증 실패");
+        }
     }
 }

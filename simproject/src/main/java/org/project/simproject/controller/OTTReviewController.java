@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.attribute.UserPrincipalNotFoundException;
 import java.security.Principal;
 import java.util.List;
 
@@ -33,11 +34,15 @@ public class OTTReviewController {
     @Operation(summary = "리뷰 추가하기", description = "특정 OTT 컨텐츠에 대한 리뷰 데이터 추가")
     @PostMapping("/add/{ottId}")
     public ResponseEntity<OTTReview> save(@PathVariable String ottId,
-                                          @RequestBody AddOTTReviewRequest request, Principal principal){
-        OTTContents ott = ottService.findById(ottId);
-        User user = userService.findByEmail(principal.getName());
+                                          @RequestBody AddOTTReviewRequest request, Principal principal) throws UserPrincipalNotFoundException {
+        try{
+            OTTContents ott = ottService.findById(ottId);
+            User user = userService.findByEmail(principal.getName());
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(ottReviewService.save(user, ott, request));
+            return ResponseEntity.status(HttpStatus.CREATED).body(ottReviewService.save(user, ott, request));
+        } catch (Exception e){
+            throw new UserPrincipalNotFoundException("인증 실패");
+        }
     }
 
     @Operation(summary = "리뷰 보기(OTT)", description = "특정 OTT 컨텐츠에 대한 모든 리뷰 데이터 보기")
@@ -48,18 +53,26 @@ public class OTTReviewController {
 
     @Operation(summary = "특정 리뷰 보기", description = "특정 OTT 컨텐츠에 대한 특정 리뷰 데이터 보기")
     @GetMapping("/reviews/{id}")
-    public ResponseEntity<OTTReviewResponse> getOTTReview(@PathVariable Long id, Principal principal){
-        User user = userService.findByEmail(principal.getName());
+    public ResponseEntity<OTTReviewResponse> getOTTReview(@PathVariable Long id, Principal principal) throws UserPrincipalNotFoundException {
+        try {
+            User user = userService.findByEmail(principal.getName());
 
-        return ResponseEntity.status(HttpStatus.OK).body(ottReviewService.findByIdForDTO(id, user));
+            return ResponseEntity.status(HttpStatus.OK).body(ottReviewService.findByIdForDTO(id, user));
+        } catch (Exception e){
+            throw new UserPrincipalNotFoundException("인증 실패");
+        }
     }
 
     @Operation(summary = "리뷰 보기(User)", description = "특정 유저에 대한 모든 리뷰 데이터 보기")
     @GetMapping("/reviews/user")
-    public ResponseEntity<List<OTTReviewResponse>> getOTTReviewByUser(@RequestParam Long userId){
-        User user = userService.findById(userId);
+    public ResponseEntity<List<OTTReviewResponse>> getOTTReviewByUser(Principal principal) throws UserPrincipalNotFoundException {
+        try {
+            User user = userService.findByEmail(principal.getName());
 
-        return ResponseEntity.status(HttpStatus.OK).body(ottReviewService.findByUserId(user));
+            return ResponseEntity.status(HttpStatus.OK).body(ottReviewService.findByUserId(user));
+        } catch (Exception e){
+            throw new UserPrincipalNotFoundException("인증 실패");
+        }
     }
 
     @Operation(summary = "리뷰 수정하기", description = "특정 OTT 컨텐츠에 대한 특정 리뷰 데이터 수정")

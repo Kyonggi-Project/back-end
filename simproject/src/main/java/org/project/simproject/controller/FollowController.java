@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.attribute.UserPrincipalNotFoundException;
 import java.security.Principal;
 
 @RestController
@@ -19,9 +20,13 @@ public class FollowController {
 
     @Operation(summary = "팔로우 추가 및 삭제", description = "팔로우 추가/삭제는 Service단에서 실행")
     @PostMapping("/following/{nickname}")
-    public ResponseEntity<Void> toggleFollow(Principal principal, @PathVariable String nickname){
-        followService.toggle(principal.getName(), nickname);
-        return ResponseEntity.status(HttpStatus.OK).build();
+    public ResponseEntity<Void> toggleFollow(Principal principal, @PathVariable String nickname) throws UserPrincipalNotFoundException {
+        try {
+            followService.toggle(principal.getName(), nickname);
+            return ResponseEntity.status(HttpStatus.OK).build();
+        } catch (Exception e){
+            throw new UserPrincipalNotFoundException("인증 실패");
+        }
     }
 
 }
