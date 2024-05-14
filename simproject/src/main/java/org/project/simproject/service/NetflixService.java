@@ -85,7 +85,7 @@ public class NetflixService {
             float rakingScoreRating = rankingScoreMatrix[categoryCount++];
 
             List<OTTContents> mostWatchedMovies = new ArrayList<>();
-            List<String> mostWatchedTitles = new ArrayList<>(); // 중복검사용 제목 저장
+            List<String> mostWatchedTitles = new ArrayList<>();     // 중복검사용 제목 저장
 
             // Top10 제목 크롤링
             int count = 0;  // Top10 크롤링을 위한 10개 카운팅 (순위와 같은 값)
@@ -111,15 +111,12 @@ public class NetflixService {
                 OTTContents movie;
                 if (ottContentsRepository.findAllByTitle(title).size() == 1) {
                     movie = ottContentsRepository.findOTTByTitle(title);
-                } else {
+                } else if (ottContentsRepository.findAllByTitle(title).size() > 1) {
                     List<OTTContents> ottContentsList = ottContentsRepository.findAllByTitle(title);
-                    movie = ottContentsList.get(0);
-                    for (OTTContents ottContents : ottContentsList) {
-                        if (ottContents.getOttList().contains("Netflix") && ottContents.getYear() > movie.getYear()) {
-                            movie = ottContents;
-                        }
-                    }
-
+                    movie = getLatestMovieByYear(ottContentsList);
+                } else {
+                    List<OTTContents> ottContentsList = ottContentsRepository.findAllBySubtitleListContainsIgnoreCase(title);
+                    movie = getLatestMovieByYear(ottContentsList);
                 }
 
                 float rakingScore = pointMatrix[count] * rakingScoreRating;
@@ -209,4 +206,13 @@ public class NetflixService {
         Thread.sleep(1000);
     }
 
+    public OTTContents getLatestMovieByYear(List<OTTContents> ottContentsList) {
+        OTTContents movie = ottContentsList.get(0);
+        for (OTTContents ottContents : ottContentsList) {
+            if (ottContents.getOttList().contains("Netflix") && ottContents.getYear() > movie.getYear()) {
+                movie = ottContents;
+            }
+        }
+        return movie;
+    }
 }
