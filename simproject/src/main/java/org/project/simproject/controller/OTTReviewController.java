@@ -86,6 +86,8 @@ public class OTTReviewController {
                                             @RequestBody ModifyOTTReviewRequest request){
         User user = userService.findById(userId);
 
+        inputTagService.save(request.getInputTags());
+
         return ResponseEntity.status(HttpStatus.OK).body(ottReviewService.modify(ottReviewId, user, request));
     }
 
