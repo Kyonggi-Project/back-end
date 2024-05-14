@@ -172,6 +172,19 @@ public class KinolightsCrawlingService {
         WEB_DRIVER.quit();
     }
 
+    /* 크롤링 되지 않은 작품 크롤링용 메소드
+    * href를 통해 크롤링
+    * OTT가 여러 개일 경우, MongoDB Compass를 이용해 수동으로 입력 바람 */
+    public void crawlingMovieByHref(String href, String ott) throws InterruptedException {
+        init();
+        WEB_DRIVER.get(href);
+        Thread.sleep(5000);
+        String title = getTitle();
+        OTTContents movie = crawlingInfo(0, title, href, ott);
+        saveNewMovie(movie, href);
+        WEB_DRIVER.quit();
+    }
+
     public void init() {
         System.setProperty("webdriver.chrome.driver", WEB_DRIVER_PATH);
 
