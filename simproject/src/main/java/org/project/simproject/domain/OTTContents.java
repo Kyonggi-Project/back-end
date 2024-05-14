@@ -26,6 +26,7 @@ public class OTTContents {
     private LinkedHashMap<String, String> actorList = new LinkedHashMap<>();
     private LinkedHashMap<String, String> staffList = new LinkedHashMap<>();
     private List<String> ottList = new ArrayList<>();
+    private HashMap<String, Integer> tagMap = new HashMap<>();
     private List<String> tagList = new ArrayList<>();
     private double score;
     private int reviewCount;
