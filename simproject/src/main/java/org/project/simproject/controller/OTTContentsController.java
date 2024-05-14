@@ -4,13 +4,16 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.project.simproject.domain.OTTContents;
+import org.project.simproject.dto.request.SentimentAnalysisRequest;
 import org.project.simproject.dto.response.OTTContentsResponse;
+import org.project.simproject.dto.response.SentimentAnalysisResponse;
 import org.project.simproject.service.OTTContentsService;
 import org.project.simproject.service.WatchListService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.nio.file.attribute.UserPrincipalNotFoundException;
 import java.security.Principal;
 import java.util.List;
@@ -44,6 +47,19 @@ public class OTTContentsController {
         } catch (Exception e){
             throw new UserPrincipalNotFoundException("인증 실패");
         }
+    }
+
+    @Operation(summary = "감정분석 이용 작품 추천", description = "메인페이지 모달창을 이용해 입력받은 문장을 통한 작품 추천")
+    @GetMapping("/sentiment")
+    public ResponseEntity<SentimentAnalysisResponse> getContentsListBySentimentAnalysis(@RequestBody SentimentAnalysisRequest request) throws IOException {
+        List<OTTContents> contentsByEmotion = ottContentsService.getContentsByEmotion(request.getEmotion());
+        List<OTTContents> contentsByClaim = ottContentsService.getContentsByClaim(request.getClaim());
+        SentimentAnalysisResponse response = SentimentAnalysisResponse.builder()
+                .contentsByEmotion(contentsByEmotion)
+                .contentsByClaim(contentsByClaim)
+                .build();
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @Operation(summary = "인기 TOP 10", description = "서비스 자체 인기 순위 TOP 10")
