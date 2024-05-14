@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.attribute.UserPrincipalNotFoundException;
 import java.security.Principal;
 
 @RestController
@@ -21,14 +22,18 @@ public class AuthorizeController {
 
     @Operation(summary = "사용자 인증", description = "특정 게시글의 작성자와 사용자의 일치 여부 확인")
     @GetMapping("/{author}")
-    public ResponseEntity<String> authorize(@PathVariable String author, Principal principal){
-        User user = userService.findByEmail(principal.getName());
+    public ResponseEntity<Boolean> authorize(@PathVariable String author, Principal principal) throws UserPrincipalNotFoundException {
+        try {
+            User user = userService.findByEmail(principal.getName());
 
-        if(AuthorizeUtil.authorizeByAuthor(author, user.getNickname())){
-            return ResponseEntity.status(HttpStatus.OK).body("Authorized Successfully");
-        }
-        else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authorized failed");
+            if(AuthorizeUtil.authorizeByAuthor(author, user.getNickname())){
+                return ResponseEntity.status(HttpStatus.OK).body(true);
+            }
+            else {
+                return ResponseEntity.status(HttpStatus.OK).body(false);
+            }
+        } catch (Exception e){
+            throw new UserPrincipalNotFoundException("인증 실패");
         }
     }
 }
