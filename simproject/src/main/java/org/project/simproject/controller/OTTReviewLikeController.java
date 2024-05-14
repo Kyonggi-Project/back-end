@@ -9,6 +9,9 @@ import org.project.simproject.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.attribute.UserPrincipalNotFoundException;
+import java.security.Principal;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/ottReview-like")
@@ -20,8 +23,14 @@ public class OTTReviewLikeController {
 
     @Operation(summary = "리뷰 좋아요 토글", description = "리뷰 좋아요 추가/취소 기능 실행")
     @PostMapping("/toggle/{ottReviewId}")
-    public ResponseEntity<String> toggleOTTReviewLike(@PathVariable Long ottReviewId, @RequestParam Long userId){
-        User user = userService.findById(userId);
+    public ResponseEntity<String> toggleOTTReviewLike(@PathVariable Long ottReviewId, Principal principal) throws UserPrincipalNotFoundException {
+        User user;
+
+        try {
+            user = userService.findByEmail(principal.getName());
+        } catch (Exception e){
+            throw new UserPrincipalNotFoundException("인증 실패");
+        }
 
         try{
             ottReviewLikeService.toggle(ottReviewId, user);

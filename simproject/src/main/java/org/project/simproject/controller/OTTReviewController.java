@@ -82,22 +82,30 @@ public class OTTReviewController {
 
     @Operation(summary = "리뷰 수정하기", description = "특정 OTT 컨텐츠에 대한 특정 리뷰 데이터 수정")
     @PutMapping("/modify/{ottReviewId}")
-    public ResponseEntity<OTTReview> modify(@PathVariable Long ottReviewId, @RequestParam Long userId,
-                                            @RequestBody ModifyOTTReviewRequest request){
-        User user = userService.findById(userId);
+    public ResponseEntity<OTTReview> modify(@PathVariable Long ottReviewId,
+                                            @RequestBody ModifyOTTReviewRequest request, Principal principal) throws UserPrincipalNotFoundException {
+        try{
+            User user = userService.findByEmail(principal.getName());
 
-        inputTagService.save(request.getInputTags());
+            inputTagService.save(request.getInputTags());
 
-        return ResponseEntity.status(HttpStatus.OK).body(ottReviewService.modify(ottReviewId, user, request));
+            return ResponseEntity.status(HttpStatus.OK).body(ottReviewService.modify(ottReviewId, user, request));
+        } catch (Exception e){
+            throw new UserPrincipalNotFoundException("인증 실패");
+        }
     }
 
     @Operation(summary = "리뷰 삭제하기", description = "특정 OTT 컨텐츠에 대한 특정 리뷰 데이터 삭제")
     @DeleteMapping("/delete/{ottReviewId}")
-    public ResponseEntity<Void> delete(@PathVariable Long ottReviewId, @RequestParam Long userId){
-        User user = userService.findById(userId);
+    public ResponseEntity<Void> delete(@PathVariable Long ottReviewId, Principal principal) throws UserPrincipalNotFoundException {
+        try {
+            User user = userService.findByEmail(principal.getName());
 
-        ottReviewService.delete(ottReviewId, user);
+            ottReviewService.delete(ottReviewId, user);
 
-        return ResponseEntity.status(HttpStatus.OK).build();
+            return ResponseEntity.status(HttpStatus.OK).build();
+        } catch (Exception e){
+            throw new UserPrincipalNotFoundException("인증 실패");
+        }
     }
 }
