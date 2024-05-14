@@ -43,6 +43,17 @@ public class OTTContents {
         this.score = score;
     }
 
+    public void modifyRating(float score){
+        int reviewCount = this.reviewCount;
+        float rating = this.rating;
+
+        rating*=(reviewCount-1);
+        rating+=score;
+        rating/=reviewCount;
+
+        this.rating = rating;
+    }
+
 
     public void updateRakingScore(int rankingScore) {
         this.rankingScore += rankingScore;

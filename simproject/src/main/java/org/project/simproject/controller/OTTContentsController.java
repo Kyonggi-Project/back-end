@@ -4,11 +4,15 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.project.simproject.domain.OTTContents;
+import org.project.simproject.dto.response.OTTContentsResponse;
 import org.project.simproject.service.OTTContentsService;
+import org.project.simproject.service.WatchListService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.attribute.UserPrincipalNotFoundException;
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -19,12 +23,27 @@ public class OTTContentsController {
 
     private final OTTContentsService ottContentsService;
 
-    @Operation(summary = "작품 상세페이지", description = "작품 상세페이지용 OTT Contents")
+    private final WatchListService watchListService;
+
+    @Operation(summary = "작품 상세페이지(비로그인)", description = "작품 상세페이지용 OTT Contents(Not Login version)")
     @GetMapping("/{id}")
-    public ResponseEntity<OTTContents> getOTTContents(@PathVariable("id") String id) {
+    public ResponseEntity<OTTContents> getOTTContents(@PathVariable String id) {
         OTTContents ottContents = ottContentsService.findById(id);
 
         return ResponseEntity.status(HttpStatus.OK).body(ottContents);
+    }
+
+    @Operation(summary = "작품 상세페이지(로그인)", description = "작품 상세페이지용 OTT Contents(Login version)")
+    @GetMapping("/authorize/{id}")
+    public ResponseEntity<OTTContentsResponse> getOTTContentsForLogin(@PathVariable String id, Principal principal) throws UserPrincipalNotFoundException {
+        try {
+            OTTContents ott = ottContentsService.findById(id);
+            boolean isBookmarked = watchListService.isBookmarked(ott, principal.getName());
+
+            return ResponseEntity.status(HttpStatus.OK).body(new OTTContentsResponse(ott, isBookmarked));
+        } catch (Exception e){
+            throw new UserPrincipalNotFoundException("인증 실패");
+        }
     }
 
     @Operation(summary = "인기 TOP 10", description = "서비스 자체 인기 순위 TOP 10")

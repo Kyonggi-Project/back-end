@@ -17,9 +17,9 @@ public class FollowService {
     private final UserService userService;
 
     @Transactional
-    public void toggle(Long id, String followeeEmail){
-        User follower = userService.findById(id);
-        User followee = userService.findByEmail(followeeEmail);
+    public void toggle(String email, String nickname){
+        User follower = userService.findByEmail(email);
+        User followee = userService.findByNickname(nickname);
 
         if(isFollowed(follower, followee)){
             Follow follow = followRepository.findFollowByFollowerAndFollowee(follower, followee);

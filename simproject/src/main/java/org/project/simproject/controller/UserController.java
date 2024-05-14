@@ -69,13 +69,17 @@ public class UserController {
 
     @Operation(summary = "특정 닉네임의 유저 보기", description = "유저 서비스에서 특정 유저의 정보를 닉네임으로 조회")
     @GetMapping("/profile/nickname/{nickname}")
-    public ResponseEntity<Map<String, Object>> getProfileByNickname(@PathVariable String nickname){
+    public ResponseEntity<Map<String, Object>> getProfileByNickname(@PathVariable String nickname, Principal principal){
         User user = userService.findByNickname(nickname);
+        User user2 = userService.findByEmail(principal.getName());
+        boolean isFollowed = followService.isFollowed(user2, user);
         WatchList watchList = watchListService.findByEmail(user.getEmail());
+        List<OTTReviewResponse> ottReviewList = ottReviewService.findByUserId(user);
 
         Map<String, Object> data = new HashMap<>();
-        data.put("user", new UserResponse(user));
+        data.put("user", new UserResponse(user, isFollowed));
         data.put("watchList", watchList);
+        data.put("OTTReviewList", ottReviewList);
 
         return ResponseEntity.status(HttpStatus.OK).body(data);
     }

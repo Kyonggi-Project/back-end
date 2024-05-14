@@ -21,6 +21,8 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Service
@@ -45,10 +47,9 @@ public class CoupangPlayService {
 
     @Value("${coupang_pass}")
     private String COUPANG_PLAY_PWD;
-
-    private String Popular = "'이번 주 인기작 TOP 20'";
-
-    private String Movie = "'이번 주 인기 영화 Top 20'";
+    private RankingInfo Top20Series;
+    private RankingInfo Top20Movies;
+    private final int[] score = {25,18,15,12,10,8,6,4,2,1};
 
     public RankingInfo save(RankingInfo rankingInfo) {
         return RankingInfo
@@ -59,6 +60,17 @@ public class CoupangPlayService {
                 .build();
     }
     public void crawlingMostWatchedCoupangPlay() throws InterruptedException {
+        try {
+            run();
+        }catch (Exception e) {
+            WEB_DRIVER.quit();
+            run();
+        }
+    }
+    public void run() throws InterruptedException{
+        final String Popular = "'이번 주 인기작 TOP 20'";
+        final String Movie = "'이번 주 인기 영화 Top 20'";
+
         init();
 
         WEB_DRIVER.get(COUPANG_PLAY_URL);
@@ -71,23 +83,11 @@ public class CoupangPlayService {
 
         Thread.sleep(2000);
 
-        RankingInfo Top20Series = seriesRanking(Popular);
+        Top20Series = seriesRanking(Popular);
 
         Thread.sleep(1000);
 
-        RankingInfo Top20Movies = movieRanking(Movie);
-
-//        for (RankingInfo result : rankingInfoRepository.findAll()) {
-//            System.out.println(result.getCategory());
-//            List<OTTContents> ottContents = result.getRankingList();
-//            System.out.println(result.getRankingList().size());
-//            for(OTTContents ott : ottContents) {
-//                if(ott == null) {
-//                    continue;
-//                }
-//                System.out.println(ott.getTitle());
-//            }
-//        }
+        Top20Movies = movieRanking(Movie);
 
         WEB_DRIVER.quit();
     }
@@ -98,6 +98,17 @@ public class CoupangPlayService {
             RankingInfo Info = rankingInfoRepository.findRankingInfoByOttAndCategory(seriesRankingInfo.getOtt(), seriesRankingInfo.getCategory());      // 해당 RankingInfo 객체 찾기
             rankingInfoRepository.delete(Info);
         }
+
+        for(int i = 0; i < score.length; i++) {
+            OTTContents ottContents = seriesRankingInfo.getRankingList().get(i);
+            if (ottContents == null) {
+                continue;
+            } else {
+                int rank = score[i] * 6;
+                ottContents.updateRakingScore(rank);
+            }
+        }
+
         return rankingInfoRepository.save(seriesRankingInfo);
     }
     @Transactional
@@ -107,6 +118,25 @@ public class CoupangPlayService {
             RankingInfo Info = rankingInfoRepository.findRankingInfoByOttAndCategory(movieRankingInfo.getOtt(), movieRankingInfo.getCategory());      // 해당 RankingInfo 객체 찾기
             rankingInfoRepository.delete(Info);
         }
+
+        for(int i = 0; i < score.length; i++) {
+            OTTContents ottContents = movieRankingInfo.getRankingList().get(i);
+            List<OTTContents> seriesRankingTop10 = Top20Series.getRankingList().subList(0,10);
+            if (ottContents == null) {
+                continue;
+            } else {
+                if (!seriesRankingTop10.contains(ottContents)) {
+                    movieRankingInfo.getRankingList().get(i).updateRakingScore((int) (score[i] * 0.7 * 6));
+                }
+                else {
+                    int seriesRank = seriesRankingTop10.indexOf(ottContents);
+                    int rank = (int) (score[i] * 0.7 * 6);
+                    int max_value = (rank > score[seriesRank] * 6) ? rank : score[seriesRank] * 6;
+                    movieRankingInfo.getRankingList().get(i).updateRakingScore(max_value);
+                }
+            }
+        }
+
         return rankingInfoRepository.save(movieRankingInfo);
     }
     public RankingInfo getRankingInfo(String CrawlingStr) throws InterruptedException {
@@ -115,11 +145,50 @@ public class CoupangPlayService {
         List<OTTContents> ottContents = new ArrayList<>();
         for(String ottTitle:titleList) {
             if(ottRepository.existsOTTByTitle(ottTitle)) {
-                ottContents.add(ottRepository.findOTTByTitle(ottTitle));
+                List<OTTContents> ott = ottRepository.findAllOTTContentsByTitle(ottTitle);
+                if (ott.size() == 1) {
+                    OTTContents oneOTT = ott.get(0);
+                    ottContents.add(oneOTT);
+                }
+                else {
+                    for (OTTContents contents : ott) {
+                        if (contents.getOttList().contains("Coupang Play")) {
+                            ottContents.add(contents);
+                        }
+                    }
+                }
+            } else if (ottRepository.findOTTContentsBySubtitleListContaining(ottTitle.replace(" ","")) != null) {
+                OTTContents ott = ottRepository.findOTTContentsBySubtitleListContaining(ottTitle.replace(" ",""));
+                ottContents.add(ott);
+            } else if (ottRepository.findOTTContentsBySubtitleListContaining(ottTitle) != null) {
+                OTTContents ott = ottRepository.findOTTContentsBySubtitleListContaining(ottTitle.replace(" ",""));
+                ottContents.add(ott);
+            } else if (ottRepository.findOTTContentsBySubtitleListContaining(ottTitle.replace(" ","").replace("-",":")) != null) {
+                OTTContents ott = ottRepository.findOTTContentsBySubtitleListContaining(ottTitle.replace(" ","").replace("-",":"));
+                ottContents.add(ott);
+            } else if (ottRepository.findOTTContentsByTitleContaining(getPrefixBeforeName(ottTitle)) != null) {
+                OTTContents ott = ottRepository.findOTTContentsByTitleContaining(getPrefixBeforeName(ottTitle));
+                String OTTReplace = ottTitle.replace(" ","");
+                Pattern pattern = Pattern.compile("^(!+)(.*?)(!+)$");
+                Matcher matcher = pattern.matcher(OTTReplace);
+                String filteringStr = "";
+                if(matcher.find()) {
+                    filteringStr = matcher.group(1);
+                }
+                if(ottTitle.replace(" ","").contains(""+ott.getYear())) {
+                    ottContents.add(ott);
+                } else if(ott.getSubtitleList().contains(filteringStr)) {
+                    ottContents.add(ott);
+                } else {
+                    log.info("Null Title : " + ottTitle);
+                    ottContents.add(null);
+                }
+            } else {
+                log.info("Null Title : " + ottTitle);
+                ottContents.add(null);
             }
         }
-        RankingInfo rankingInfo = new RankingInfo("CoupangPlay",CrawlingStr,ottContents);
-        log.info("Contents>>>>>>>>"+ottContents);
+        RankingInfo rankingInfo = new RankingInfo("Coupang Play",CrawlingStr,ottContents);
         return rankingInfo;
     }
     public List<String> getList(String CrawlingStr) throws InterruptedException {
@@ -159,7 +228,7 @@ public class CoupangPlayService {
             }
             titleList.add(title);
         }
-        log.info("titleList>>>>>"+titleList);
+//        log.info("titleList>>>>>"+titleList);
 
         return titleList;
     }
@@ -234,5 +303,13 @@ public class CoupangPlayService {
         }
         log.info("Scroll Success");
     }
-
+    public static String getPrefixBeforeName (String input) {
+        // "데드맨" 문자열 찾기
+        int index = input.indexOf("(");
+        if (index != -1) { // "데드맨" 문자열이 발견되면
+            return input.substring(0, index).trim(); // 발견된 문자열 앞까지 잘라서 반환
+        } else { // "데드맨" 문자열이 없으면
+            return input.trim(); // 원본 문자열 그대로 반환
+        }
+    }
 }
