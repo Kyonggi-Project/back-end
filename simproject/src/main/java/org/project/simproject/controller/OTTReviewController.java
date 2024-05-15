@@ -43,6 +43,7 @@ public class OTTReviewController {
             User user = userService.findByEmail(principal.getName());
 
             inputTagService.save(request.getInputTags());
+            ott.modifyTag(request.getTags());
 
             return ResponseEntity.status(HttpStatus.CREATED).body(ottReviewService.save(user, ott, request));
         } catch (Exception e){
