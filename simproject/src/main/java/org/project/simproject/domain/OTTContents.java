@@ -2,6 +2,7 @@ package org.project.simproject.domain;
 
 import jakarta.persistence.Id;
 import lombok.*;
+import org.project.simproject.util.comparator.TagMapComparator;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.*;
@@ -53,6 +54,20 @@ public class OTTContents {
         rating/=reviewCount;
 
         this.rating = rating;
+    }
+
+    public void modifyTag(List<String> tags){
+        for(String tag : tags){
+            if(!this.tagMap.containsKey(tag)){
+                this.tagMap.put(tag, 1);
+            }
+            else {
+                int val = this.tagMap.get(tag);
+                this.tagMap.put(tag, (val+1));
+            }
+        }
+
+        this.tagList = TagMapComparator.comparator(this.tagMap);
     }
 
 
