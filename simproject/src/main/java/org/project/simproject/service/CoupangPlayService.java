@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -62,7 +63,7 @@ public class CoupangPlayService {
     public void crawlingMostWatchedCoupangPlay() throws InterruptedException {
         try {
             run();
-        }catch (Exception e) {
+        }catch (TimeoutException | NoSuchElementException e) {
             WEB_DRIVER.quit();
             run();
         }
@@ -141,9 +142,12 @@ public class CoupangPlayService {
     }
     public RankingInfo getRankingInfo(String CrawlingStr) throws InterruptedException {
         List<String> titleList = getList(CrawlingStr);
+
         WebElement mostWatchedElement = WEB_DRIVER.findElement(By.xpath("//*[contains(text(),"+CrawlingStr+")]/.."));
         List<OTTContents> ottContents = new ArrayList<>();
+        int year = 0;
         for(String ottTitle:titleList) {
+            String replaceStr = ottTitle.replace(" ","");
             if(ottRepository.existsOTTByTitle(ottTitle)) {
                 List<OTTContents> ott = ottRepository.findAllOTTContentsByTitle(ottTitle);
                 if (ott.size() == 1) {
@@ -151,20 +155,31 @@ public class CoupangPlayService {
                     ottContents.add(oneOTT);
                 }
                 else {
+                    year = ott.stream().mapToInt(OTTContents::getYear).max().orElse(year);
+                    List<String> temp = new ArrayList<>();
+                    OTTContents eqaulsYearOTT = new OTTContents();
                     for (OTTContents contents : ott) {
-                        if (contents.getOttList().contains("Coupang Play")) {
+                        if (temp.contains(contents.getTitle())) {
+                            break;
+                        } else if (contents.getOttList().contains("Coupang Play")) {
                             ottContents.add(contents);
+                            temp.add(contents.getTitle());
+                        } else if(contents.getYear() == year) {
+                            eqaulsYearOTT = contents;
                         }
                     }
+                    if(!temp.contains(eqaulsYearOTT.getTitle()) && eqaulsYearOTT.getTitle() != null) {
+                        ottContents.add(eqaulsYearOTT);
+                    }
                 }
-            } else if (ottRepository.findOTTContentsBySubtitleListContaining(ottTitle.replace(" ","")) != null) {
-                OTTContents ott = ottRepository.findOTTContentsBySubtitleListContaining(ottTitle.replace(" ",""));
+            } else if (ottRepository.findOTTContentsBySubtitleListContaining(replaceStr) != null) {
+                OTTContents ott = ottRepository.findOTTContentsBySubtitleListContaining(replaceStr);
                 ottContents.add(ott);
             } else if (ottRepository.findOTTContentsBySubtitleListContaining(ottTitle) != null) {
-                OTTContents ott = ottRepository.findOTTContentsBySubtitleListContaining(ottTitle.replace(" ",""));
+                OTTContents ott = ottRepository.findOTTContentsBySubtitleListContaining(replaceStr);
                 ottContents.add(ott);
-            } else if (ottRepository.findOTTContentsBySubtitleListContaining(ottTitle.replace(" ","").replace("-",":")) != null) {
-                OTTContents ott = ottRepository.findOTTContentsBySubtitleListContaining(ottTitle.replace(" ","").replace("-",":"));
+            } else if (ottRepository.findOTTContentsBySubtitleListContaining(replaceStr.replace("-",":")) != null) {
+                OTTContents ott = ottRepository.findOTTContentsBySubtitleListContaining(replaceStr.replace("-",":"));
                 ottContents.add(ott);
             } else if (ottRepository.findOTTContentsByTitleContaining(getPrefixBeforeName(ottTitle)) != null) {
                 OTTContents ott = ottRepository.findOTTContentsByTitleContaining(getPrefixBeforeName(ottTitle));
@@ -199,7 +214,6 @@ public class CoupangPlayService {
         String category = mostWatchedElement.findElement(By.cssSelector("h1")).getText();
         JS_EXECUTOR.executeScript("arguments[0].scrollIntoView({behavior: 'auto', block: 'center', inline: 'center'});", mostWatchedElement); // mostWatchedElement를 화면 가운데로 이동
 
-        log.info(category);
         WebElement ContentList = mostWatchedElement.findElement(By.xpath("./div[1]/div[1]"));
 
         for (int j = 1; j <= 20; j++) {
@@ -228,13 +242,10 @@ public class CoupangPlayService {
             }
             titleList.add(title);
         }
-//        log.info("titleList>>>>>"+titleList);
-
         return titleList;
     }
     public String crawlingTitleName(String category, WebElement Content, WebElement mostWatchedElement, int j) throws InterruptedException {
         String title ="";
-        log.info("[" + category + "] Visit Success: " + j);
         WebDriverWait wait = new WebDriverWait(WEB_DRIVER, Duration.ofSeconds(20));
         if(wait.until(ExpectedConditions.visibilityOf(Content)) != null) {
             wait.until(ExpectedConditions.elementToBeClickable(Content));

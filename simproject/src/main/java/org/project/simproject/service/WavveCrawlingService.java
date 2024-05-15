@@ -3,10 +3,7 @@ package org.project.simproject.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.project.simproject.domain.OTTContents;
@@ -18,6 +15,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -52,7 +50,7 @@ public class WavveCrawlingService {
     public void crawlingMostWatchedWavve() throws InterruptedException {
         try {
             run();
-        } catch (Exception e) {
+        } catch (TimeoutException | NoSuchElementException e) {
             webDriver.quit();
             run();
         }
@@ -135,7 +133,10 @@ public class WavveCrawlingService {
         WebElement top20Container = webDriver.findElement(By.xpath("//*[contains(text(),"+CrawlingStr+")]"));
 
         List<OTTContents> ottContents = new ArrayList<>();
+        int year = 0;
+
         for(String ottTitle:list) {
+            String replaceStr = ottTitle.replace(" ","");
             if(ottRepository.existsOTTByTitle(ottTitle)) {
                 List<OTTContents> ott = ottRepository.findAllOTTContentsByTitle(ottTitle);
                 if (ott.size() == 1) {
@@ -143,20 +144,31 @@ public class WavveCrawlingService {
                     ottContents.add(oneOTT);
                 }
                 else {
+                    year = ott.stream().mapToInt(OTTContents::getYear).max().orElse(year);
+                    List<String> temp = new ArrayList<>();
+                    OTTContents eqaulsYearOTT = new OTTContents();
                     for (OTTContents contents : ott) {
-                        if (contents.getOttList().contains("Wavve")) {
+                        if (temp.contains(contents.getTitle())) {
+                            break;
+                        } else if (contents.getOttList().contains("Wavve")) {
                             ottContents.add(contents);
+                            temp.add(contents.getTitle());
+                        } else if(contents.getYear() == year) {
+                            eqaulsYearOTT = contents;
                         }
                     }
+                    if(!temp.contains(eqaulsYearOTT.getTitle()) && eqaulsYearOTT.getTitle() != null) {
+                        ottContents.add(eqaulsYearOTT);
+                    }
                 }
-            } else if (ottRepository.findOTTContentsBySubtitleListContaining(ottTitle.replace(" ","")) != null) {
-                OTTContents ott = ottRepository.findOTTContentsBySubtitleListContaining(ottTitle.replace(" ",""));
+            } else if (ottRepository.findOTTContentsBySubtitleListContaining(replaceStr) != null) {
+                OTTContents ott = ottRepository.findOTTContentsBySubtitleListContaining(replaceStr);
                 ottContents.add(ott);
             } else if (ottRepository.findOTTContentsBySubtitleListContaining(ottTitle) != null) {
-                OTTContents ott = ottRepository.findOTTContentsBySubtitleListContaining(ottTitle.replace(" ",""));
+                OTTContents ott = ottRepository.findOTTContentsBySubtitleListContaining(replaceStr);
                 ottContents.add(ott);
-            } else if (ottRepository.findOTTContentsBySubtitleListContaining(ottTitle.replace(" ","").replace("-",":")) != null) {
-                OTTContents ott = ottRepository.findOTTContentsBySubtitleListContaining(ottTitle.replace(" ","").replace("-",":"));
+            } else if (ottRepository.findOTTContentsBySubtitleListContaining(replaceStr.replace("-",":")) != null) {
+                OTTContents ott = ottRepository.findOTTContentsBySubtitleListContaining(replaceStr.replace("-",":"));
                 ottContents.add(ott);
             } else if (ottRepository.findOTTContentsByTitleContaining(getPrefixBeforeName(ottTitle)) != null) {
                 log.info("Section getPrefix : "+ottTitle);
@@ -201,7 +213,6 @@ public class WavveCrawlingService {
             WebElement result = top.findElement(By.tagName("img"));
             list.add(result.getAttribute("alt"));
         }
-        log.info("list>>>"+list);
         return list;
     }
     public void popupclose() throws InterruptedException {
