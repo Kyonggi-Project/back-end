@@ -69,7 +69,7 @@ public class OTTReviewController {
         }
     }
 
-    @Operation(summary = "리뷰 보기(User)", description = "특정 유저에 대한 모든 리뷰 데이터 보기")
+    @Operation(summary = "리뷰 보기(User)", description = "로그인 유저에 대한 모든 리뷰 데이터 보기")
     @GetMapping("/reviews/user")
     public ResponseEntity<List<OTTReviewResponse>> getOTTReviewByUser(Principal principal) throws UserPrincipalNotFoundException {
         try {
@@ -79,6 +79,14 @@ public class OTTReviewController {
         } catch (Exception e){
             throw new UserPrincipalNotFoundException("인증 실패");
         }
+    }
+
+    @Operation(summary = "리뷰 보기(OtherUser)", description = "특정 유저에 대한 모든 리뷰 데이터 보기")
+    @GetMapping("/reviews/otherUser/{nickname}")
+    public ResponseEntity<List<OTTReviewResponse>> getOTTReviewByOtherUser(@PathVariable String nickname) {
+        User user = userService.findByNickname(nickname);
+
+        return ResponseEntity.status(HttpStatus.OK).body(ottReviewService.findByUserId(user));
     }
 
     @Operation(summary = "리뷰 수정하기", description = "특정 OTT 컨텐츠에 대한 특정 리뷰 데이터 수정")
