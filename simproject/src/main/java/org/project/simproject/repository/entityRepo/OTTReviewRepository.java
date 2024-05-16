@@ -11,7 +11,5 @@ import java.util.List;
 public interface OTTReviewRepository extends JpaRepository<OTTReview, Long> {
     List<OTTReview> findOTTReviewByOttIdOrderByLikesCountDesc(String ottId);
 
-    List<OTTReview> findOTTReviewByOttIdOrderByCreatedAtDesc(String ottId);
-
     List<OTTReview> findOTTReviewByUserId(User user);
 }

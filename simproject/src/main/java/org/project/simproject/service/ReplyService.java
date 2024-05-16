@@ -50,11 +50,4 @@ public class ReplyService {
 
         replyRepository.delete(reply);
     }
-
-    // 현재 사용자와 리뷰 작성자가 일치하는지 검사
-    private static void authorizeReplyAuthor(Reply reply, User user){
-        if(!reply.getUserId().getNickname().equals(user.getNickname())){
-            throw new IllegalArgumentException("Not Authorization User");
-        }
-    }
 }

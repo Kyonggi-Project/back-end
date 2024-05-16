@@ -12,6 +12,7 @@ import org.project.simproject.repository.entityRepo.OTTReviewLikeRepository;
 import org.project.simproject.repository.entityRepo.OTTReviewRepository;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -24,8 +25,9 @@ public class OTTReviewService {
     private final OTTReviewLikeRepository ottReviewLikeRepository;
 
     @Transactional
-    public OTTReview save(User user, OTTContents ott, AddOTTReviewRequest request){
+    public OTTReview save(User user, OTTContents ott, AddOTTReviewRequest request) throws IOException {
         ottService.addScore(ott, request.getScore());
+        ottService.addRating(ott, request.getTags());
         return ottReviewRepository.save(request.toEntity(user, ott.getId(), ott.getTitle()));
     }
 
@@ -82,12 +84,5 @@ public class OTTReviewService {
 
         ottService.deleteScore(ott, ottReview.getScore());
         ottReviewRepository.delete(ottReview);
-    }
-
-    // 현재 사용자와 리뷰 작성자가 일치하는지 검사
-    private static void authorizeOTTReviewAuthor(OTTReview ottReview, User user){
-        if(!ottReview.getUserId().getNickname().equals(user.getNickname())){
-            throw new IllegalArgumentException("Not Authorization User");
-        }
     }
 }
