@@ -54,7 +54,7 @@ public class OTTContentsController {
     }
 
     @Operation(summary = "감정분석 이용 작품 추천", description = "메인페이지 모달창을 이용해 입력받은 문장을 통한 작품 추천")
-    @GetMapping("/sentiment")
+    @PostMapping("/sentiment")
     public ResponseEntity<SentimentAnalysisResponse> getContentsListBySentimentAnalysis(@RequestBody SentimentAnalysisRequest request) throws IOException {
         List<OTTContents> contentsByEmotion = ottContentsService.getContentsByEmotion(request.getEmotion());
         List<OTTContents> contentsByClaim = ottContentsService.getContentsByClaim(request.getClaim());
