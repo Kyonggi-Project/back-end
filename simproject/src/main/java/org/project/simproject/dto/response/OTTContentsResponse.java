@@ -26,8 +26,9 @@ public class OTTContentsResponse {
     private double score;
     private int reviewCount;
     private boolean isBookmarked;
+    private boolean existOTTReview;
 
-    public OTTContentsResponse(OTTContents ottContents, boolean isBookmarked){
+    public OTTContentsResponse(OTTContents ottContents, boolean isBookmarked, boolean existOTTReview){
         this.id = ottContents.getId();
         this.title = ottContents.getTitle();
         this.year = ottContents.getYear();
@@ -43,5 +44,6 @@ public class OTTContentsResponse {
         this.score = ottContents.getScore();
         this.reviewCount = ottContents.getReviewCount();
         this.isBookmarked = isBookmarked;
+        this.existOTTReview = existOTTReview;
     }
 }

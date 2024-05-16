@@ -10,6 +10,7 @@ import org.project.simproject.dto.request.ModifyOTTReviewRequest;
 import org.project.simproject.dto.response.OTTReviewResponse;
 import org.project.simproject.repository.entityRepo.OTTReviewLikeRepository;
 import org.project.simproject.repository.entityRepo.OTTReviewRepository;
+import org.project.simproject.repository.entityRepo.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -23,6 +24,8 @@ public class OTTReviewService {
     private final OTTService ottService;
 
     private final OTTReviewLikeRepository ottReviewLikeRepository;
+
+    private final UserService userService;
 
     @Transactional
     public OTTReview save(User user, OTTContents ott, AddOTTReviewRequest request) throws IOException {
@@ -84,5 +87,11 @@ public class OTTReviewService {
 
         ottService.deleteScore(ott, ottReview.getScore());
         ottReviewRepository.delete(ottReview);
+    }
+
+    public boolean existsOTTReview(String ottId, String email){
+        User user = userService.findByEmail(email);
+
+        return ottReviewRepository.existsOTTReviewByOttIdAndUserId(ottId, user);
     }
 }

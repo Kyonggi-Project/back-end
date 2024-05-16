@@ -12,4 +12,6 @@ public interface OTTReviewRepository extends JpaRepository<OTTReview, Long> {
     List<OTTReview> findOTTReviewByOttIdOrderByLikesCountDesc(String ottId);
 
     List<OTTReview> findOTTReviewByUserId(User user);
+
+    boolean existsOTTReviewByOttIdAndUserId(String ottId, User user);
 }

@@ -8,6 +8,7 @@ import org.project.simproject.dto.request.SentimentAnalysisRequest;
 import org.project.simproject.dto.response.OTTContentsResponse;
 import org.project.simproject.dto.response.SentimentAnalysisResponse;
 import org.project.simproject.service.OTTContentsService;
+import org.project.simproject.service.OTTReviewService;
 import org.project.simproject.service.WatchListService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +29,8 @@ public class OTTContentsController {
 
     private final WatchListService watchListService;
 
+    private final OTTReviewService ottReviewService;
+
     @Operation(summary = "작품 상세페이지(비로그인)", description = "작품 상세페이지용 OTT Contents(Not Login version)")
     @GetMapping("/{id}")
     public ResponseEntity<OTTContents> getOTTContents(@PathVariable String id) {
@@ -42,8 +45,9 @@ public class OTTContentsController {
         try {
             OTTContents ott = ottContentsService.findById(id);
             boolean isBookmarked = watchListService.isBookmarked(ott, principal.getName());
+            boolean existOTTReview = ottReviewService.existsOTTReview(id, principal.getName());
 
-            return ResponseEntity.status(HttpStatus.OK).body(new OTTContentsResponse(ott, isBookmarked));
+            return ResponseEntity.status(HttpStatus.OK).body(new OTTContentsResponse(ott, isBookmarked, existOTTReview));
         } catch (Exception e){
             throw new UserPrincipalNotFoundException("인증 실패");
         }
