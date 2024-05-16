@@ -27,10 +27,6 @@ public class OTTService {
                 .orElseThrow(() -> new IllegalArgumentException("Not Found Contents"));
     }
 
-    public OTTContents findByTitle(String title){
-        return ottRepository.findOTTByTitle(title);
-    }
-
     @Transactional
     public void addRating(OTTContents ottContents, List<String> tags) throws IOException {
         StringBuilder builder = new StringBuilder();

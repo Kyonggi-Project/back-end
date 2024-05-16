@@ -30,7 +30,7 @@ public class OTTReviewService {
     @Transactional
     public OTTReview save(User user, OTTContents ott, AddOTTReviewRequest request) throws IOException {
         ottService.addScore(ott, request.getScore());
-        ottService.addRating(ott, request.getTags());
+        //ottService.addRating(ott, request.getTags());
         return ottReviewRepository.save(request.toEntity(user, ott.getId(), ott.getTitle()));
     }
 
