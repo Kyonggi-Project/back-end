@@ -309,11 +309,11 @@ public class KinolightsCrawlingService {
             posterImgUrl = WEB_DRIVER.findElement(By.className("movie-poster")).getAttribute("data-src");
             if (posterImgUrl != null) break;
         }
-        posterImgUrl = posterImgUrl.replaceAll("/[ml]/", "/original/").replace(".webp", ".jpeg");
+//        posterImgUrl = posterImgUrl.replaceAll("/[ml]/", "/original/").replace(".webp", ".jpeg");
 
 
         String backgroundImgUrl = WEB_DRIVER.findElement(By.cssSelector("div.backdrop img")).getAttribute("data-src");
-        backgroundImgUrl = backgroundImgUrl.replaceAll("/[ml]/", "/original/").replace(".webp", ".jpeg");
+//        backgroundImgUrl = backgroundImgUrl.replaceAll("/[ml]/", "/original/").replace(".webp", ".jpeg");
 
         WebElement metadataYearElement = WEB_DRIVER.findElement(By.cssSelector("p.metadata"));
         int year = Integer.parseInt(metadataYearElement.findElement(By.cssSelector("span.metadata-item:last-child")).getText());
