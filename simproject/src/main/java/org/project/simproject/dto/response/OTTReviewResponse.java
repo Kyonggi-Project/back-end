@@ -17,6 +17,8 @@ public class OTTReviewResponse {
 
     private String author;
 
+    private String ottId;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
     private LocalDateTime creatAt;
 
@@ -39,6 +41,7 @@ public class OTTReviewResponse {
         this.id = ottReview.getId();
         this.content = ottReview.getContent();
         this.author = ottReview.getUserId().getNickname();
+        this.ottId = ottReview.getOttId();
         this.creatAt = ottReview.getCreatedAt();
         this.updateAt = ottReview.getUpdatedAt();
         this.likesCount = ottReview.getLikesCount();
@@ -51,6 +54,7 @@ public class OTTReviewResponse {
         this.id = ottReview.getId();
         this.content = ottReview.getContent();
         this.author = ottReview.getUserId().getNickname();
+        this.ottId = ottReview.getOttId();
         this.creatAt = ottReview.getCreatedAt();
         this.updateAt = ottReview.getUpdatedAt();
         this.likesCount = ottReview.getLikesCount();
