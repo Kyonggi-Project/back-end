@@ -76,13 +76,19 @@ public class NetflixService {
         // 시리즈 Top 10, 영화 Top 10 두 가지 Element 크롤링
         mostWatchedElements = WEB_DRIVER.findElements(By.cssSelector("div[data-list-context='mostWatched']"));
 
-        int categoryCount = 0;
         for (WebElement mostWatchedElement : mostWatchedElements) {
             JS_EXECUTOR.executeScript("arguments[0].scrollIntoView({ behavior: 'smooth', block: 'center' });", mostWatchedElement);
             String category = mostWatchedElement.findElement(By.cssSelector(".row-header-title")).getText();
             log.info("[" + category + "]");
 
-            float rakingScoreRating = rankingScoreMatrix[categoryCount++];
+
+            int categoryCount = 0;
+            categoryCount = switch (category) {
+                case SERIES_CATEGORY -> 0;
+                case MOVIE_CATEGORY -> 1;
+                default -> categoryCount;
+            };
+            float rakingScoreRating = rankingScoreMatrix[categoryCount];
 
             List<OTTContents> mostWatchedMovies = new ArrayList<>();
             List<String> mostWatchedTitles = new ArrayList<>();     // 중복검사용 제목 저장
