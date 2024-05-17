@@ -98,7 +98,7 @@ public class KinolightsCrawlingService {
                 OTTContents movie = crawlingInfo(count++, title, hrefLink, ott);
 
                 if (ottContentsRepository.existsOTTContentsByHref(hrefLink)) {
-                    updateMovieByHref(movie, hrefLink);
+                    updateMovieByHref(movie, title, hrefLink);
                 } else {
                     saveNewMovie(movie, hrefLink);
                 }
@@ -159,7 +159,7 @@ public class KinolightsCrawlingService {
 
 
                     if (hrefListInDB.contains(hrefLink)) {
-                        updateMovieByHref(movie, hrefLink);
+                        updateMovieByHref(movie, title, hrefLink);
                     } else {
                         saveNewMovie(movie, hrefLink);
                     }
@@ -428,8 +428,9 @@ public class KinolightsCrawlingService {
         hrefListInDB.add(href);
     }
 
-    public void updateMovieByHref(OTTContents movie, String href) {
+    public void updateMovieByHref(OTTContents movie, String title, String href) {
         OTTContents updateMovie = ottContentsRepository.findOTTContentsByHref(href);
+        updateMovie.setTitle(title);
         updateMovie.setPosterImg(movie.getPosterImg());
         updateMovie.setBackgroundImg(movie.getBackgroundImg());
         updateMovie.setGenreList(movie.getGenreList());
