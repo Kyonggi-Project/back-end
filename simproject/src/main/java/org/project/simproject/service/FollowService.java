@@ -8,6 +8,7 @@ import org.project.simproject.dto.response.UserResponse;
 import org.project.simproject.repository.entityRepo.FollowRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -36,11 +37,15 @@ public class FollowService {
 
     public List<UserResponse> findFollowers(String nickname){
         User user = userService.findByNickname(nickname);
-        return user.getFollowers()
-                .stream()
-                .map(Follow::getFollower)
-                .map(UserResponse::new)
-                .toList();
+        List<Follow> followers = user.getFollowers();
+
+        List<UserResponse> list = new ArrayList<>();
+        for(Follow follow : followers){
+            boolean isFollowed = isFollowed(follow.getFollowee(), follow.getFollower());
+            list.add(new UserResponse(follow.getFollower(), isFollowed));
+        }
+
+        return list;
     }
 
     public List<UserResponse> findFollowees(String nickname){
