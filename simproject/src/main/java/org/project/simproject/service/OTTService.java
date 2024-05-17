@@ -97,11 +97,17 @@ public class OTTService {
     }
 
     public float reCalculationRating(float magnitude, float score){
+        String mag = "1.0";
         if(magnitude > 1.0f){
+            magnitude-=score;
             int val = (int)magnitude;
             magnitude-=val;
-            magnitude+=1;
-            score*=magnitude;
+            magnitude*=10;
+
+            String rat = mag + String.valueOf((int)magnitude);
+            float rating = Float.valueOf(rat);
+
+            score*=rating;
         }
         return score;
     }
