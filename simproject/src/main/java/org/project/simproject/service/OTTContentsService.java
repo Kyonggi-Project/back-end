@@ -82,10 +82,9 @@ public class OTTContentsService {
 
         List<OTTContents> contentsByGenreList = ottContentsRepository.findAllByGenreListContainsIgnoreCase(genre);
         contentsByGenreList.sort(new OTTContentsScoreComparator());
-        log.info("Sorting contents by genre");
 
         int i = 0;
-        while (ottContentsList.size() <= 20) {
+        while (ottContentsList.size() < 20) {
             OTTContents ottContents = contentsByGenreList.get(i);
             if (!ottContentsList.contains(ottContents)) {
                 ottContentsList.add(ottContents);
@@ -104,7 +103,7 @@ public class OTTContentsService {
         if (contentsListByRating.size() < 20) {     // contentsListByRating의 size가 20개가 되지 않는 경우
             float f = 0.15F;
             while (contentsListByRating.size() <= 20) {
-                contentsListByRating = ottContentsRepository.findAllByRatingBetween(rating - f,rating + f);
+                contentsListByRating = ottContentsRepository.findAllByRatingBetween(rating - f, rating + f);
                 f += 0.05F;
             }
         }
@@ -147,7 +146,7 @@ public class OTTContentsService {
             }
         }
         claim = claim.substring(0, index);
-        
+
         List<OTTContents> ottContentsList = new ArrayList<>();
 
         // 문장 속 장르가 존재한다면, 이를 통한 작품 찾기
@@ -169,13 +168,11 @@ public class OTTContentsService {
         // 문장의 감정분석 Rating 이용해 작품 찾기
         int sentimentSize = 20 - contentsByGenreList.size();
         List<OTTContents> contentsBySentiment = getContentsByEmotion(claim);
-        contentsBySentiment = contentsByGenreList.subList((int) (10 - Math.floor((double) sentimentSize / 2)), (int) (10 + Math.ceil((double) sentimentSize / 2)));
-
+        contentsBySentiment = contentsBySentiment.subList((int) (10 - Math.floor((double) sentimentSize / 2)), (int) (10 + Math.ceil((double) sentimentSize / 2)));
         ottContentsList.addAll(contentsByGenreList);
         ottContentsList.addAll(contentsBySentiment);
 
         Collections.shuffle(ottContentsList);   // 장르/감정분석 이용 작품 랜덤 배치
-
         return ottContentsList.subList(0, 20);
     }
 
@@ -187,7 +184,6 @@ public class OTTContentsService {
             ottContentsList.addAll(rankingInfo.getRankingList());
         }
         ottContentsList.sort(new OTTContentsRankingScoreComparator());
-        log.info("Get All Contents By Ranking Info");
         return ottContentsList.stream().distinct().toList();
     }
 
