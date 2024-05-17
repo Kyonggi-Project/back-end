@@ -121,7 +121,7 @@ public class NetflixService {
                     List<OTTContents> ottContentsList = ottContentsRepository.findAllByTitle(title);
                     movie = getLatestMovieByYear(ottContentsList);
                 } else {
-                    List<OTTContents> ottContentsList = ottContentsRepository.findAllBySubtitleListContainsIgnoreCase(title);
+                    List<OTTContents> ottContentsList = getMovieListBySubtitle(title);
                     movie = getLatestMovieByYear(ottContentsList);
                 }
 
@@ -210,6 +210,15 @@ public class NetflixService {
         anyElement.click();
 
         Thread.sleep(1000);
+    }
+
+    public List<OTTContents> getMovieListBySubtitle(String title) {
+        if (ottContentsRepository.existsBySubtitleListContainsIgnoreCase(title)) {
+            return ottContentsRepository.findAllBySubtitleListContainsIgnoreCase(title);
+        } else {
+            String subtitle = title.replaceAll(" ", "");
+            return ottContentsRepository.findAllBySubtitleListContainsIgnoreCase(subtitle);
+        }
     }
 
     public OTTContents getLatestMovieByYear(List<OTTContents> ottContentsList) {
