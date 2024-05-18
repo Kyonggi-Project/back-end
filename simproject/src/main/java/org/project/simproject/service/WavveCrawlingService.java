@@ -127,11 +127,8 @@ public class WavveCrawlingService {
 
     public RankingInfo getRankingInfo(String CrawlingStr) throws InterruptedException {
         List<String> list = getList(CrawlingStr);
-
         webDriver.manage().timeouts().implicitlyWait(2, TimeUnit.SECONDS);
-
         WebElement top20Container = webDriver.findElement(By.xpath("//*[contains(text(),"+CrawlingStr+")]"));
-
         List<OTTContents> ottContents = new ArrayList<>();
         int year = 0;
 
@@ -170,31 +167,61 @@ public class WavveCrawlingService {
             } else if (ottRepository.findOTTContentsBySubtitleListContaining(replaceStr.replace("-",":")) != null) {
                 OTTContents ott = ottRepository.findOTTContentsBySubtitleListContaining(replaceStr.replace("-",":"));
                 ottContents.add(ott);
-            } else if (ottRepository.findOTTContentsByTitleContaining(getPrefixBeforeName(ottTitle)) != null) {
-                log.info("Section getPrefix : "+ottTitle);
-                OTTContents ott = ottRepository.findOTTContentsByTitleContaining(getPrefixBeforeName(ottTitle));
-                String OTTReplace = ottTitle.replace(" ","");
-                Pattern pattern = Pattern.compile("^(!+)(.*?)(!+)$");
-                Matcher matcher = pattern.matcher(OTTReplace);
-                String filteringStr = "";
-                if(matcher.find()) {
-                    filteringStr = matcher.group(1);
+            } else if(ottRepository.findAllBySubtitleListContainsIgnoreCase(replaceStr+"시즌") != null){
+                String seasonString = "시즌";
+                OTTContents seasonOTT = getSeason(replaceStr+seasonString);
+                if(seasonOTT == null) {
+                    if(ottRepository.findOTTContentsByTitleContaining(getPrefixBeforeName(ottTitle)) != null) {
+                        getAnotherPatternCheck(ottContents,ottTitle);
+                    } else {
+                        emptyOTT(ottContents,ottTitle);
+                    }
+                } else {
+                    ottContents.add(seasonOTT);
                 }
-                if(OTTReplace.contains(""+ott.getYear())) {
-                    ottContents.add(ott);
-                } else if(ott.getSubtitleList().contains(filteringStr)) {
-                    ottContents.add(ott);
-                }  else {
-                    log.info("Null Title : " + ottTitle);
-                    ottContents.add(null);
-                }
-            } else {
-                log.info("Null Title : " + ottTitle);
-                ottContents.add(null);
+            }  else {
+                emptyOTT(ottContents,ottTitle);
             }
         }
         RankingInfo RankingInfo = new RankingInfo("Wavve",top20Container.getText(),ottContents);
         return RankingInfo;
+    }
+
+    public void getAnotherPatternCheck(List<OTTContents> ottContents,String ottTitle) {
+        OTTContents ott = ottRepository.findOTTContentsByTitleContaining(getPrefixBeforeName(ottTitle));
+        String OTTReplace = ottTitle.replace(" ","");
+        Pattern pattern = Pattern.compile("^(!+)(.*?)(!+)$");
+        Matcher matcher = pattern.matcher(OTTReplace);
+        String filteringStr = "";
+        if(matcher.find()) {
+            filteringStr = matcher.group(1);
+        }
+        if(OTTReplace.contains(""+ott.getYear())) {
+            ottContents.add(ott);
+        } else if(ott.getSubtitleList().contains(filteringStr)) {
+            ottContents.add(ott);
+        } else {
+            emptyOTT(ottContents,ottTitle);
+        }
+    }
+
+    public OTTContents getSeason(String replaceStr) {
+
+        List<OTTContents> seasonOTT = ottRepository.findAllBySubtitleListContainsIgnoreCase(replaceStr);
+        int year = 0;
+        year = seasonOTT.stream().mapToInt(OTTContents::getYear).max().orElse(year);
+        for(OTTContents season : seasonOTT) {
+            log.info("Section Title : "+season.getTitle());
+            if(season.getYear() == year) {
+                return season;
+            }
+        }
+        return null;
+    }
+
+    public void emptyOTT(List<OTTContents> ottContents, String ottTitle) {
+        log.info("Null Title : " + ottTitle);
+        ottContents.add(null);
     }
 
     public List<String> getList(String CrawlingStr) throws InterruptedException {
@@ -267,11 +294,11 @@ public class WavveCrawlingService {
         }
     }
     public static String getPrefixBeforeName (String input) {
-        // "데드맨" 문자열 찾기
+        // 특정 문자열 찾기
         int index = input.indexOf("(");
-        if (index != -1) { // "데드맨" 문자열이 발견되면
+        if (index != -1) { // 특정 문자열이 발견되면
             return input.substring(0, index).trim(); // 발견된 문자열 앞까지 잘라서 반환
-        } else { // "데드맨" 문자열이 없으면
+        } else { // 특정 문자열이 없으면
             return input.trim(); // 원본 문자열 그대로 반환
         }
     }

@@ -142,10 +142,10 @@ public class CoupangPlayService {
     }
     public RankingInfo getRankingInfo(String CrawlingStr) throws InterruptedException {
         List<String> titleList = getList(CrawlingStr);
-
         WebElement mostWatchedElement = WEB_DRIVER.findElement(By.xpath("//*[contains(text(),"+CrawlingStr+")]/.."));
         List<OTTContents> ottContents = new ArrayList<>();
         int year = 0;
+
         for(String ottTitle:titleList) {
             String replaceStr = ottTitle.replace(" ","");
             if(ottRepository.existsOTTByTitle(ottTitle)) {
@@ -181,31 +181,61 @@ public class CoupangPlayService {
             } else if (ottRepository.findOTTContentsBySubtitleListContaining(replaceStr.replace("-",":")) != null) {
                 OTTContents ott = ottRepository.findOTTContentsBySubtitleListContaining(replaceStr.replace("-",":"));
                 ottContents.add(ott);
-            } else if (ottRepository.findOTTContentsByTitleContaining(getPrefixBeforeName(ottTitle)) != null) {
-                OTTContents ott = ottRepository.findOTTContentsByTitleContaining(getPrefixBeforeName(ottTitle));
-                String OTTReplace = ottTitle.replace(" ","");
-                Pattern pattern = Pattern.compile("^(!+)(.*?)(!+)$");
-                Matcher matcher = pattern.matcher(OTTReplace);
-                String filteringStr = "";
-                if(matcher.find()) {
-                    filteringStr = matcher.group(1);
-                }
-                if(ottTitle.replace(" ","").contains(""+ott.getYear())) {
-                    ottContents.add(ott);
-                } else if(ott.getSubtitleList().contains(filteringStr)) {
-                    ottContents.add(ott);
+            } else if(ottRepository.findAllBySubtitleListContainsIgnoreCase(replaceStr+"시즌") != null){
+                String seasonString = "시즌";
+                OTTContents seasonOTT = getSeason(replaceStr+seasonString);
+                if(seasonOTT == null) {
+                    if(ottRepository.findOTTContentsByTitleContaining(getPrefixBeforeName(ottTitle)) != null) {
+                        getAnotherPatternCheck(ottContents,ottTitle);
+                    } else {
+                        emptyOTT(ottContents,ottTitle);
+                    }
                 } else {
-                    log.info("Null Title : " + ottTitle);
-                    ottContents.add(null);
+                    ottContents.add(seasonOTT);
                 }
-            } else {
-                log.info("Null Title : " + ottTitle);
-                ottContents.add(null);
+            }  else {
+                emptyOTT(ottContents,ottTitle);
             }
         }
         RankingInfo rankingInfo = new RankingInfo("Coupang Play",CrawlingStr,ottContents);
         return rankingInfo;
     }
+    public void getAnotherPatternCheck(List<OTTContents> ottContents,String ottTitle) {
+        OTTContents ott = ottRepository.findOTTContentsByTitleContaining(getPrefixBeforeName(ottTitle));
+        String OTTReplace = ottTitle.replace(" ","");
+        Pattern pattern = Pattern.compile("^(!+)(.*?)(!+)$");
+        Matcher matcher = pattern.matcher(OTTReplace);
+        String filteringStr = "";
+        if(matcher.find()) {
+            filteringStr = matcher.group(1);
+        }
+        if(OTTReplace.contains(""+ott.getYear())) {
+            ottContents.add(ott);
+        } else if(ott.getSubtitleList().contains(filteringStr)) {
+            ottContents.add(ott);
+        } else {
+            emptyOTT(ottContents,ottTitle);
+        }
+    }
+    public OTTContents getSeason(String replaceStr) {
+
+        List<OTTContents> seasonOTT = ottRepository.findAllBySubtitleListContainsIgnoreCase(replaceStr);
+        int year = 0;
+        year = seasonOTT.stream().mapToInt(OTTContents::getYear).max().orElse(year);
+        for(OTTContents season : seasonOTT) {
+            log.info("Section Title : "+season.getTitle());
+            if(season.getYear() == year) {
+                return season;
+            }
+        }
+        return null;
+    }
+
+    public void emptyOTT(List<OTTContents> ottContents, String ottTitle) {
+        log.info("Null Title : " + ottTitle);
+        ottContents.add(null);
+    }
+
     public List<String> getList(String CrawlingStr) throws InterruptedException {
         List<String> titleList = new ArrayList<>();
         String title = "";
@@ -226,7 +256,7 @@ public class CoupangPlayService {
                 WebDriverWait wait = new WebDriverWait(WEB_DRIVER, Duration.ofSeconds(15));
                 if (wait.until(ExpectedConditions.visibilityOf(Content)) != null) {
                     wait.until(ExpectedConditions.elementToBeClickable(Content));
-                    title = crawlingTitleName(category,Content,mostWatchedElement, j);
+                    title = crawlingTitleName(category,Content,mostWatchedElement);
                 }
             } catch (Exception e) {
                 WebElement right = ContentList.findElement(By.xpath("//*[@id='right']"));
@@ -236,7 +266,7 @@ public class CoupangPlayService {
                 if (wait.until(ExpectedConditions.visibilityOf(Content)) != null) {
                     // 요소가 화면에 보임
                     wait.until(ExpectedConditions.elementToBeClickable(Content));
-                    title = crawlingTitleName(category,Content,mostWatchedElement, j);
+                    title = crawlingTitleName(category,Content,mostWatchedElement);
                     Thread.sleep(5000);
                 }
             }
@@ -244,7 +274,7 @@ public class CoupangPlayService {
         }
         return titleList;
     }
-    public String crawlingTitleName(String category, WebElement Content, WebElement mostWatchedElement, int j) throws InterruptedException {
+    public String crawlingTitleName(String category, WebElement Content, WebElement mostWatchedElement) throws InterruptedException {
         String title ="";
         WebDriverWait wait = new WebDriverWait(WEB_DRIVER, Duration.ofSeconds(20));
         if(wait.until(ExpectedConditions.visibilityOf(Content)) != null) {
@@ -315,11 +345,11 @@ public class CoupangPlayService {
         log.info("Scroll Success");
     }
     public static String getPrefixBeforeName (String input) {
-        // "데드맨" 문자열 찾기
+        // 특정 문자열 찾기
         int index = input.indexOf("(");
-        if (index != -1) { // "데드맨" 문자열이 발견되면
+        if (index != -1) { // 특정 문자열이 발견되면
             return input.substring(0, index).trim(); // 발견된 문자열 앞까지 잘라서 반환
-        } else { // "데드맨" 문자열이 없으면
+        } else { // 특정 문자열이 없으면
             return input.trim(); // 원본 문자열 그대로 반환
         }
     }
