@@ -188,6 +188,6 @@ public class OTTContentsService {
     }
 
     public List<OTTContents> getOTTContentsByTitle(String search) {
-        return ottContentsRepository.findAllByTitleContainsIgnoreCaseAndSubtitleListContainsIgnoreCase(search, search);
+        return ottContentsRepository.findAllByTitleContainsIgnoreCaseOrSubtitleListContainsIgnoreCase(search, search);
     }
 }

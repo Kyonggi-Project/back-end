@@ -148,7 +148,7 @@ public class CoupangPlayService {
 
         for(String ottTitle:titleList) {
             String replaceStr = ottTitle.replace(" ","");
-            if(ottRepository.existsOTTByTitle(ottTitle)) {
+            if(ottRepository.existsOTTContentsByTitle(ottTitle)) {
                 List<OTTContents> ott = ottRepository.findAllOTTContentsByTitle(ottTitle);
                 if (ott.size() == 1) {
                     OTTContents oneOTT = ott.get(0);

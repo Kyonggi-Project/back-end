@@ -15,12 +15,12 @@ public interface OTTContentsRepository extends MongoRepository<OTTContents, Stri
 
     List<OTTContents> findAllByGenreListContainsIgnoreCase(String genre);
     List<OTTContents> findAllByTitle(String title);
-    List<OTTContents> findAllByTitleContainsIgnoreCaseAndSubtitleListContainsIgnoreCase(String title, String subtitle);
+    List<OTTContents> findAllByTitleContainsIgnoreCaseOrSubtitleListContainsIgnoreCase(String title, String subtitle);
     List<OTTContents> findAllBySubtitleListContainsIgnoreCase(String subtitle);
     List<OTTContents> findAllByRatingBetween(float minRating, float maxRating);
     List<OTTContents> findAllOTTContentsByTitle(String ottTitle);
 
-    boolean existsOTTByTitle(String title);
+    boolean existsOTTContentsByTitle(String title);
     boolean existsBySubtitleListContainsIgnoreCase(String subtitle);
     boolean existsOTTContentsByHref(String href);
 }
