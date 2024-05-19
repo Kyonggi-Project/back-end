@@ -66,12 +66,14 @@ public class DisneyRankingCrawlingService {
 
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("p.info__title")));
 
+        List<String> hrefs = getHrefs(webDriver);
+
         if(!rankingInfoRepository.existsRankingInfoByOtt(ott)){
-            createRanking(webDriver, ott);
+            createRanking(hrefs, ott);
         }
         else{
             RankingInfo rankingInfo = rankingInfoRepository.findRankingInfoByOtt(ott);
-            updateRanking(webDriver, rankingInfo);
+            updateRanking(hrefs, rankingInfo);
         }
 
 
@@ -79,27 +81,16 @@ public class DisneyRankingCrawlingService {
     }
 
     @Transactional
-    public void createRanking(WebDriver driver, String ott){
+    public void createRanking(List<String> hrefs, String ott){
         int count = 0;
         List<OTTContents> rankingList = new ArrayList<>();
-
-        List<WebElement> movieItems = driver.findElements(By.cssSelector("div.ranking"));
-
-        List<WebElement> anchorTags = new ArrayList<>();
-        for(WebElement movieItem : movieItems){
-            anchorTags.add(movieItem.findElement(By.tagName("a")));
-        }
-
-        List<String> hrefs = new ArrayList<>();
-        for (WebElement anchorTag : anchorTags) {
-            hrefs.add(anchorTag.getAttribute("href"));
-        }
 
         for(String href : hrefs){
             if(ottRepository.existsOTTContentsByHref(href)){
                 OTTContents movie = ottRepository.findOTTContentsByHref(href);
                 movie.updateRakingScore(scoreMatrix[count] * rate);
                 rankingList.add(movie);
+                ottRepository.save(movie);
                 count++;
                 if(count == 10) break;
             }
@@ -116,8 +107,28 @@ public class DisneyRankingCrawlingService {
     }
 
     @Transactional
-    public void updateRanking(WebDriver driver, RankingInfo rankingInfo){
+    public void updateRanking(List<String> hrefs, RankingInfo rankingInfo){
         int count = 0;
+
+        rankingInfo.deleteRankingList();
+
+        for(String href : hrefs){
+            if(ottRepository.existsOTTContentsByHref(href)){
+                OTTContents movie = ottRepository.findOTTContentsByHref(href);
+                movie.updateRakingScore(scoreMatrix[count] * rate);
+                rankingInfo.addRankingList(movie);
+                ottRepository.save(movie);
+                count++;
+                if(count == 10) break;
+            }
+        }
+
+        rankingInfoRepository.save(rankingInfo);
+
+        log.info("rankinginfo 업데이트 완료");
+    }
+
+    public List<String> getHrefs(WebDriver driver){
         List<WebElement> movieItems = driver.findElements(By.cssSelector("div.ranking"));
 
         List<WebElement> anchorTags = new ArrayList<>();
@@ -130,20 +141,6 @@ public class DisneyRankingCrawlingService {
             hrefs.add(anchorTag.getAttribute("href"));
         }
 
-        rankingInfo.deleteRankingList();
-
-        for(String href : hrefs){
-            if(ottRepository.existsOTTContentsByHref(href)){
-                OTTContents movie = ottRepository.findOTTContentsByHref(href);
-                movie.updateRakingScore(scoreMatrix[count] * rate);
-                rankingInfo.addRankingList(movie);
-                count++;
-                if(count == 10) break;
-            }
-        }
-
-        rankingInfoRepository.save(rankingInfo);
-
-        log.info("rankinginfo 업데이트 완료");
+        return hrefs;
     }
 }
