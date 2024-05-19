@@ -32,8 +32,6 @@ public class DisneyRankingCrawlingService {
 
     private WebDriverWait wait;
 
-    private JavascriptExecutor jse;
-
     private int[] scoreMatrix = {25, 18, 15, 12, 10, 8, 6, 4, 2, 1};
 
     private int rate = 4;
@@ -85,11 +83,21 @@ public class DisneyRankingCrawlingService {
         int count = 0;
         List<OTTContents> rankingList = new ArrayList<>();
 
-        List<WebElement> ranking = driver.findElements(By.cssSelector("p.info__title"));
+        List<WebElement> movieItems = driver.findElements(By.cssSelector("div.ranking"));
 
-        for(WebElement rank : ranking){
-            if(ottRepository.existsOTTByTitle(rank.getText())){
-                OTTContents movie = ottRepository.findOTTByTitle(rank.getText());
+        List<WebElement> anchorTags = new ArrayList<>();
+        for(WebElement movieItem : movieItems){
+            anchorTags.add(movieItem.findElement(By.tagName("a")));
+        }
+
+        List<String> hrefs = new ArrayList<>();
+        for (WebElement anchorTag : anchorTags) {
+            hrefs.add(anchorTag.getAttribute("href"));
+        }
+
+        for(String href : hrefs){
+            if(ottRepository.existsOTTContentsByHref(href)){
+                OTTContents movie = ottRepository.findOTTContentsByHref(href);
                 movie.updateRakingScore(scoreMatrix[count] * rate);
                 rankingList.add(movie);
                 count++;
@@ -110,13 +118,23 @@ public class DisneyRankingCrawlingService {
     @Transactional
     public void updateRanking(WebDriver driver, RankingInfo rankingInfo){
         int count = 0;
-        List<WebElement> ranking = driver.findElements(By.cssSelector("p.info__title"));
+        List<WebElement> movieItems = driver.findElements(By.cssSelector("div.ranking"));
+
+        List<WebElement> anchorTags = new ArrayList<>();
+        for(WebElement movieItem : movieItems){
+            anchorTags.add(movieItem.findElement(By.tagName("a")));
+        }
+
+        List<String> hrefs = new ArrayList<>();
+        for (WebElement anchorTag : anchorTags) {
+            hrefs.add(anchorTag.getAttribute("href"));
+        }
 
         rankingInfo.deleteRankingList();
 
-        for(WebElement rank : ranking){
-            if(ottRepository.existsOTTByTitle(rank.getText())){
-                OTTContents movie = ottRepository.findOTTByTitle(rank.getText());
+        for(String href : hrefs){
+            if(ottRepository.existsOTTContentsByHref(href)){
+                OTTContents movie = ottRepository.findOTTContentsByHref(href);
                 movie.updateRakingScore(scoreMatrix[count] * rate);
                 rankingInfo.addRankingList(movie);
                 count++;
