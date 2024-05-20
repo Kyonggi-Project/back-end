@@ -31,7 +31,7 @@ public class OTTReviewService {
     public OTTReview save(User user, OTTContents ott, AddOTTReviewRequest request) throws IOException {
         ottService.addScore(ott, request.getScore());
         //ottService.addRating(ott, request.getTags());
-        return ottReviewRepository.save(request.toEntity(user, ott.getId(), ott.getTitle()));
+        return ottReviewRepository.save(request.toEntity(user, ott.getId(), ott.getTitle(), ott.getPosterImg()));
     }
 
     public OTTReview findById(Long id){

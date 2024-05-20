@@ -22,13 +22,14 @@ public class AddOTTReviewRequest {
 
     private List<String> inputTags = new ArrayList<>();
 
-    public OTTReview toEntity(User userId, String ottId, String contentsTitle){
+    public OTTReview toEntity(User userId, String ottId, String contentsTitle, String contentsPoster){
         return OTTReview.builder()
                 .content(content)
                 .score(score)
                 .userId(userId)
                 .ottId(ottId)
                 .contentsTitle(contentsTitle)
+                .contentsPoster(contentsPoster)
                 .build();
     }
 }

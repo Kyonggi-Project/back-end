@@ -33,6 +33,8 @@ public class OTTReviewResponse {
 
     private String contentsTitle;
 
+    private String contentsPoster;
+
     private String backgroundImg;
 
     private boolean isLiked;
@@ -48,6 +50,7 @@ public class OTTReviewResponse {
         this.repliesCount = ottReview.getReplies().size();
         this.score = ottReview.getScore();
         this.contentsTitle = ottReview.getContentsTitle();
+        this.contentsPoster = ottReview.getContentsPoster();
     }
 
     public OTTReviewResponse(OTTReview ottReview, OTTContents ottContents, boolean isLiked){

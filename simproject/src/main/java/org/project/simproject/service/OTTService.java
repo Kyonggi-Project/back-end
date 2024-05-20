@@ -44,7 +44,9 @@ public class OTTService {
         score = response.getScore();
         result = reCalculationRating(magnitude, score);
 
-        //ottContents.modifyRating(result); 감정 점수 계산 우선 정지
+        ottContents.modifyRating(result);
+
+        ottRepository.save(ottContents);
 
     }
 
