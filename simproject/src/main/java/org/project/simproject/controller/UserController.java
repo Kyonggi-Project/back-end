@@ -86,16 +86,24 @@ public class UserController {
 
     @Operation(summary = "특정 유저의 팔로워 목록 보기", description = "FollowService에서 실행")
     @GetMapping("/follower/{nickname}")
-    public ResponseEntity<List<UserResponse>> getFollower(@PathVariable String nickname){
-        List<UserResponse> list = followService.findFollowers(nickname);
-        return ResponseEntity.status(HttpStatus.OK).body(list);
+    public ResponseEntity<List<UserResponse>> getFollower(@PathVariable String nickname, Principal principal) throws UserPrincipalNotFoundException {
+        try {
+            List<UserResponse> list = followService.findFollowers(nickname, principal.getName());
+            return ResponseEntity.status(HttpStatus.OK).body(list);
+        } catch (Exception e){
+            throw new UserPrincipalNotFoundException("인증 실패");
+        }
     }
 
     @Operation(summary = "특정 유저의 팔로잉 목록 보기", description = "FollowService에서 실행")
     @GetMapping("/following/{nickname}")
-    public ResponseEntity<List<UserResponse>> getFollowing(@PathVariable String nickname){
-        List<UserResponse> list = followService.findFollowees(nickname);
-        return ResponseEntity.status(HttpStatus.OK).body(list);
+    public ResponseEntity<List<UserResponse>> getFollowing(@PathVariable String nickname, Principal principal) throws UserPrincipalNotFoundException {
+        try {
+            List<UserResponse> list = followService.findFollowees(nickname, principal.getName());
+            return ResponseEntity.status(HttpStatus.OK).body(list);
+        } catch (Exception e){
+            throw new UserPrincipalNotFoundException("인증 실패");
+        }
     }
 
     //현재 유저 수정
