@@ -35,26 +35,32 @@ public class FollowService {
         }
     }
 
-    public List<UserResponse> findFollowers(String nickname){
+    public List<UserResponse> findFollowers(String nickname, String email){
         User user = userService.findByNickname(nickname);
+        User loginUser = userService.findByEmail(email);
         List<Follow> followers = user.getFollowers();
 
         List<UserResponse> list = new ArrayList<>();
         for(Follow follow : followers){
-            boolean isFollowed = isFollowed(follow.getFollowee(), follow.getFollower());
+            boolean isFollowed = isFollowed(loginUser, follow.getFollower());
             list.add(new UserResponse(follow.getFollower(), isFollowed));
         }
 
         return list;
     }
 
-    public List<UserResponse> findFollowees(String nickname){
+    public List<UserResponse> findFollowees(String nickname, String email){
         User user = userService.findByNickname(nickname);
-        return user.getFollowing()
-                .stream()
-                .map(Follow::getFollowee)
-                .map(UserResponse::new)
-                .toList();
+        User loginUser = userService.findByEmail(email);
+        List<Follow> followees = user.getFollowing();
+
+        List<UserResponse> list = new ArrayList<>();
+        for(Follow follow : followees){
+            boolean isFollowed = isFollowed(loginUser, follow.getFollowee());
+            list.add(new UserResponse(follow.getFollowee(), isFollowed));
+        }
+
+        return list;
     }
 
     public boolean isFollowed(User follower, User followee){
