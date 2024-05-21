@@ -58,9 +58,8 @@ public class ReplyController {
     public ResponseEntity<Reply> modify(@RequestBody ModifyReplyRequest request, @RequestParam Long replyId,
                                         Principal principal) throws UserPrincipalNotFoundException {
         try {
-            User user = userService.findByEmail(principal.getName());
 
-            return ResponseEntity.status(HttpStatus.OK).body(replyService.modify(request, replyId, user));
+            return ResponseEntity.status(HttpStatus.OK).body(replyService.modify(request, replyId));
         } catch (Exception e){
             throw new UserPrincipalNotFoundException("인증 실패");
         }
@@ -70,9 +69,8 @@ public class ReplyController {
     @DeleteMapping("/delete")
     public ResponseEntity<String> delete(@RequestParam Long replyId, Principal principal) throws UserPrincipalNotFoundException {
         try {
-            User user = userService.findByEmail(principal.getName());
 
-            replyService.delete(replyId, user);
+            replyService.delete(replyId);
 
             return ResponseEntity.ok("Reply Delete Successfully");
         } catch (Exception e){

@@ -63,7 +63,7 @@ public class OTTReviewService {
     }
 
     @Transactional
-    public OTTReview modify(Long id, User user, ModifyOTTReviewRequest request){
+    public OTTReview modify(Long id, ModifyOTTReviewRequest request){
         OTTReview ottReview = ottReviewRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found Review"));
 
@@ -80,7 +80,7 @@ public class OTTReviewService {
     }
 
     @Transactional
-    public void delete(Long id, User user){
+    public void delete(Long id){
         OTTReview ottReview = ottReviewRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found Review"));
         OTTContents ott = ottService.findById(ottReview.getOttId());

@@ -94,11 +94,10 @@ public class OTTReviewController {
     public ResponseEntity<OTTReview> modify(@PathVariable Long ottReviewId,
                                             @RequestBody ModifyOTTReviewRequest request, Principal principal) throws UserPrincipalNotFoundException {
         try{
-            User user = userService.findByEmail(principal.getName());
 
             inputTagService.save(request.getInputTags());
 
-            return ResponseEntity.status(HttpStatus.OK).body(ottReviewService.modify(ottReviewId, user, request));
+            return ResponseEntity.status(HttpStatus.OK).body(ottReviewService.modify(ottReviewId, request));
         } catch (Exception e){
             throw new UserPrincipalNotFoundException("인증 실패");
         }
@@ -108,9 +107,8 @@ public class OTTReviewController {
     @DeleteMapping("/delete/{ottReviewId}")
     public ResponseEntity<Void> delete(@PathVariable Long ottReviewId, Principal principal) throws UserPrincipalNotFoundException {
         try {
-            User user = userService.findByEmail(principal.getName());
 
-            ottReviewService.delete(ottReviewId, user);
+            ottReviewService.delete(ottReviewId);
 
             return ResponseEntity.status(HttpStatus.OK).build();
         } catch (Exception e){
