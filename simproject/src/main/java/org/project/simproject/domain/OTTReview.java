@@ -34,6 +34,8 @@ public class OTTReview {
 
     private String contentsPoster;
 
+    private String contentsBackgroundImg;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -63,7 +65,8 @@ public class OTTReview {
     }
 
     @Builder
-    public OTTReview(String content, User userId, String ottId, String contentsTitle, String contentsPoster, double score){
+    public OTTReview(String content, User userId, String ottId, String contentsTitle, String contentsPoster,
+                     String contentsBackgroundImg, double score){
         this.content = content;
         this.userId = userId;
         this.ottId = ottId;
@@ -71,6 +74,7 @@ public class OTTReview {
         this.score = score;
         this.contentsTitle = contentsTitle;
         this.contentsPoster = contentsPoster;
+        this.contentsBackgroundImg = contentsBackgroundImg;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }

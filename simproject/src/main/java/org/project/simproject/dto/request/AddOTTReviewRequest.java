@@ -22,7 +22,8 @@ public class AddOTTReviewRequest {
 
     private List<String> inputTags = new ArrayList<>();
 
-    public OTTReview toEntity(User userId, String ottId, String contentsTitle, String contentsPoster){
+    public OTTReview toEntity(User userId, String ottId, String contentsTitle, String contentsPoster,
+                              String contentsBackgroundImg){
         return OTTReview.builder()
                 .content(content)
                 .score(score)
@@ -30,6 +31,7 @@ public class AddOTTReviewRequest {
                 .ottId(ottId)
                 .contentsTitle(contentsTitle)
                 .contentsPoster(contentsPoster)
+                .contentsBackgroundImg(contentsBackgroundImg)
                 .build();
     }
 }

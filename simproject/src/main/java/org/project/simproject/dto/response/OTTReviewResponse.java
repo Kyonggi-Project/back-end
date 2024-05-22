@@ -51,6 +51,7 @@ public class OTTReviewResponse {
         this.score = ottReview.getScore();
         this.contentsTitle = ottReview.getContentsTitle();
         this.contentsPoster = ottReview.getContentsPoster();
+        this.backgroundImg = ottReview.getContentsBackgroundImg();
     }
 
     public OTTReviewResponse(OTTReview ottReview, OTTContents ottContents, boolean isLiked){
@@ -64,6 +65,7 @@ public class OTTReviewResponse {
         this.repliesCount = ottReview.getReplies().size();
         this.score = ottReview.getScore();
         this.contentsTitle = ottContents.getTitle();
+        this.contentsPoster = ottReview.getContentsPoster();
         this.backgroundImg = ottContents.getBackgroundImg();
         this.isLiked = isLiked;
     }
