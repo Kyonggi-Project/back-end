@@ -32,6 +32,7 @@ public class OTTContents {
     private double score;
     private int reviewCount;
     private float rating;
+    private int ratingCount;
     private int rankingScore;
 
     public void addOTTList(String ott){
@@ -46,12 +47,12 @@ public class OTTContents {
     }
 
     public void modifyRating(float score){
-        int reviewCount = this.reviewCount;
         float rating = this.rating;
 
-        rating*=(reviewCount-1);
+        rating*=this.ratingCount;
+        this.ratingCount++;
         rating+=score;
-        rating/=reviewCount;
+        rating/=this.ratingCount;
 
         this.rating = rating;
     }
@@ -107,6 +108,7 @@ public class OTTContents {
         this.reviewCount = reviewCount;
         this.rating = rating;
         this.rankingScore = 0;
+        this.ratingCount = 0;
     }
 
 }
