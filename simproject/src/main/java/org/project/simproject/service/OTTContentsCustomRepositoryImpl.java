@@ -19,4 +19,11 @@ public class OTTContentsCustomRepositoryImpl implements OTTContentsCustomReposit
         Update update = new Update().set("rankingScore", 0);
         mongoTemplate.updateMulti(query, update, OTTContents.class);
     }
+
+    @Override
+    public void initializeRatingCount() {
+        Query query = new Query();
+        Update update = new Update().set("ratingCount", 0);
+        mongoTemplate.updateMulti(query, update, OTTContents.class);
+    }
 }

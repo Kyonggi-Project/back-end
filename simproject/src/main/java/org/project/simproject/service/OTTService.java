@@ -98,6 +98,10 @@ public class OTTService {
         ottContentsCustomRepository.initializeRankingScore();
     }
 
+    public void initializeRatingCount() {
+        ottContentsCustomRepository.initializeRatingCount();
+    }
+
     public float reCalculationRating(float magnitude, float score){
         String mag = "1.0";
         if(magnitude > 1.0f){
