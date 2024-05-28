@@ -83,4 +83,13 @@ public class WatchListController {
             throw new UserPrincipalNotFoundException("인증 실패");
         }
     }
+
+    @Operation(summary = "OtherUser WatchList 목록 보기", description = "WatchList Repository 불러오기 기능")
+    @GetMapping("/view/otheruser/{nickname}")
+    public ResponseEntity<WatchList> getWatchListForOtherUser(@PathVariable String nickname){
+        User otherUser = userService.findByNickname(nickname);
+        WatchList watchList = watchListService.findByEmail(otherUser.getEmail());
+
+        return ResponseEntity.status(HttpStatus.OK).body(watchList);
+    }
 }
