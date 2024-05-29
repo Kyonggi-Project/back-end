@@ -52,7 +52,9 @@ public class OTTContentsService {
             "드라마",
             "컨텐츠",
             "시리즈",
-            "작품"));
+            "작품",
+            "물",
+            "장르"));
 
     public OTTContents findById(String id) {
         return ottContentsRepository.findById(id).orElse(null);
@@ -96,8 +98,14 @@ public class OTTContentsService {
     }
 
     public List<OTTContents> getContentsByEmotion(String emotion) throws IOException {
+        // 문자열 정제
+        emotion = String.format("\"%s\"", emotion);
+
         // 문장의 Rating 이용해 작품 찾기
         float rating = sentimentAnalysisService.analyzeSentiment(emotion).getScore();
+
+        // 중립적인 rating 점수 정제
+        if(rating == 0.0f) rating = 0.45f;
 
         List<OTTContents> contentsListByRating = ottContentsRepository.findAllByRatingBetween((float) (rating - 0.1), (float) (rating + 0.1));
         if (contentsListByRating.size() < 20) {     // contentsListByRating의 size가 20개가 되지 않는 경우

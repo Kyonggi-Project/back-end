@@ -8,10 +8,13 @@ import org.project.simproject.dto.request.CreateChatRoomRequest;
 import org.project.simproject.dto.response.ChatRoomResponse;
 import org.project.simproject.service.ChatRoomService;
 import org.project.simproject.service.TokenService;
+import org.project.simproject.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.attribute.UserPrincipalNotFoundException;
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -20,14 +23,18 @@ import java.util.List;
 @Tag(name = "대화방", description = "대화방 기능")
 public class ChatRoomController {
     private final ChatRoomService chatRoomService;
-    private final TokenService tokenService;
+    private final UserService userService;
 
     @Operation(summary = "대화방 만들기", description = "대화방 서비스에서 데이터베이스에 대화방 데이터 추가")
     @PostMapping("/addChatroom")
     public ResponseEntity<ChatRoomResponse> addChatRoom(@RequestBody CreateChatRoomRequest createChatRoomRequest,
-                                                        @CookieValue(value = "refresh_token", defaultValue = "cookie") String cookie) {
-        User user = tokenService.findByUserId(cookie);
-        return ResponseEntity.status(HttpStatus.CREATED).body(chatRoomService.save(createChatRoomRequest, user));
+                                                        Principal principal) throws UserPrincipalNotFoundException {
+        try {
+            User user = userService.findByEmail(principal.getName());
+            return ResponseEntity.status(HttpStatus.CREATED).body(chatRoomService.save(createChatRoomRequest, user));
+        } catch (Exception e){
+            throw new UserPrincipalNotFoundException("인증 실패");
+        }
     }
 
     @Operation(summary = "모든 대화방 찾기", description = "대화방 서비스에서 데이터베이스에서 모든 대화방 데이터 찾기")

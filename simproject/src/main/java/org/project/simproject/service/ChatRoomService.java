@@ -55,5 +55,8 @@ public class ChatRoomService {
         if(chatRoom.getMasterId().equals(userId)) {
             chatRoomRepository.delete(chatRoom);
         }
+        else {
+            throw new IllegalArgumentException("User Not Authentication");
+        }
     }
 }
