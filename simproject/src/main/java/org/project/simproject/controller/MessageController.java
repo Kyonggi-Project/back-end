@@ -34,9 +34,9 @@ public class MessageController {
         int leave = messageService.findMessageByRoomIdAndSenderAndStatus(addMessageRequest.getRoomId(),
                 addMessageRequest.getSender(), ChatMessageStatus.LEAVE);
 
-        chatRoomService.memberCounting(addMessageRequest.getRoomId(), true);
 
         if((enter - leave) == 0){   // 입장/퇴장 횟수를 이용해 메시지 전송 여부를 판단
+            chatRoomService.memberCounting(addMessageRequest.getRoomId(), true);
             addMessageRequest.setContent(addMessageRequest.getSender() + "님이 입장하였습니다.");
             template.convertAndSend("/topic/" + addMessageRequest.getRoomId(),
                     messageService.save(addMessageRequest));

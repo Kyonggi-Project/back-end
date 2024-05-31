@@ -15,9 +15,12 @@ public class ChatRoomResponse {
 
     private String masterId;
 
+    private int memberCount;
+
     public ChatRoomResponse(ChatRoom chatRoom) {
         this.id = chatRoom.getId();
         this.name = chatRoom.getName();
         this.masterId = chatRoom.getMasterId();
+        this.memberCount = chatRoom.getMemberCount();
     }
 }
