@@ -17,13 +17,24 @@ public class ChatRoom {
 
     private String masterId;
 
+    private int memberCount;
+
     public void modify(String name) {
         this.name = name;
+    }
+
+    public void addMember(){
+        this.memberCount++;
+    }
+
+    public void exitMember(){
+        this.memberCount--;
     }
 
     @Builder
     public ChatRoom(String name, String masterId) {
         this.name = name;
         this.masterId = masterId;
+        this.memberCount = 0;
     }
 }

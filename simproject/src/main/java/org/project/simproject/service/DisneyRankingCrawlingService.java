@@ -103,7 +103,7 @@ public class DisneyRankingCrawlingService {
                 .build();
 
         rankingInfoRepository.save(rankingInfo);
-        log.info("rankinginfo 추가 완료");
+        log.info("디즈니 플러스 rankinginfo 추가 완료");
     }
 
     @Transactional
@@ -125,7 +125,7 @@ public class DisneyRankingCrawlingService {
 
         rankingInfoRepository.save(rankingInfo);
 
-        log.info("rankinginfo 업데이트 완료");
+        log.info("디즈니 플러스 rankinginfo 업데이트 완료");
     }
 
     public List<String> getHrefs(WebDriver driver){

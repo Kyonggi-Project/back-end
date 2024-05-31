@@ -29,6 +29,15 @@ public class ChatRoomService {
                 .toList();
     }
 
+    @Transactional
+    public void memberCounting(Long id, boolean IOBool){
+        ChatRoom chatRoom = chatRoomRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("ChatRoom Not Found"));
+
+        if(IOBool) chatRoom.addMember();
+        else chatRoom.exitMember();
+    }
+
     public List<ChatRoomResponse> findByName(String name) {
         return chatRoomRepository.findAllByNameContains(name)
                 .stream()
