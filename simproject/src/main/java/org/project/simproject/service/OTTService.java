@@ -94,7 +94,7 @@ public class OTTService {
         ottRepository.save(ott);
     }
 
-    public void initializeRankingScore() {
+    public void initializeRankingScore() throws InterruptedException {
         ottContentsCustomRepository.initializeRankingScore();
     }
 
