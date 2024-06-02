@@ -19,15 +19,16 @@ public class UserService {
 
     @Transactional
     public User save(AddUserRequest addUserRequest) {
+        User user = userRepository.save(
+                        User.builder()
+                                .email(addUserRequest.getEmail())
+                                .password(bCryptPasswordEncoder.encode(addUserRequest.getPassword()))
+                                .nickname(addUserRequest.getNickname())
+                                .build()
+        );
         watchListService.save(addUserRequest.getEmail());
 
-        return userRepository.save(
-                User.builder()
-                        .email(addUserRequest.getEmail())
-                        .password(bCryptPasswordEncoder.encode(addUserRequest.getPassword()))
-                        .nickname(addUserRequest.getNickname())
-                        .build()
-        );
+        return user;
     }
 
     public User findById(Long id){
