@@ -75,11 +75,9 @@ public class OTTContentsService {
             if (ottContents.getGenreList().contains(genre)) {
                 ottContentsList.add(ottContents);
             }
-        }
-
-        // 이미 20개를 찾았다면, return
-        if (ottContentsList.size() >= 20) {
-            return ottContentsList;
+            if (ottContentsList.size() == 20) {
+                return ottContentsList;
+            }
         }
 
         List<OTTContents> contentsByGenreList = ottContentsRepository.findAllByGenreListContainsIgnoreCase(genre);
