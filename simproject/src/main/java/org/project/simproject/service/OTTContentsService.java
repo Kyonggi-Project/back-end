@@ -74,9 +74,9 @@ public class OTTContentsService {
         for (OTTContents ottContents : rankingContentsList) {
             if (ottContents.getGenreList().contains(genre)) {
                 ottContentsList.add(ottContents);
-            }
-            if (ottContentsList.size() == 20) {
-                return ottContentsList;
+                if (ottContentsList.size() == 20) {
+                    return ottContentsList;
+                }
             }
         }
 

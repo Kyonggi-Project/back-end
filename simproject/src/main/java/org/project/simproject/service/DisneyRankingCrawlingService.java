@@ -33,7 +33,7 @@ public class DisneyRankingCrawlingService {
 
     private int[] scoreMatrix = {25, 18, 15, 12, 10, 8, 6, 4, 2, 1};
 
-    private int rate = 4;
+    private int rate = 7;
 
     private final RankingInfoRepository rankingInfoRepository;
 
