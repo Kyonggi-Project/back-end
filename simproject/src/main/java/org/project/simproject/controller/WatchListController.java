@@ -10,7 +10,6 @@ import org.project.simproject.service.OTTService;
 import org.project.simproject.service.UserService;
 import org.project.simproject.service.WatchListService;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

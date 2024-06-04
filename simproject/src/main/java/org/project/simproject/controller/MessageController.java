@@ -1,22 +1,15 @@
 package org.project.simproject.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.project.simproject.domain.ChatRoom;
 import org.project.simproject.dto.request.AddMessageRequest;
 import org.project.simproject.dto.response.MessageResponse;
 import org.project.simproject.service.ChatRoomService;
 import org.project.simproject.service.MessageService;
 import org.project.simproject.util.ChatMessageStatus;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequiredArgsConstructor
@@ -60,10 +53,4 @@ public class MessageController {
         template.convertAndSend("/topic/" + addMessageRequest.getRoomId(),
                 messageService.save(addMessageRequest));
     }
-
-    /*@DeleteMapping("/delete/{messageId}")
-    public ResponseEntity<Void> deleteMessage(@PathVariable Long messageId, @RequestParam String userId) {
-        messageService.delete(messageId, userId);
-        return ResponseEntity.status(HttpStatus.OK).build();
-    }*/
 }

@@ -10,7 +10,6 @@ import org.project.simproject.dto.request.ModifyOTTReviewRequest;
 import org.project.simproject.dto.response.OTTReviewResponse;
 import org.project.simproject.repository.entityRepo.OTTReviewLikeRepository;
 import org.project.simproject.repository.entityRepo.OTTReviewRepository;
-import org.project.simproject.repository.entityRepo.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;

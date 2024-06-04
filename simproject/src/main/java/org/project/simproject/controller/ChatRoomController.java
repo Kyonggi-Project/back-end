@@ -7,7 +7,6 @@ import org.project.simproject.domain.User;
 import org.project.simproject.dto.request.CreateChatRoomRequest;
 import org.project.simproject.dto.response.ChatRoomResponse;
 import org.project.simproject.service.ChatRoomService;
-import org.project.simproject.service.TokenService;
 import org.project.simproject.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

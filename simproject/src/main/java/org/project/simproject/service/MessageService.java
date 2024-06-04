@@ -34,12 +34,4 @@ public class MessageService {
     public int findMessageByRoomIdAndSenderAndStatus(Long roomId, String sender, ChatMessageStatus status){
         return messageRepository.findMessageByRoomIdAndSenderAndStatus(roomId, sender, status).size();
     }
-
-    /*public void delete(Long messageId, String userId) {
-        Message message = messageRepository.findById(messageId)
-                .orElseThrow(() -> new IllegalArgumentException("Message Not Found"));
-        if(message.getSender().equals(userId)) {
-            messageRepository.delete(message);
-        }
-    }*/
 }
