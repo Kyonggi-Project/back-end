@@ -91,6 +91,7 @@ public class DisneyRankingCrawlingService {
                 rankingList.add(movie);
                 ottRepository.save(movie);
                 count++;
+                log.info(count + "위 " + movie.getTitle() + ": 추가 완료");
                 if(count == 10) break;
             }
         }
@@ -118,6 +119,7 @@ public class DisneyRankingCrawlingService {
                 rankingInfo.addRankingList(movie);
                 ottRepository.save(movie);
                 count++;
+                log.info(count + "위 " + movie.getTitle() + ": 추가 완료");
                 if(count == 10) break;
             }
         }
