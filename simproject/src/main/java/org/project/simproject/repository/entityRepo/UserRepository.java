@@ -12,4 +12,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
     List<User> findByNicknameContains(String author);
     Optional<User> findByNickname(String nickname);     // DM Room 생성 시 필요성
+    Optional<User> findByRefreshToken(String refreshToken);
+    Optional<User> findByProviderAndProviderId(String provider, String providerId);
 }

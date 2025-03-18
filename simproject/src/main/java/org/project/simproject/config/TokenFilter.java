@@ -1,4 +1,4 @@
-package org.project.simproject.config;
+/*package org.project.simproject.config;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -28,4 +28,4 @@ public class TokenFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
-}
+}*/

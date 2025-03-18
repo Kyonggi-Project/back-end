@@ -1,4 +1,4 @@
-package org.project.simproject.config.oauth;
+/*package org.project.simproject.config.oauth;
 
 import lombok.RequiredArgsConstructor;
 import org.project.simproject.domain.User;
@@ -52,4 +52,4 @@ public class OAuth2UserCustomService extends DefaultOAuth2UserService {
 
         return userRepository.save(user);
     }
-}
+}*/

@@ -19,7 +19,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Table(name = "users")
-public class User implements UserDetails {
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,6 +31,13 @@ public class User implements UserDetails {
 
     @Column(unique = true)
     private String nickname;
+
+    private String providerId;
+
+    private String provider;
+
+    @Column(length = 400)
+    private String refreshToken;
 
     private int articlesCount;
 
@@ -58,6 +65,10 @@ public class User implements UserDetails {
         this.articlesCount--;
     }
 
+    public void updateRefreshToken(String refreshToken){
+        this.refreshToken = refreshToken;
+    }
+
     public User update(String nickname){
         this.nickname = nickname;
         return this;
@@ -67,46 +78,14 @@ public class User implements UserDetails {
         this.nickname = modifyRequest.getNickname();
         this.password = bCryptPasswordEncoder.encode(modifyRequest.getPassword());
     }
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("user"));
-    }
-
-    @Override
-    public String getPassword() {
-        return password;
-    }
-
-    @Override
-    public String getUsername() {
-        return email;
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
 
     @Builder
-    public User(String email, String password, String nickname){
+    public User(String email, String password, String nickname, String provider, String providerId){
         this.email = email;
         this.password = password;
         this.nickname = nickname;
+        this.provider = provider;
+        this.providerId = providerId;
         this.articlesCount = 0;
     }
 }

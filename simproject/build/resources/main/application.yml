@@ -1,16 +1,42 @@
+#spring:
+#  jpa:
+#    show-sql: true
+#    properties:
+#      hibernate:
+#        format_sql: true
+#
+#    defer-datasource-initialization: true
+#
+#  datasource:
+#    url: jdbc:h2:mem:testdb
+#    username: sa
+#
+#  h2:
+#    console:
+#      enabled: true
+
 spring:
   jpa:
+    database: mysql
+    hibernate.ddl-auto: update
     show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-
-    defer-datasource-initialization: true
-
   datasource:
-    url: jdbc:h2:mem:testdb
-    username: sa
-
-  h2:
-    console:
-      enabled: true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${SPRING_DATASOURCE_URL}
+    username: root
+    password: ${SPRING_DATASOURCE_PASSWORD}
+  data:
+    mongodb:
+      uri: ${MONGO_DATABASE_URI}
+  google:
+    cloud:
+      project-id: springboot-developer-410908
+  profiles :
+    active : local
+    group :
+      local :
+        - db
+        - jwt
+        - oauth2
+        - crawling
+        - mongo

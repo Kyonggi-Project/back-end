@@ -1,4 +1,4 @@
-package org.project.simproject.config.oauth;
+/*package org.project.simproject.config.oauth;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,4 +19,4 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.getWriter().write(errorMessage);
     }
-}
+}*/

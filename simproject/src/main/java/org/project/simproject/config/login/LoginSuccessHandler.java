@@ -1,18 +1,17 @@
-/*package org.project.simproject.config.oauth;
+package org.project.simproject.config.login;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.project.simproject.config.auth.PrincipalDetails;
 import org.project.simproject.config.jwt.JwtTokenProvider;
-import org.project.simproject.domain.RefreshToken;
 import org.project.simproject.domain.User;
-import org.project.simproject.repository.entityRepo.RefreshTokenRepository;
-import org.project.simproject.service.UserService;
+import org.project.simproject.repository.entityRepo.UserRepository;
 import org.project.simproject.util.CookieUtil;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
-import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
@@ -21,27 +20,34 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RequiredArgsConstructor
-@Component
-public class AuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
+@Slf4j
+public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     public static final String REFRESH_TOKEN_COOKIE_NAME = "refresh_token";
-    public static final Duration REFRESH_TOKEN_DURATION = Duration.ofDays(14);
-    public static final Duration ACCESS_TOKEN_DURATION = Duration.ofMinutes(30);
+    private static final Duration ACCESS_DURATION = Duration.ofMinutes(30);
+    private static final Duration REFRESH_DURATION = Duration.ofDays(7);
     public static final String REDIRECT_PATH = "http://localhost:3000/userprofile";         // TargetUrl 추후 설정
 
-    private final JwtTokenProvider jwtTokenProvider;
-    private final RefreshTokenRepository refreshTokenRepository;
-    private final UserService userService;
+    private final JwtTokenProvider jwtTokenService;
+
+    private final UserRepository userRepository;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
-        String email = authentication.getName();
-        User user = userService.findByEmail(email);
-
-        String refreshToken = jwtTokenProvider.createToken(user, REFRESH_TOKEN_DURATION);
-        saveRefreshToken(user, refreshToken);
+        User user = userRepository.findByEmail(getUsername(authentication))
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        String accessToken = jwtTokenService.createToken(user, ACCESS_DURATION);
+        String refreshToken = jwtTokenService.createToken(user, REFRESH_DURATION);
         addRefreshTokenToCookie(request, response, refreshToken);
 
-        String accessToken = jwtTokenProvider.createToken(user, ACCESS_TOKEN_DURATION);
+        jwtTokenService.sendAccessAndRefreshToken(response, accessToken, refreshToken);
+
+        user.updateRefreshToken(refreshToken);
+        userRepository.saveAndFlush(user);
+
+        log.info("로그인 계정 : "+user.getEmail());
+        log.info("Access Token : "+accessToken);
+        log.info("Refresh Token : "+refreshToken);
+
         String targetUrl = getTargetUrl(accessToken);
 
         Map<String, String> responseData = new HashMap<>();
@@ -54,16 +60,14 @@ public class AuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         response.getWriter().write(jsonResponse);
     }
 
-    private void saveRefreshToken(User user, String newRefreshToken) {
-        RefreshToken refreshToken = refreshTokenRepository.findByUserId(user)
-                .map(entity -> entity.update(newRefreshToken))
-                .orElse(new RefreshToken(user, newRefreshToken));
+    public String getUsername(Authentication authentication){
+        PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
 
-        refreshTokenRepository.save(refreshToken);
+        return principalDetails.getUsername();
     }
 
     private void addRefreshTokenToCookie(HttpServletRequest request, HttpServletResponse response, String refreshToken) {
-        int cookieMaxAge = (int) REFRESH_TOKEN_DURATION.toSeconds();
+        int cookieMaxAge = (int) REFRESH_DURATION.toSeconds();
 
         CookieUtil.deleteCookie(request, response, REFRESH_TOKEN_COOKIE_NAME);
         CookieUtil.addCookie(response, REFRESH_TOKEN_COOKIE_NAME, refreshToken, cookieMaxAge);
@@ -76,4 +80,4 @@ public class AuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
                 .build()
                 .toString();
     }
-}*/
+}
